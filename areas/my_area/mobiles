@@ -1,0 +1,16 @@
+#include <drogon.h>
+#include "rooms.h"
+
+{
+  MOBILE ("an old fisherman", "Winker_fisherman", 
+  MALE, 0, 0, 0, Winker_OutsideHouse) ;
+  MFIXED   = "He doesn't want to leave his rocking chair." ;
+  MXATTACK = "He waves you away nonchalantly and carries on whistling." ;
+  MDNAME   = "An old fisherman sits here in a rocking chair, whistling a sea shanty." ;
+  MDESC    = "
+  He has a weather-beaten face, red from the sun, and he seems contented
+  as he whistles to himself. He is looking out to sea as if reminiscing
+  about his life on the ocean." ;
+}
+
+

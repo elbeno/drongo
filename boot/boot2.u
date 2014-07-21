@@ -1,0 +1,9 @@
+/*	boot2.u
+*/
+
+#include "drogon.h"
+
+/* #include "area.admissions.u" */
+/* #include "area.comments.u" */
+/* #include "area.handling.u" */
+#include "emotes.u"

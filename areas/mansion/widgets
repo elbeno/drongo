@@ -1,0 +1,220 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include "drogon.h"
+#include  "rooms.h"
+
+
+{
+
+/** Mansion Gates **/
+
+  WIDGET /** + describeFn-s **/
+  (
+    "golden gates", "mansion_gates",
+    0,0, 0,0, 0,
+    mansion_road_02
+  )
+  $widget.locked = 1 ;
+  $widget.closed = 1 ;
+  $widget.dName  = "Large golden gates lead east into the mansion grounds." ;
+  WFIXED         = "They are fixed into the stonework by their hinges." ;
+
+/** Phantom gate for the other side **/
+
+  WIDGET
+  (
+    "golden gates", "mansion_gates2",
+    0,0, 0,0, 0,
+    mansion_road_03
+  )
+  $widget.dName    = "Large golden gates lead west out of the mansion grounds." ;
+  $widget.fixedMsg = "They are fixed into the stonework by their hinges." ;
+
+}{
+
+  WIDGET
+  (
+    "an ornate peacock", "mansion_ornatePeacock",
+    450,100, 0,0, -1,
+    mansion_folly
+  )
+  WDESC = "
+  This is a a fair sized peacock, hand carved from lapis lazuli." ;
+
+}{
+
+/** Fountain: Drinking from it (roomFn) causes you to change sex! **/
+
+  WIDGET
+  (
+    "a small fountain", "mansion_fountain",
+    0,0, 0,0, 0,
+    mansion_grass_01
+  )
+  WFIXED = "It seems to be very firmly attached to the ground." ;
+  WDESC  = "
+  This is a small fountain at about waist height. A gentle stream of cool,
+  crystal clear water flows from the centre of the fountain. You could
+  probably drink its water if you felt the need." ;
+
+}{
+
+/** Candlestick and goblet in the dining room **/
+
+  WIDGET
+  (
+    "a silver candlestick", "mansion_candlestick",
+    350,100, 0,0, -1,
+    mansion_diningRoom
+  )
+
+  WIDGET
+  (
+    "a silver goblet", "mansion_goblet",
+    250,100, 0,0, -1,
+    mansion_diningRoom
+  )
+
+}{
+
+/** A violin in the stage: Has a play function, just for effect. **/
+
+  WIDGET
+  (
+    "a violin", "mansion_violin",
+    50,50, 0,0, -1,
+    mansion_stage
+  )
+
+}{
+
+/** Rocking Unicorn: Has an _rideFn - makes you get on the unicorn, rocks it
+    and throws you off, grabbing it's horn if still attached **/
+
+  WIDGET
+  (
+    "a rocking unicorn", "mansion_unicorn",
+    0,0, 0,0, 0,
+    mansion_nursery
+  )
+  WFIXED = "It's too large and akward to carry." ;
+  WTEXT  = "Rocking unicorn model IV:
+  Design copyright (c) Turbo Unicorn manufacturing company." ;
+  $widget.broken = 0 ;
+
+  WIDGET
+  (
+    "a unicorns horn", "mansion_unicornHorn",
+    350,40, 0,0, Mins(30),
+    specialStore
+  )
+
+}{
+
+/** Stuff in the ladies and master bedrooms **/
+
+  WIDGET
+  (
+    "a silver hairbrush", "mansion_hairBrush",
+    200,100, 0,0, -1,
+    mansion_ladiesBedroom
+  )
+  WDESC = "
+  A fine brush, made out of silver with a mother of pearl inlaid back." ;
+
+  WIDGET
+  (
+    "a silver comb", "mansion_comb",
+    150,50, 0,0, -1,
+    mansion_ladiesBedroom
+  )
+
+  WIDGET
+  (
+    "a silver mirror", "mansion_ladiesMirror",
+    150,100, 0,0, -1,
+    mansion_ladiesBedroom
+  )
+  /** _describeFn **/
+
+  WIDGET
+  (
+    "a gold tie pin", "mansion_tiePin",
+    150,40, 0,0, -1,
+    mansion_masterBedroom
+  )
+
+}{
+
+/** Stuff in the Study **/
+
+  WIDGET
+  (
+    "a jewel encrusted letter opener", "mansion_letterOpener",
+    350,100, 30,0, -1,
+    mansion_study
+  )
+  WDESC = "
+  This letter opener is constructed from fine silver with lots of precious
+  jewels on the handle." ;
+
+  WIDGET
+  (
+    "a quill", "mansion_quill",
+    100,5, 0,0, -1,
+    mansion_study
+  )
+  WDESC = "
+  It's a very fine and long swan wing feather. It might be quite good at
+  tickling things when in use ..." ;
+  /** object.tickle function when in use! **/
+
+}{
+
+/** The barrel of ale - it conceals a passageway to a little room
+        -- moveFn **/
+
+  WIDGET
+  (
+    "a barrel of ale", "mansion_ale",
+    0,0, 0,0, 0,
+    mansion_cellar_01
+  )
+  WFIXED = "What are you trying to do? Give yourself a hernia?" ;
+  WDESC  = "
+  It's a very large and heavy barrel. Probably full of fine ale! Now, if
+  only you could open it ..." ;
+  $widget.moved = 0 ;
+
+/** And the claymore and shield to be found therein **/
+
+  WIDGET
+  (
+    "a claymore", "mansion_claymore",
+    100,200, 100,0, Mins(30),
+    mansion_cellar_03
+  )
+  WDESC = "
+  This is a very sharp claymore. A fine example of Scottish weapon craft.
+  The blade has been lightly oiled to keep it in perfect condition." ;
+
+  WIDGET
+  (
+    "a round shield", "mansion_shield",
+    20,100, 0,15, Mins(30),
+    mansion_cellar_03
+  )
+  WDESC = "
+  This is a fairly solid and heavy round wooden shield." ;
+
+}

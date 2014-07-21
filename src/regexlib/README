@@ -1,0 +1,6 @@
+
+	This is Henry Spencer's regexp library, with some mods by Glenn
+Mason of Welch Medical Library, and a bit of re-arrangement.
+
+	There is a spot in regsub that is #ifndef UBERMUD where it ignores
+the call to regerror() that makes the program exit.

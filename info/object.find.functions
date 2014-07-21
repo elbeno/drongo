@@ -1,0 +1,12 @@
+Some replacements for _singleVis, etc, in match.u:
+
+func @._findLO            local object
+        findLOz           no voice in head message, still 'I see no ...'
+        findIO            inventory object
+LO is room or inventory and will match players too
+        findRO            room only, inc players, mobiles, etc
+       _findPlayer        any player, online or offline
+        findOLP_G         online playeer globally
+        findOLP_L         online plyer locally (+z for no voiceInHead)
+                Gzz       no messages at all - returns obj# or null.
+                          iCanSeeYou only

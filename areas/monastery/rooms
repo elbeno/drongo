@@ -1,0 +1,176 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include "drogon.h"
+
+{
+  SEA_ROOM ("Rocky path", "mon_path_01") ; RDESC = "
+  This is a rocky path which leads Southwards, up a steep hill, from the
+  beach which is down and to the North West." ;
+}{
+  SEA_ROOM ("Rocky path", "mon_path_02") ; RDESC = "
+  A rocky North/South path on a steep hill, leading up to what looks like an
+  open and level area to the South." ;
+}{
+  SEA_ROOM ("Outside a monastery", "mon_path_03") ; RDESC = "
+  You are standing in a flat and open area. Paths lead down, both to the
+  North and South. An archway to the West leads into what once was a
+  monastery many years ago, but looks deserted and in not too good a state
+  of repair." ;
+}{
+  SEA_ROOM ("Rocky path", "mon_path_04") ; RDESC = "
+  A rocky North/South path on a steep hill, leading up to what looks like
+  an open and level area to the North, and Down to a small beach to the
+  South" ;
+}{
+  SEA_ROOM ("Small beach", "mon_path_05") ; RDESC = "
+  This is a small beach on the Southern side of the island. A steep path
+  leads up the hill to the North. The entrance to a cave is visible to
+  the Northwest." ;
+}{
+  SEA_ROOM ("Cave entrance", "mon_path_06") ; RDESC = "
+  You are in a small damp cavern. The cavern continues to the Northwest
+  with the beach being back to the Southeast. The sea laps gently at the
+  entrance to the cave." ;
+}{
+  SEA_ROOM ("Damp and dark cave", "mon_cave") ; RDESC = "
+  This is a small round cave which is quite damp. It looks like it would be
+  fully underwater at high tide. Daylight is visible to the Southeast. The
+  sea sounds quite funny from within this cave. You can almost imagine it
+  sounds like a hollow voice saying \"plugh\" ..." ;
+  INDOORS ;
+}
+
+
+{
+  SEA_ROOM ("Stone archway", "mon_archway") ; RDESC = "
+  This is a wide stone archway, leading from an open area to the East into
+  the wide courtyard to the West. Small archways lead North and South." ;
+}{
+  SEA_ROOM ("Small corridor", "mon_corridor") ; RDESC = "
+  This is a small arched corridor, leading from the main entrance archway
+  to the South to a large hall to the West." ;
+  INDOORS ;
+}{
+  SEA_ROOM ("Hall", "mon_hall") ; RDESC = "
+  You are standing in a fairly large hall. This was probably used at one time
+  as a place of dining and social gathering. It's not in a very good state
+  of repair - you can make out holes in the roof tiles. Archways lead East,
+  West and South." ;
+  SCENERY ("roof",  "Slate tiles, with a few missing.") ;
+  SCENERY ("tiles", "They are made from slate.") ;
+  INDOORS ;
+}{
+  SEA_ROOM ("Kitchen", "mon_kitchen") ; RDESC = "
+  This was once the kitchen for the monastery. You see a great fireplace with
+  stone ovens on either side, a large sink, but not much else. Archways lead
+  East, West and South." ;
+  SCENERY ("fireplace", "It's large and cold. Looks like there hasn't been a fire for a few years.") ;
+  SCENERY ("ovens",     "They are large stone ovens set into the fireplace.") ;
+  SCENERY ("sink",      "*") ;
+  INDOORS ;
+}{
+  SEA_ROOM ("Ante-chamber", "mon_anteChamber") ; RDESC = "
+  This is a small circular room with archways leading South and East." ;
+  INDOORS ;
+}{
+  SEA_ROOM ("Chapel", "mon_chapel") ; /** _describeFn **/
+  SCENERY ("floor",   "Made from fairly regular slabs of stone.") ;
+  SCENERY ("table",   "It's a long wooden table.") ;
+  SCENERY ("statues", "They look like ordinary people, dressed in long robes.") ;
+  SCENERY ("stained glass window", "*") ; SDESC = "
+  This is in a remarkably good condition, with only 1 or 2 bits of glass
+  missing. It shows the image of some holy person who seems to have a halo
+  round his head!" ;
+  INDOORS ;
+}
+
+{
+  SEA_ROOM ("Monastery courtyard", "mon_courtyard_01") ; RDESC = "
+  This is the Eastern end of a wide East/West courtyard. Archways lead North
+  and East." ;
+}{
+  SEA_ROOM ("Monastery courtyard", "mon_courtyard_02") ; RDESC = "
+  This is the western end of a wide East/West courtyard. Archways lead North
+  and West." ;
+}
+
+{
+  SEA_ROOM ("Long corridor", "mon_corridor_03") ; RDESC = "
+  This is the Western end of a long East/West corridor. Archways lead
+  North and South." ;
+}{
+  SEA_ROOM ("Long corridor", "mon_corridor_02") ; RDESC = "
+  You are in the middle of a long East/West corridor. An archway leads
+  South." ;
+  INDOORS ;
+}{
+  SEA_ROOM ("Long corridor", "mon_corridor_01") ; RDESC = "
+  This is the Eastern end of a long East/West corridor. Archways lead
+  South and East." ;
+  INDOORS ;
+}{
+  SEA_ROOM ("Library", "mon_library_01") ; RDESC = "
+  This was once a large library, the shelves, now empty, must at one time
+  been home to hundreds of volumes. Archways lead North and South." ;
+  SCENERY ("shelves", "They are dusty and empty") ;
+  INDOORS ;
+}{
+  SEA_ROOM ("Study room", "mon_library_02") ; RDESC = "
+  This room is filled with about a dozen reading/writing desks and chairs.
+  The library is to the North." ;
+  SCENERY ("desks",  "They are fairly large desks with a sloping top.") ;
+  SCENERY ("chairs", "Plain wooden chairs, next to the desks.") ;
+  INDOORS ;
+}{
+  SEA_ROOM ("Sleeping area", "mon_dorm_02") ; RDESC = "
+  This looks like it was once a sleeping area for the more senior of the
+  monks who once worked here. The room is divided into half a dozen
+  smaller individual chambers, each now empty, but with more than enough
+  room for a bed and small table. An archways leads North." ;
+  INDOORS ;
+}{
+  SEA_ROOM ("Sleeping area", "mon_dorm_01") ; RDESC = "
+  This is a large room, divided into about a dozen smaller chambers with
+  simple partitions. The chambers would have been big enough to fit a bed
+  and a small table." ;
+  INDOORS ;
+}
+
+{
+  SEA_ROOM ("Bottom of the bell tower", "mon_bell_01") ; RDESC = "
+  You are standing at the bottom of the tall bell tower. A wide spiral
+  staircase leads up round the outside of the tower. An archway to the
+  North leads to the main entranceway and an archway to the West leads
+  to a long corridor." ;
+  INDOORS ;
+}{
+  SEA_ROOM ("In the bell tower", "mon_bell_02") ; RDESC = "
+  You are on the spiral staircase in the bell tower, quite near the bottom." ;
+  INDOORS ;
+}{
+  SEA_ROOM ("In the bell tower", "mon_bell_03") ; RDESC = "
+  You are on the spiral staircase in the bell tower. You reckon that you
+  are about halfway up (or down!)" ;
+  INDOORS ;
+}{
+  SEA_ROOM ("In the bell tower", "mon_bell_04") ; RDESC = "
+  You are on the spiral staircase in the bell tower, almost near the top." ;
+  INDOORS ;
+}{
+  SEA_ROOM ("The top of the bell tower", "mon_bell_05") ; RDESC = "
+  This is the top of the bell tower. It is a fairly open structure, with
+  four pillars supporting the roof and a wooden beam at about head height." ;
+  SCENERY ("pillars", "They are made out of wood and seem very sturdy.") ;
+  SCENERY ("beam",    "It's a stout wooden beam which can carry a great load.") ;
+  SCENERY ("roof",    "A simple wooden roof, tiled with slates.") ;
+}

@@ -1,0 +1,40 @@
+#include <drogon.h>
+#include "rooms.h"
+/*
+#include "/homes/dtm10/drongo/Bugblatter/rooms.h"
+
+BI_CONNECT (Winker_Beach_SandyShore, island2_beach_01, "west", "east") ;
+*/
+BI_CONNECT (Winker_Beach_SandyShore, Winker_Beach_SandBar, "east", "west") ;
+BI_CONNECT (Winker_Beach_SandyShore, Winker_Dunes_1, "ne", "east") ;
+BI_CONNECT (Winker_Dunes_1, Winker_Dunes_1, "north", "sw") ;
+BI_CONNECT (Winker_Dunes_1, Winker_Dunes_5, "south", "south") ;
+BI_CONNECT (Winker_Dunes_1, Winker_Dunes_4, "west", "west") ;
+BI_CONNECT (Winker_Dunes_1, Winker_Dunes_4, "ne", "north") ;
+BI_CONNECT (Winker_Dunes_1, Winker_Dunes_3, "nw", "nw") ;
+BI_CONNECT (Winker_Dunes_1, Winker_Dunes_5, "se", "se") ;
+BI_CONNECT (Winker_Dunes_2, Winker_Dunes_2, "north", "sw") ;
+BI_CONNECT (Winker_Dunes_2, Winker_Dunes_4, "east", "se") ;
+CONNECT (Winker_Dunes_2, Winker_Dunes_3, "south") ;
+CONNECT (Winker_Dunes_2, Winker_Dunes_5, "west") ;
+BI_CONNECT (Winker_Dunes_2, Winker_BehindDunes, "ne", "south") ;
+CONNECT (Winker_Dunes_2, Winker_Dunes_4, "nw") ;
+CONNECT (Winker_Dunes_2, Winker_Dunes_3, "se") ;
+BI_CONNECT (Winker_Dunes_3, Winker_Dunes_5, "north", "north") ;
+BI_CONNECT (Winker_Dunes_3, Winker_Dunes_5, "east", "west") ;
+BI_CONNECT (Winker_Dunes_3, Winker_Dunes_4, "south", "south") ;
+CONNECT (Winker_Dunes_3, Winker_Dunes_3, "west") ;
+CONNECT (Winker_Dunes_3, Winker_Dunes_4, "ne") ;
+CONNECT (Winker_Dunes_3, Winker_Dunes_5, "se") ;
+CONNECT (Winker_Dunes_3, Winker_Dunes_1, "sw") ;
+BI_CONNECT (Winker_Dunes_4, Winker_Dunes_4, "east", "ne") ;
+CONNECT (Winker_Dunes_4, Winker_Dunes_5, "nw") ;
+CONNECT (Winker_Dunes_5, Winker_Dunes_4, "east") ;
+CONNECT (Winker_Dunes_5, Winker_Dunes_5, "sw") ;
+BI_CONNECT (Winker_Dunes_5, Winker_Dunes_5, "ne", "nw") ;
+BI_CONNECT (Winker_SmallBedroom, Winker_DingyLanding, "west", "east") ;
+BI_CONNECT (Winker_DingyLanding, Winker_SteepStaircase, "down", "up") ;
+BI_CONNECT (Winker_SteepStaircase, Winker_CrampedHallway, "down", "up") ;
+BI_CONNECT (Winker_CrampedHallway, Winker_SmallKitchen, "east", "west") ;
+BI_CONNECT (Winker_CrampedHallway, Winker_OutsideHouse, "south", "north") ;
+BI_CONNECT (Winker_Beach_SandyShore, Winker_OutsideHouse, "nw", "se") ;

@@ -1,0 +1,130 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+/*
+ * Listening functions for Prescotts pet kitten.
+ *
+ */
+
+#include "drogon.h"
+#include  "owner.h"
+#include    "pet.h"
+
+func prescott_kit._listen
+{
+
+  if (regcmp ($1, "^Mortis, scratch.*"))
+    { #self._scratch ($1) ;	return ; }
+
+  if (regcmp ($1, "^Mortis, go play.*"))
+    { #self._play ($1) ;	return ; }
+
+  if (regcmp ($1, "^Mortis, attack.*"))
+    { #self._attack ($1) ;	return ; }
+
+/* Default action */
+
+  if (regcmp ($1, "^Mortis,"))
+    @._reko (#self.location, "Mortis stops licking himself and looks up.\n") ;
+
+}
+
+func prescott_kit._duh
+{
+  @._reko (#self.location, "Mortis stares about blankly.\n") ;
+}
+
+
+/*
+ * scratch a player.
+ *
+ */
+
+func prescott_kit._scratch
+{
+
+/* Isolate victims name */
+
+  $s = regexp ($1, " [a-zA-Z]*$") ; $s = regexp ($s, "[^ ].*") ;
+
+  if ($s == "me")
+    $s = #actor.name ;
+
+  if (($p = @._findOLP_Lz ($s)) == NULL)
+    return #self._duh () ;
+
+  if ( ARCH ($p) || ($p == PRESCOTT) )
+  {
+    @._reko (#self.location, 
+"Mortis looks at his friend ", $p.name, ", shakes his head and decides
+to scratch ", #actor.name, " instead!\n") ;
+    $p = #actor ;
+  }
+
+  @._reko (#self.location,
+"Mortis lets out a hiss and makes a swipe with his paw at ", $p.name, ",
+but misses and lands on his head.\n") ;
+
+}
+
+
+/*
+ * go play
+ * 
+ */
+
+func prescott_kit._play
+{
+  @._reko (#self.location,
+"Mortis pounces on the nearest mouse and proceeds to bat it around with
+his paws.\n") ;
+}
+
+
+/*
+ * Attack another player.
+ *
+ */
+
+func prescott_kit._attack
+{
+
+  if ( !(ARCH (#actor) || (#actor == PRESCOTT)) )
+    return #self._duh () ;
+
+/* Isolate victims name */
+
+  $s = regexp ($1, " [a-zA-Z]*$") ; $s = regexp ($s, "[^ ].*") ;
+
+  if ($s == "me")
+    $s = #actor.name ;
+
+  if (($p = @._findOLP_Lz ($s)) == NULL)
+    return #self._duh () ;
+
+  if ( ARCH ($p) || ($p == PRESCOTT) )
+  {
+    @._reko (#self.location, 
+"Mortis looks at his friend ", $p.name, ", shakes his head and decides
+to pounce upon ", #actor.name, " instead!\n") ;
+    $p = #actor ;
+  }
+
+  becomePlayer ($p) ;
+  echo (
+"Mortis pounces upon you and scratches at your throat quickly making
+mince meat out of you.\n") ;
+
+  @._geko ("\n<!> ", #actor.name, " has been sliced and diced by Prescott's pet kitten.\n") ;
+  @._resurrect (0) ;
+  becomeMyself ;
+}

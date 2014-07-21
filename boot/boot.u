@@ -1,0 +1,343 @@
+/*	boot.u	v. 1.20	26/05/95
+
+	Ubermud universe rules for Drongo.
+
+By:
+  Borogove
+  Sidhe
+  Karuvel
+  Milamber
+  Winker   (emotes)
+
+Revision log in boot.log
+*/
+
+
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+#include "umInit0.u"
+#include "match.u"
+#include "strings.u"
+#include "drongo.u"
+#include "tick.u"
+#include "create.u"
+#include "print.u"
+#include "movement.u"
+#include "players.u"
+#include "wizard.u"
+#include "examine.u"
+#include "arch.u"
+#include "communication.u"
+#include "objects.u"
+#include "status.u"
+#include "connect.u"
+#include "magic.u"
+
+/* ONLINE BUILDING UTILITIES */
+
+func @.rdesc
+{
+  $loc = #actor.location ;
+  if ($loc.owner != #actor)
+  {
+    echo ("You do not own this location!\n") ;
+    return ;
+  }
+  bundleArgsNLs ;
+  $loc.description = str ("\n", $arg) ;
+  echo ("Room description set to : ",$loc.description, "\n") ;
+}
+
+func @.myrooms
+{
+  echo ("All rooms belonging to ",#actor.name,":\n") ;
+  $cnt = 0 ;
+  foreach $rm in (#actor.rooms)
+  {
+    echo ($rm,": ",$rm.name,", <",$rm.urn,">\n") ;
+    $cnt = $cnt + 1 ;
+  }
+  if ($cnt == 0 )
+    echo ("None built!\n") ;
+}
+
+func @.link
+{
+  if ($# != 2) {
+    echo ("link <dir> <room>\n<dir> must be east, west, etc.\n") ;
+    return ;
+  }
+
+  $dir = $1 ;
+  $to = $2 ;
+  if (!isobj ($to)) {
+    foreach $obj in (#actor.rooms) {
+      if ($obj.urn == $2)
+        $to = $obj ;
+    }
+  }
+  if (!isobj ($to)) {
+    echo ("Unknown destination room, ",$to, "\n") ;
+    return ;
+  }
+
+  $ln = @._link ( #actor.location, $to, $dir) ;
+  echo ("Created link as ",$ln, "\n") ;
+}
+
+func @.removeLink
+{
+  archWizCommand;
+  numArgs(1,"*** removeLink <direction>");
+  if ($exit=match($1,#actor.location.exits,"name"))
+  {
+    #actor.location.exits=listdrop(#actor.location.exits,$exit);
+    echo("Exit to the ",$1," remove.\n");
+  } else {
+    echo ("Exit ", $1," does not exist.\n");
+  }
+} chmod (&@.removeLink,"W:rs");
+
+func @.Rdestroy
+{
+  $room=#actor.location;
+  if($room && (#actor != $roow.owner))
+    archWizCommand;
+
+  if (!$room)
+  {
+    echo ("Forget it - you aren't in a room, so don't try destroying it.\n");
+    return;
+  }
+
+  foreach $arg in ($room.contents)
+    if ($arg.player)
+      @._move($arg,#2);
+
+
+  foreach $arg in ($room.contents) {
+    echo($arg.name, " (",$arg,") about to be destroyed.\n");
+    objectdestroy($arg);
+  }
+  echo($room.name, " (",$room,") about to be destroyed.\n");
+  objectdestroy($room);
+} chmod (&@.Rdestroy, "W:rs");
+
+func @._notExitName
+{
+  if (($1=="north") || ($1=="south") || ($1=="east") || ($1=="west") ||
+	 ($1=="ne") || ($1=="nw") || ($1=="se") || ($1=="sw"))
+    return 0;
+  return 1;
+} chmod(&@._notExitName, "W:rs");
+
+
+
+func @.dig
+{
+  if ($# != 2)
+  {
+    echo ("Dig <room> <urn>\n") ;
+    return ;
+  }
+  $rm = @._newRoom ($1,$2) ;
+  echo ("Dug room as ", $rm, "\n" ) ;
+} chmod(&@.dig, "W:rs");
+
+func @.odesc
+{
+  minArgs(1, "*** odesc <description>");
+
+  bundleArgsNLs;
+
+  if (#actor.inUse==NULL) {
+    echo("You need to be using an object!\n");
+    return;
+  }
+
+  if ((#actor.inUse.owner!=#actor) && (geteuid()!=#0)) {
+    echo("You don't own the object!\n") ;
+    return ;
+  }
+
+  if ($arg=="*")
+    $arg=NULL ;
+  else
+    $arg=str("\n", $arg) ;
+
+  #actor.inUse.description = $arg ;
+  echo("Description changed. Please examine the object to check it.\n") ;
+
+} chmod (&@.odesc, "W:rs") ;
+
+func @.odestroy
+{
+  numArgs(0, "*** odestroy needs no parameters") ;
+
+  if (#actor.inUse==NULL) {
+    echo("You need to be using an object!\n") ;
+    return ;
+  }
+
+  if ((#actor.inUse.owner!=#actor) && (geteuid()!=#0)) {
+    echo("You don't own the object!\n") ;
+    return ;
+  }
+
+  $obj=#actor.inUse ;
+
+  Util.widgets=listdrop(Util.widgets, $obj) ;
+  @._move($obj, #0) ;
+  objectdestroy($obj) ;
+
+  @._use (NULL) ;
+
+  echo("Object destroyed.\n") ;
+
+} chmod (&@.odesc, "W:rs");
+
+func @.object
+{
+  numArgs(7,
+	 "Usage: object \"<name>\" <uon> <val> <wgt> <wpwr> <armr> <time>") ;
+
+  $widg = @._newWidget($1, $2, atoi($3), atoi($4), atoi($5), atoi($6), atoi($7), #actor.location) ;
+  @._move($widg, #actor) ;
+  #actor.inUse = $widg ;
+  #actor._use = $widg ;
+
+  echo("There is a soft <pop> as something materialises in-use in your inventory!\n") ;
+}
+
+func @._ownRoom
+{
+  if (#actor == $1.owner) return 1 ;
+  return 0 ;
+}
+/*
+func @._setArea
+{
+  $mch = 0 ;
+  foreach $xarea in (Util.areas) {
+    if ($xarea.name == $1)
+      $mch = $xarea ;
+  }
+  if ($mch == 0) {
+    $mch = objectnew () ;
+    $mch.area = 1 ;
+    $mch.name = $1 ;
+    Util.areas = listadd (Util.areas, $mch) ;
+  }
+  #actor._editArea = $1 ;
+}
+*/
+
+
+
+/* Rest of stuff from old boot.u: */
+
+
+func @._objectDestroy
+{
+  $widget = atoobj ($1) ;
+  $sleep = $widget.sleep ;
+  if ($sleep == -2) objectdestroy ($widget) ;
+  else
+  {
+    @._move ($widget, #3) ;
+    $widget.sleeptime = time() + $sleep ;
+  }
+} chmod(&@._objectDestroy, "W:rs");
+
+
+func @.clock
+{
+  echo("The time is ", strtime(), ".\n");
+} chmod(&@.clock, "W:rs");
+
+func @._highlight
+{
+  echoto ($1,$2,$3,$4) ;
+}
+
+func @._resurrect
+{
+  echo("
+As you float through the void of the dead,  you hear a sigh and some
+mumbling in the distance: \"There goes another one... Now where did I
+put my orange smoke...\"    **>>POOF<<**    There is a blinding flash
+and a *lot* of orange smoke. You emerge, coughing into ...\n");
+
+  @._moveply (#2);
+  #actor.invis=NULL;
+
+  @._leko("There is a blinding flash and a *lot* of orange smoke.
+The smoke clears to reveal a rather started and confused ", #actor.name, "!\n\n");
+  @._resetInvent(#actor);
+
+  if ($1) {
+    $cost=(#actor.money/100)*$1;
+    echo("The Dungeon Master takes ", $cost, " pobblebeads for the resurrection.\n");
+    @._takeMoney($cost) ;
+  }
+  #actor.hp=@._maxHp(#actor.level);
+}
+
+func @.brief
+{
+  echo("BRIEF mode on.\n");
+  #actor.verbose=0;
+} chmod(&@.brief, "W:rs");
+
+func @.verbose
+{
+  echo("VERBOSE mode on.\n");
+  #actor.verbose=1;
+} chmod(&@.verbose, "W:rs");
+
+/*
+func @.xflags ;
+func @.xattack on/off ;
+xemote prefix/off/on
+build on/off
+xmaw on/off
+xwam on/off Wizard attack mobile
+sbf/cbf Builder flags
+Fetch where fetched from
+ban 0 1 2 3 4 5 days
+makeVis /Invis
+allobjects
+allrooms   player like dump
+makeWiz plr
+death d
+ldir (po)
+siteBan
+
+*/
+
+/* THINGS YOU NEED TO DO:
+
+Apart from eat and drink, people can currently push, pull, open,
+close without anybody else seeing anything.. Do you just let
+the _pushFn, etc. handle that? (eat, drink are special cases
+as they can be '.edible', but not have an '_eatFn')
+
+'read' now prints things to onlookers.. Other things could be modified
+similarly...
+
+Have a look at BundleArgsNLs - do you want to do it like that?
+
+Also, splitParse...
+
+Not sure how you want @.give() to work as regards what other people see..
+I've set it up so that if the onlooker can see _either_ party to the give,
+they see it (with appropriate 'Someone() ing')
+
+I haven't taken into account NO_HOME yet, and no wizzes lose objects on homing..
+
+EXITS function
+
+*/
+

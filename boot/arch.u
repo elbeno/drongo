@@ -1,0 +1,748 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @.set
+{
+  archWizCommand;
+
+  $synt = "*** set <object> <element> <value>\n";
+  numArgs(3, $synt);
+  if (!($obj=atoobj($1)))
+  {
+    echo ($synt);
+    return;
+  }
+
+  if (@._cannotChange($1))
+  {
+    echo("You cannot change that object.\n");
+    return;
+  }
+
+  if (regcmp($3, "^[0-9]+$"))
+  {
+    echo ("Setting to a number..\n");
+    $arg = atoi($3);
+  }
+  else
+  {
+    if ($arg=atoobj($3))
+      echo("Setting to an object.\n");
+    else
+    {
+      if ($3 == "NULL")
+      {
+        echo ("Setting to null.\n");
+        $arg=NULL;
+      }
+      else
+      {
+        echo ("Setting to text.\n");
+        $arg = $3;
+      }
+    }
+  }
+  $obj.($2)=$arg;
+  @.see($obj, $2);
+} chmod (&@.set, "W:rs"); 
+
+
+func @.reset
+#define echoRESETtime(WTYPE) @._echoToArchesHere(\
+         " - restoring ", $obj, " - WTYPE)\n"); \
+     echo("*** Setting restoreTime of ", $obj.name, " (WTYPE) to now.\n");
+
+#define echoRESETalready(WTYPE,WPLACE) @._echoToArchesHere(\
+         " - ", $obj, " - WTYPE - already in ", WPLACE, ")\n"); \
+     echo("*** ", $obj.name, ", ", $obj, " (WTYPE) is already in ", \
+         WPLACE.name, " (", WPLACE, ")\n");
+
+#define echoRESETfailure(WTYPE) @._echoToArchesHere(\
+         " - failure on ", $obj, " - WTYPE)\n"); \
+     echo("*** You cannot reset ", $obj.name, " (WTYPE)\n");
+
+#define echoRESETmoving(WTYPE,WPLACE) @._echoToArchesHere(\
+         " - restoring ", $obj, " - WTYPE)\n"); \
+     echo("*** Moving ", $obj.name, " (WTYPE) back to ", WPLACE.name, \
+         " (", WPLACE, ")\n");
+{
+  archWizCommand;
+
+  minArgs(1, "*** reset <anything>");
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Tarkaset, do a reset\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), 
+	" hands and mutters \"Tarkaset, do a reset\" ...");
+  @._echoToArchesHere("  ('", $arg, "'");
+  if (!($obj = @._matchAnything($arg))) { /*** assignment not comparison ***/
+    @._echoToArchesHere(" - can't match)\n");
+    return;
+  }
+
+  if (@._cannotAccess($obj)) {
+    echo("You cannot access that object.\n");
+    @._echoToArchesHere(" - can't access)\n");
+    return;
+  }
+
+  $from = $obj.location;
+
+  if ($obj.mobile) {
+    if (($from == specialStore) || ($from == generalStore)) {
+      echoRESETtime(mobile);
+      $obj.restoreTime = time();
+      return;
+    }
+
+    if ($from == $obj.home) {
+      echoRESETalready(mobile,$from);
+      return;
+    }
+
+    if (($from.rxfetch >= #actor.level) || ($obj.xFetch)) {
+      echoRESETfailure(mobile);
+      return;
+    }
+
+    echoRESETmoving(mobile,$obj.home);
+    $obj.hp = $obj.maxhp;
+    @._reko($from, $obj.name, " suddenly disappears!\n");
+    @._move($obj, $obj.home);
+    @._reko($obj.home, $obj.name, " suddenly appears!\n");
+
+    if ($obj.fighting) {
+      if ($obj.fighting.fighting == $obj)
+        $obj.fighting.fighting = NULL;
+      $obj.fighting = NULL;
+    }
+
+    return ;
+  }
+
+  if ($obj.widget)  {
+    if ($obj.special) {
+      if ($from == specialStore) {
+        echoRESETtime(widget);
+        $obj.restoreTime = time();
+        return;
+      }
+
+      echoRESETtime(widget);
+      @._reko($from, $obj.name, " suddenly disappears!\n");
+      @._move($obj, specialStore);
+      $obj.restoreTime = time();
+      return;
+    }
+
+    if ($from == $obj.home) {
+      echoRESETalready(widget,$from);
+      $obj.restoreTime = time();
+      return;
+    }
+
+    if (($from.rxfetch >= #actor.level) || ($obj.xFetch)) {
+      echoRESETfailure(widget);
+      return;
+    }
+
+    echoRESETmoving(widget,$obj.home);
+    $obj.restoreTime = time();
+    @._reko($from, $obj.name, " suddenly disappears!\n");
+    @._move($obj, $obj.home);
+    @._reko($obj.home, $obj.name, " suddenly appears!\n");
+    return;
+  }
+
+
+  if ($obj.player) {
+    if ($obj.level >= #actor.level) {
+      echoRESETfailure(player);
+      return;
+    }
+
+    if (!listsearch(@.onlinePlayers, $obj)) {
+      if (!($from)) {
+        echoRESETalready(player,#0);
+        return;
+      }
+
+      echoRESETmoving(player,#0);
+      @._move($obj, #0);
+      @._reko($from, $obj.name, " suddenly disappears!\n");
+      return;
+    }
+
+    if ($from.noSummonOut >= #actor.level) {
+      echoRESETfailure(player);
+      return;
+    }
+
+    if (!($home = $obj.home))      /** assignment not comparison **/
+      $home = #2;
+    echoRESETmoving(player,$obj.home);
+    echoto($obj, "You have been sent home.\n");
+
+    @._reko($home, $obj.name, " suddenly appears!\n");
+    @._move($obj, $home);
+    @._reko($from, $obj.name, " suddenly disappears!\n");
+    @._resetitems(#actor);
+
+    if ($obj.fighting) {
+      if ($obj.fighting.fighting == $obj)
+        $obj.fighting.fighting = NULL;
+      $obj.fighting = NULL;
+    }
+
+    return;
+  }
+  if ($obj.link) {
+    if ($from) {
+      echoRESETmoving(link,#0);
+      @._move($obj, #0);
+      return;
+    } else {
+      echoRESETalready(link,#0);
+    }
+    return;
+  }
+
+  if ($obj.scenery)  {
+    if ($from) {
+      echoRESETmoving(scenery,#0);
+      @._move($obj, #0);
+    } else {
+      echoRESETalready(scenery,#0);
+    }
+    return;
+  }
+
+  if ($obj.room)  {
+    if ($from) {
+      echoRESETmoving(room,#0)
+      @._move($obj, #0);
+    } else {
+      echoRESETalready(room,#0);
+    }
+    return;
+  }
+
+  echo("*** That is an invalid object\n");
+  @._echoToArchesHere(" - invalid object)\n");
+
+} chmod(&@.reset, "W:rs");
+
+func @.lp
+{
+  archWizCommand;
+  minArgs(1, "*** lp selector");
+
+  if (($1=="s>") || ($1=="-dwiz") || ($1=="+dwiz") || ($1=="-d") || ($1=="+d")) {
+    if (($#!=2) || (atoi($2)==NULL)) {
+      echo("*** lp ", $1, " <param>\n");
+      return;
+    }
+    $par=atoi($2);
+  }
+
+  foreach $pl in (Util.players) {
+    if ($1=="s0") {
+      if (!$txt) $txt="Players whose score is zero:";
+      if ($pl.money==0)
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="l0") {
+      if (!$txt) $txt="Players at level 0:";
+      if ($pl.level==0)
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="s>") {
+      if (!$txt) $txt=str("Players whose score > ", $par, ":");
+      if ($pl.money>$par)
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="pk") {
+      if (!$txt) $txt="Player killers:";
+    } /* Dunno */
+    if ($1=="wiz") {
+      if (!$txt) $txt="Wizards:";
+      if (WIZ($pl))
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="ywiz") {
+      if (!$txt) $txt="Young Wizards:";
+      if ($pl.level==20)
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="mwiz") {
+      if (!$txt) $txt="Mature Wizards:";
+      if ($pl.level==21)
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="swiz") {
+      if (!$txt) $txt="Senior Wizards:";
+      if ($pl.level==22)
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="ban") {
+      if (!$txt) $txt="Banned players:";
+    } /* Dunno */
+    if ($1=="jail") {
+      if (!$txt) $txt="Jailed players:";
+    } /* Dunno */
+    if ($1=="nc") {
+      if (!$txt) $txt="Players who have never connected:";
+      if ($pl.loginTime==NULL)
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="tix") {
+      if (!$txt) $txt="Players who hold lottery tickets:";
+    } /* Dunno */
+    if ($1=="tp") {
+      if (!$txt) $txt="Players with pending tasks:";
+      if ($pl.taskPending)
+        $plist=listadd($plist, $pl);
+    }
+#define DAYS(x) (60*60*24*x)
+
+    if ($1=="-dwiz") {
+      if (!$txt) {
+        $txt=str("Wizards who have not logged on for ", $par, " day");
+        if ($par!=1) $txt=str($txt, "s");
+        $txt=str($txt, ":");
+      }
+      if (WIZ($pl) && $pl.loginTime && ((time()-$pl.loginTime)>DAYS($par)))
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="+dwiz") {
+      if (!$txt) {
+        $txt=str("Wizards who have logged on within the past ", $par, " day");
+        if ($par!=1) $txt=str($txt, "s");
+        $txt=str($txt, ":");
+      }
+      if (WIZ($pl) && $pl.loginTime && ((time()-$pl.loginTime)<DAYS($par)))
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="-d") {
+      if (!$txt) {
+        $txt=str("Players who have not logged on for ", $par, " day");
+        if ($par!=1) $txt=str($txt, "s");
+        $txt=str($txt, ":");
+      }
+      if ($pl.loginTime && ((time()-$pl.loginTime)>DAYS($par)))
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="+d") {
+      if (!$txt) {
+        $txt=str("Players who have logged on within the past ", $par, " day");
+        if ($par!=1) $txt=str($txt, "s");
+        $txt=str($txt, ":");
+      }
+      if ($pl.loginTime && ((time()-$pl.loginTime)<DAYS($par)))
+        $plist=listadd($plist, $pl);
+    }
+    if ($1=="-sbr") {
+      if (!$txt) $txt="Players with banned site registration flags:";
+    } /* Dunno */
+  }
+
+  if ($txt)
+    echo($txt, "\n");
+  else {
+    echo("*** Invalid lp command\n");
+    return;
+  }
+  $mat = 0;
+  foreach $pl in ($plist) {
+    echo("   ", $pl, ": ", $pl.name, "\n");
+    $mat = $mat + 1;
+  }
+  echo("Total: ", $mat, ".\n");
+}
+
+func @.oe
+{
+  archWizCommand;
+  numArgs(1, "*** oe <object>");
+
+  $obj = atoobj($1) ;
+
+  if (!($obj) || ($obj == NULL)) {
+    echo("That is not a valid object.\n");
+    return;
+  }
+
+  if (@._cannotAccess($obj)) {
+    echo("You cannot access that object.\n");
+    return;
+  }
+
+  objectelements($obj);
+  echo("\n");
+}
+
+func @.seel
+{
+  archWizCommand;
+
+  numArgs(2, "*** seel <object> <list-element>");
+
+  $item = atoobj($1) ;
+
+  if (!($item) || ($item == NULL)) {
+    echo("That is not a valid object.\n");
+    return;
+  }
+
+  if (@._cannotAccess($item)) {
+    echo("You cannot access that object.\n");
+    return;
+  }
+
+  echo("Objects in ", $1, ".", $2, ":");
+
+  if ($item.($2)==NULL)
+    echo("none");
+  else
+    foreach $elem in ($item.($2))
+      echo(" ", $elem);
+  echo("\n");
+}
+
+func @.see
+{
+  archWizCommand;
+  numArgs(2, "*** see <object> <element>");
+
+  $obj = atoobj($1) ;
+
+  if (!($obj) || ($obj == NULL))
+  {
+    echo("That is not a valid object.\n");
+    return;
+  }
+
+  if (@._cannotAccess($obj))
+  {
+    echo("You cannot access that object.\n");
+    return;
+  }
+
+  echo($obj, ".", $2);
+
+  $elem=$obj.($2);
+
+  if ($elem==NULL)
+  {
+    echo(" does not exist.\n");
+    return;
+  }
+
+  if (islist($elem))
+  {
+    echo(" = list of ", listcount($elem), " element");
+    if (listcount($elem)==1)
+      echo(".\n");
+    else
+      echo("s.\n");
+    return;
+  }
+
+  if (isnum($elem))
+  {
+    if ($elem>70000000)
+      echo(" = ", strtime($elem), ".\n");
+    else
+      echo(" = ", $elem, ".\n");
+    return;
+  }
+
+  if (isobj($elem)) {
+    echo(" = ", $elem, ".\n");
+    return;
+  }
+
+  if (isstr($elem)) {
+    echo(" = \"", $elem, "\".\n");
+    return;
+  }
+
+  echo(" is an unknown object type.\n");
+}
+
+func @.whatis
+{
+  archWizCommand;
+  
+  numArgs(1, "*** whatis <object>");
+
+  $obj = atoobj($1) ;
+
+  if(!($obj) || ($obj == NULL)) {
+    echo("That is not a valid object.\n");
+    return;
+  }
+
+  if (@._cannotAccess($obj)) {
+    echo("You cannot access that object.\n");
+    return;
+  }
+
+  echo($obj, ": ");
+
+  $interp=0;
+
+  if ($obj.player) {
+    echo("Player: ", $obj.name, ".\n");
+    $interp=1;
+  }
+
+  if ($obj.widget) {
+    echo("Widget: ", $obj.name, ".\n");
+    $interp=1;
+  }
+
+  if ($obj.room) {
+    echo("Room: ", $obj.name, ".\n");
+    $interp=1;
+  }
+
+  if ($obj.mobile) {
+    echo("Mobile: ", $obj.name, ".\n");
+    $interp=1;
+  }
+
+  if ($obj.link) {
+    echo("Exit ", $obj.name, " -> ", $obj.destination, ".\n");
+    $interp=1;
+  }
+
+  if ($obj.scenery) {
+    if (!$obj.room) {
+      echo("Scenery: ", $obj.name, ".\n");
+      $interp=1;
+    }
+  }
+
+  if (!$interp) {
+    echo("Unknown: Name: ", $obj.name,".\n") ;
+  }
+}
+
+
+func @.sys
+{
+  archWizCommand;
+  bundleArgs;
+  log (strtime(), " ", #actor.name," sends system message:\n  ",$arg,"\n") ;
+  @._sysms ("  ",$arg) ;
+}
+
+func @.Leko
+{
+  archWizCommand ;
+  minArgs(1, "*** Leko <text>");
+  bundleArgs ;
+  @._reko (#actor.location, $arg,"\n") ; /* Shows to actor too */
+  log(strtime(), " ", #actor.name, " LEKOs: ", $arg, "\n");
+}
+
+func @.Geko
+{
+  archWizCommand ;
+  minArgs(1, "*** Geko <text>");
+  bundleArgs ;
+  @._geko ($arg,"\n") ;
+  echo ($arg,"\n") ;
+  log(strtime(), " ", #actor.name, " GEKOs: ", $arg, "\n");
+}
+
+func @.frob
+{
+  archWizCommand ;
+  numArgs(2,"*** frob <player> <level>") ;
+
+  echo("You wave your hands and mutter \"Ratta-dob, do me a frob\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Ratta-dob, do me a frob\" ...");
+
+  $who = @._singleVis(@.onlinePlayers, $1) ;
+  if (!$who) return ;
+  if ($who == #actor) {
+    echo ("Frobbing yourself is silly and dangerous (TM).\n") ;
+    return ;
+  }  
+  if ($who.level >= #actor.level) {
+    echo ("You can only frob someone who is a lower level than you.\n") ;
+    return ;
+  }
+  $lvl = atoi ($2) ;
+  if ($lvl >= #actor.level) {
+    echo ("You can't frob someone to your level or higher.\n") ;
+    return ;
+  }
+  $who.level = $lvl ;
+  if ($who.invis>$who.level)
+    $who.invis=$who.level;
+
+  $who.money=@._minScore($who.level);
+
+  echo ("Frobbing ",$who.name," to level ", $lvl, " (", @._levelName ($lvl, $who.sex), ").\n") ;
+}
+
+func @.cName
+{
+  archWizCommand ;
+  numArgs(2,"*** cName <old-name> <new-name>") ;
+
+  $who = @._singleVis(@.onlinePlayers, $1) ;
+
+  if (!$who) return ;
+
+  if ($who.level >= #actor.level) {
+    echo ("You can't change that person's name!\n") ;
+    return ;
+  }
+
+  echo ("Renaming ",$who.name," to ",$2,".\n") ; 
+  $who.name = $2 ;
+} chmod (&@.cName,"W:rs") ;
+
+func @.plode
+{
+  archWizCommand;
+
+  minArgs (1, "*** plode <player>");
+  bundleArgs;
+
+  echo ("You wave your hands and mutter \"Alagoad, do explode\"...\n");
+  @._visEmote ("waves ",@._hisHer (#actor),
+    " hands and mutters \"Alagoad, do explode\"...\n");
+  @._echoToArchesHere ("  (ploding ", $arg);
+
+  if (@._useMana(300))
+  {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis (@.onlinePlayers, $arg);
+  if (!$who)
+  {
+    @._echoToArchesHere(" - no match)\n");
+    return;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if ($who.level > #actor.level)
+  {
+    echo ("*** Your magic backfires!\n");
+    $who = #actor ;
+  }
+
+  becomePlayer ($who);
+  echo("WOA! Something odd happens! You swell up and explode messily!\n");
+  @._visEmote ("swells up and explodes!\n");
+  @._geko ("<!> ", $who.name, " has just swollen up and exploded messily!\n");
+  @._resurrect (0);
+
+  becomeMyself;
+} chmod (&@.plode, "W:rs");
+
+func @.Do
+{
+  archWizCommand ;
+  if ($# == 3)
+    #1.(#2) (#3) ;
+  if ($# == 4)
+    #1.(#2) (#3,#4) ;
+  if ($# == 5)
+    #1.(#2) (#3,#4,#5) ;
+} chmod(&@.Do, "W:rs") ;
+
+#define isfun(x) (!(isstr(x) || islist(x) || isobj(x) || isnum(x)))
+
+func @.force
+{
+  creatorCommand;
+  minArgs(2, "*** force <person> <command>");
+
+  $who = @._singleVis(@.onlinePlayers, $1);
+
+  if (!$who) {
+    echo("No match.\n");
+    return;
+  }
+
+  if (($who.level>=#actor.level)) {
+    echo("You can only force players of a lower level than you.\n");
+    return;
+  }
+
+  if ($who.inUse.($2) && isfun($who.inUse.($2)))
+    $root=$who.inUse;
+  else if ($who.location.($2) && isfun($who.location.($2)))
+    $root=$who.location;
+  else if (@.($2) && isfun(@.($2)))
+    $root=#0;
+  else {
+    echo("Command not known.\n");
+    return;
+  }
+
+  if ($#>6) {
+    echo("Too many parameters.\n");
+    return;
+  }
+
+  log(strtime(), " ", #actor.name, " FORCEs: <", $who.name, "> ", $2, " ", $3,
+		" ", $4, " ", $5, " ", $6, "\n");
+
+  $act=#actor;
+
+  becomePlayer($who);
+  if (CREATOR($who))
+    echo("*** Being 'forced by ", $act.name, " ***\n");
+
+  if ($#==2)
+    $root.($2)();
+  else if ($#==3)
+    $root.($2)($3);
+  else if ($#==4)
+    $root.($2)($3, $4);
+  else if ($#==5)
+    $root.($2)($3, $4, $5);
+  else if ($#==6)
+    $root.($2)($3, $4, $5, $6);
+  becomeMyself;
+  echo("Done.\n");
+} chmod(&@.force, "W:rs");
+
+func @.donate
+{
+  archWizCommand ;
+  numArgs (2, "*** donate <player> <amount>") ;
+
+  $who = @._singleVis(@.onlinePlayers, $1);
+
+  if (!$who) {
+    return;
+  }
+  $amount = atoi($2) ;
+  echo ("Donating ",$amount," to ",$who.name,".\n") ;
+  if ($amount < 0)
+  {
+    echoto ($who, "You are deducted ",-$amount," pbs.\n") ;
+  }
+  else
+  {
+    echoto ($who, "You are given ",$amount," pbs.\n") ;
+  }
+
+  becomePlayer ($who) ;
+  @._giveMoney ($amount) ;
+  becomeMyself ;
+
+} chmod (&@.donate, "W:rs") ;
+  

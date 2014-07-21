@@ -1,0 +1,139 @@
+#include <drogon.h>
+
+/* hard coded players, rooms, etc. submit this file first */
+
+{
+  PLAYER ("Winker") ;
+  PDESC = "
+  Winker wears a comfortable-looking, colourful shirt under his jacket, and 
+  smiles frequently. Although he still looks young, you can see crows' feet 
+  in the corners of his hazel eyes, no doubt caused by all that smiling. 
+  Various pieces of paper protrude from his pockets like half-formed ideas. 
+  A pair of well-worn but well-cared-for shoes completes the picture of this 
+  friendly-looking wizard." ;
+  $player.level = 29 ;
+  $player.money = @._minScore($player.level) ;
+  $player.mana = @._maxMana($player.level) ;
+  $player.hp = @._maxHp($player.level) ;
+}
+
+{
+  ROOM ("A Swirling Void", "swirling_void") ;
+  RDESC = "
+  You are floating in the middle of a swirling void. Movement in any
+  direction is impossible because, being in a void, there is nowhere
+  to move to or from." ;
+}
+
+{
+  ROOM ("With the Gods", "with_the_gods") ;
+  RDESC = "
+  You are in the depository of offered items." ;
+}
+
+{
+  ROOM ("Somewhere Else", "somewhere_else") ;
+  RDESC = "
+  You are in Drongo's magical storeroom." ;
+}
+
+{
+  ROOM ("A Prison Cell", "prison_cell") ;
+  RDESC = "
+  You seem to be in a small 10-foot square cell.  There is no way out of
+  here. All 6 walls are composed of identical grey granite blocks. There
+  is no window or door.  The only visible light is a strange orange glow
+  seemingly given off by the granite walls." ;
+}
+
+{
+  WIDGET ("The Land Of Drongo", "land_of_drongo",
+  0, 0, 0, 0, -1, #0) ;
+  WDESC = "
+  Yes, it's the Land of Drongo all right. You recognise the
+  half-finished look of the place." ;
+}
+
+{
+  PLAYER ("Death") ;
+  PDESC = "
+  Towering before you stands DEATH, Skeletal in looks and clothed only in
+  a long black robe." ;
+  $player.level = 26 ;
+  $player.money = @._minScore($player.level) ;
+  $player.mana = @._maxMana($player.level) ;
+  $player.hp = @._maxHp($player.level) ;
+}
+
+{
+  PLAYER ("Toaster") ;
+  $player.level = 29 ;
+}
+
+{
+  WIDGET ("Bare hands", "bare_hands",
+  0, 0, 0, 0, -1, #0) ;
+  WDESC = "
+  A pair of bare hands." ;
+}
+
+{
+  PLAYER ("Guest1");
+  PDESC = "
+  I am just a guest. Be kind to me." ;
+}
+
+{
+  PLAYER ("Guest2");
+  PDESC = "
+  I am just a guest. Be kind to me." ;
+}
+
+{
+  PLAYER ("Guest3");
+  PDESC = "
+  I am just a guest. Be kind to me." ;
+  $player.sex = FEMALE ;
+}
+
+{
+  PLAYER ("Guest4");
+  PDESC = "
+  I am just a guest. Be kind to me." ;
+  $player.sex = FEMALE ;
+}
+
+{
+  PLAYER ("Guest5");
+  PDESC = "
+  I am just a guest. Be kind to me." ;
+  $player.sex = NEUTER ;
+}
+
+{
+  PLAYER ("Guest6");
+  PDESC = "
+  I am just a guest. Be kind to me." ;
+  $player.sex = NEUTER ;
+}
+
+
+/*
+EX skel
+WIDGET: a skeleton, #1040. <skeleton> owner: System.
+  This guy has been here for a long time. He looks like he could do with a
+  good meal or two.  Lets hope you get out for good behaviour  long before
+  you reach his state!
+No Text.
+WFIXED: The skeleton shuffles out of your clumsy grasp as you try to get it.
+Stats: v:0, w:0, p:0, a:0, t:0.
+Home: #5, A Prison Cell (room)
+Std. Functions:
+Std. Flags:
+
+You click your heels together 3 times and mutter:
+  "Theres no place like home." ...
+Your surroundings fade, to be replaced with ...
+
+*/
+

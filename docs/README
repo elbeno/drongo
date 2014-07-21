@@ -1,0 +1,26 @@
+
+Drogon Documentation
+~~~~~~~~~~~~~~~~~~~~
+
+In this directory you should find enough information to allow you to
+create all the rooms, map, objects, mobiles, puzzles and traps that you
+can possibly immagine.
+
+Included is all the code for the monastery and the mansion. You may
+want to examine these while looking at the Build files.
+
+Included also (in the file u-code) is the u-code reference manual. This
+was written by mjr who wrote the UberMUD server.
+
+Gordon Henderson/Irn-Bru
+
+ +--+  +--+  +--+
+ |- +--+  +--+ -|
+ +---+ - - -+---+
+     | - - -|
+     |- - - |
+     | - - -+-------------------------------------------------------------+
+     |- - Arch Wizard Irn-Bru - Creator of Drogon - gordon@meiko.com - - -|
+     +--------------------------------------------------------------------+
+     | - - - - - - Ip address: 192.131.108.55,  port 6123 - - - - - - - - |
+     +--------------------------------------------------------------------+

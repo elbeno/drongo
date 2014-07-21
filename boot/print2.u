@@ -1,0 +1,319 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @._echoToArchesHere	/* X	Echo to arches at location	*/
+{
+  bundleArgsNoSpace;
+
+  foreach $pl in (#actor.location.contents)
+    if ($pl.player)
+      if (ARCH($pl) && $pl != #actor)
+        if (@._youCanSeeMe($pl)) /* Keep the Creator's business private! */
+          echoto($pl, $arg);
+}
+
+func @._itemStats		/* X	Return string for EX header	*/
+/* Handy function for @.EX which returns, of an item
+name, [optional sex], id. <uname> owner: Owner */
+
+{
+  $ret=str($1.name, ", ");
+  if ($1.sex==NEUTER)
+    $ret=str($ret, "genderless, ");
+  if ($1.sex==FEMALE)
+    $ret=str($ret, "female, ");
+  if ($1.sex==MALE)
+    $ret=str($ret, "male, ");
+  $ret=str($ret, $1, ". <");
+  if ($1.mobile)
+    $ret=str($ret, $1.umn);
+  if ($1.widget)
+    $ret=str($ret, $1.uon);
+  if ($1.room)
+    $ret=str($ret, $1.urn);
+  $ret=str($ret, "> owner: ");
+  if ($1.owner && ($1.owner != Util) && ($1.owner != CodeSub))
+    $ret=str($ret, $1.owner.name);
+  else
+    $ret=str($ret, "System");
+  return $ret;
+}
+
+func @._sysms			/* X	D=_wall? Send system msg	*/
+{ 
+  @._geko ("\nSYSTEM MESSAGE @ ",strtime(time()),":\n") ;
+  echo ("\nSending system message @ ",strtime(),":\n") ;
+  bundleArgsNoSpace ;
+  @._geko ($arg,"\n\n") ;
+  echo ($arg,"\n\n") ;
+}
+
+func @._youCanSeeMe
+{
+  return ((@._plrCanSeeLvl($1, #actor, #actor.invis)) || (listsearch(#actor._seeme, $1)));
+}
+
+func @._iCanSeeYou
+{
+  return ((@._plrCanSeeLvl(#actor, $1, $1.invis)) || (listsearch($1._seeme, #actor)));
+}
+
+
+/* _plrCanSeePlr and _plrCanSeeLvl are not Drogon compatible. Therefore, do
+something like:
+  #ifdef DRONGO
+    x=@.plrCanSeePlr ($p1, $p2) ;
+  #else
+    becomePlr ($p1)
+    ..
+  #endif
+*/
+
+func @._plrCanSeePlr
+{
+  return((@._plrCanSeeLvl($1, $2, $2.invis)) || (listsearch($2._seeme, $1)));
+}
+
+func @._plrCanSeeLvl
+{
+  return (!$3 || $1.level >= $3) ;
+}
+
+func @._lekoName
+{
+  if (!#actor.invis)
+  {
+    @._leko (#actor.name) ;
+    return ;
+  }
+  foreach $plr in (#actor.location.contents)
+  {
+    if ($plr != #actor)
+    {
+      echoto ($plr,"someone") ;
+      if (@._youCanSeeMe ($plr)) echoto ($plr," (",#actor.name,")") ;
+    }
+  }
+}
+
+
+/* lekoNAME prints Name, Someone, or Someone (Name) */
+func @._lekoNAME
+{
+  if (!#actor.invis)
+  {
+    @._leko (#actor.name) ;
+    return ;
+  }
+  foreach $plr in (#actor.location.contents)
+  {
+    if ($plr != #actor)
+    {
+      echoto ($plr, "Someone") ;
+      if (@._youCanSeeMe ($plr)) echoto ($plr," (",#actor.name,")") ;
+    }
+  }
+}
+
+
+
+/* tellName prints correct name to given plr */
+func @._tellName		/* X					*/
+{
+  if (!$2.invis)
+  {
+    echoto ($1, $2.name) ;
+    return ;
+  }
+  echoto ($1, "someone") ;
+  if (@._plrCanSeePlr($1,$2)) echoto ($1, " (",$2.name,")") ;
+}
+
+
+/* NOT DROGON */
+func @._tellNAME
+{
+  if (!$2.invis)
+  {
+    echoto ($1, $2.name) ;
+    return ;
+  }
+  echoto ($1, "Someone") ;
+  if (@._plrCanSeePlr($1,$2)) echoto ($1, " (",$2.name,")") ;
+}
+
+
+
+/* EMOTE - send to all but #actor in #actor.location
+   preceded by #actor */
+func @._emote
+{
+  @._lekoNAME () ;
+  bundleArgsNoSpace ;
+  foreach $plr in (#actor.location.contents)
+  {
+    if ($plr != #actor)
+      if (regcmp($arg,"^'.*"))
+      {
+        echoto ($plr, $arg, "\n") ;
+      }
+      else
+      { 
+        echoto ($plr, " ", $arg, "\n") ;
+      } 
+  }
+} 
+
+
+/* VISEMOTE - As emote, taking visibilities into account */
+func @._visEmote
+{
+  bundleArgsNoSpace ;
+  $invis = #actor.invis ;
+  foreach $plr in (#actor.location.contents) {
+    if ($plr != #actor && @._youCanSeeMe ($plr)) {
+      if (!$invis)
+        echoto ($plr, #actor.name) ;
+      else
+        echoto ($plr, "Someone (",#actor.name,")") ;
+      echoto ($plr," ",$arg,"\n") ;
+    }
+  }
+}
+
+
+
+/* VISLEKO - Echoes to everybody here who can see #actor */
+func @._visLeko
+{
+  bundleArgsNoSpace;
+
+  foreach $plr in (#actor.location.contents) {
+    if ($plr != #actor && @._youCanSeeMe($plr)) {
+      echoto($plr, $arg);
+    }
+  }
+}
+
+
+
+/* LEKO - Echo message to everyone here but #actor */
+
+func @._leko
+{
+  foreach $plr in (#actor.location.contents)
+    if (#actor != $plr)
+      foreacharg $arg
+        echoto ($plr, $arg) ;
+}
+
+func @._lekoFor		/* D	Echo message to object's location	*/
+{
+  $widg = atoobj($1);
+  foreach $plr in ($widg.location.contents) {
+    $valid = 0 ;
+    foreacharg $arg {
+      if ($valid)
+        echoto($plr, $arg);
+      $valid = 1;
+    }
+  }
+}
+
+
+
+/* GEKO - Echo message to everyone everywhere */
+func @._geko
+{
+  foreach $plr in (@.onlinePlayers) {
+    if ($plr != #actor )
+      foreacharg $arg
+        echoto ($plr, $arg) ;
+  }
+}
+
+
+func @._reko
+{
+  $loc = atoobj ($1) ;
+  foreach $plr in ($loc.contents) {
+    $valid = 0 ;
+    foreacharg $arg {
+      if ($valid)
+        echoto ($plr, $arg) ;
+      $valid = 1 ;
+    }
+    
+  }
+  
+}
+
+func @._emote2p
+{
+  $who=@._singleVis(#actor.location.contents, $1, @.noOneHere);
+
+  if (!$who)
+    return;
+
+  if (!@._twoPlayerEmote($who, $4, $5, $6))
+    return;
+  echo($2, $who.name, $3);
+}
+
+func @._twoPlayerEmote                             /**** general function ****/
+{
+  if (#actor.dumb)
+  {
+    echo("The sock makes emoting anything very difficult.\n") ;
+    return 0;
+  }
+
+  if ($1==#actor)
+  {
+    echo("You can't do that to yourself!\n");
+    return 0;
+  }
+
+  @._tellNAME($1, #actor);
+  echoto($1, $2);
+
+  log(strtime()," <E> ", #actor.name, $3, $1.name, $4, "\n");
+
+  foreach $person in (#actor.location.contents) 
+  {
+    if ($person.player) 
+    {
+      if (($person!=#actor) && ($person!=$1) && (!$person.blind))
+      {
+        @._tellNAME($person, #actor);
+        echoto($person, $3);
+        @._tellNAME($person, $1);
+        echoto($person, $4);
+      }
+    }
+  }
+  return 1;
+}
+
+
+func @._sp			/* d	Print n copies of $		*/
+{
+  if ($1<=0) return ;
+  echo ($2);
+  @._sp ($1-1,$2);
+}
+
+func @._pNum			/* D	Print num formatted to width 	*/
+{
+  $x = str ($1);
+  @._sp ($2-strlen($x)," ");
+  echo ($x);
+}
+
+func @._pName			/* D	Print $ padded to $2 with '$3'	*/
+{
+  @._sp ($2-strlen($1),$3);
+  echo ($1);
+}
+

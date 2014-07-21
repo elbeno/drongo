@@ -1,0 +1,1422 @@
+/***************************************************************\
+* roomFns description file for Logic Island 			*
+* Submitted by Bugblatter djt1000@uk.ac.cam.hermes		*
+\***************************************************************/
+
+/* Revision History
+ 
+ Date   | Modifications
+--------+-------------------------------------------------------
+31Jan94 | This file created
+01Feb94 | Plaque function bodies added
+04Feb94 | Completely rewritten
+07Feb94 | Accidentally deleted. Typed back in!
+08Feb94 | Other function skeletons added
+09Feb94 | This file split into widgetFns and roomFns
+10Feb94 | Exit functions completed!
+        | Decriptions altered and plaques now change
+        | Still need _resetFn
+        | Added the Exit functions to prevent mortals going up
+        |  the tower and also to call _resetFn on entering Puz Rm
+16Feb94 | _resetFn started, modified exit functions
+        | _tidyRooms function added!
+17Feb94 | Made sure you could see all the ingots appear and disappear
+        |  if you were in the correct rooms
+        | New puzzle state added: PUZZLE_RESETTING
+        | No more apparent bugs in reset code
+        | If you tp into a puzzle room, you have to tp out! (This saves
+        |  worrying about checking rooms for people!) Unfortunately
+        |  if someone enters and then awiz tps in a leaves the mortal
+        |  has to tp out!
+21Feb94 | If someone homes out, it now resets instead of staying in use!
+22Feb94 | String generation started, getting there:
+02Mar94 | Platinum function added.
+        | As are silver and gold.
+        | Lots of work done on accounting of special cases and thought
+        | Work on levels of difficulty - Done!
+        | Fallback added to set puzzle to unready if reset fails
+        | Currently 1200 lines. Trying to reduce it!
+03Mar94 | Leave functions amalgamated
+        | Massive rewrite of needle inscription
+        | A wiz must now tp out if tp-ed in - fixed bug!
+        | Platinum function fixed
+        | Random function changed!
+        | Other functions moved to study and made mWiz only
+        | Bug fixed with silver inscription
+        | Lots of stuff tidied and put in Bru standard form!
+        | Shuffle function rewritten
+        | Added search function to find platinum ingot
+04Mar94 | Modified conditions when _wrongDoor() is called
+        | in function island2_wizTower_02.enter (at the end)
+        | Also fixed it so it doesn't reset with someone in it!
+        | ._resetFn - first condition. With _Indicator & _Needle
+05Mar94 | Arches can now enter/leave without affecting the puzzle
+        | and it informs them if they picked the correct door. That
+        | way they can sort of play!
+06Mar94 | Started coding NIM (just computers move left!)
+        | NIM recoded to be faster and shorter.
+--------+-------------------------------------------------------
+04Mar94 | Submitted to Irn-Bru
+--------+-------------------------------------------------------
+*/
+
+#include <drogon.h>
+#include "rooms.h"
+#include "widgets.h"
+#include "mobiles.h"
+
+/*****************\
+* The Room Puzzle *
+\*****************/
+
+/* Debug Mode? */
+
+/*#define DEBUG 		1*/
+
+/* Definitions */
+
+#define NULL_INGOT		0
+#define BRONZE_INGOT		1
+#define SILVER_INGOT		2
+#define GOLD_INGOT		3
+#define PLATINUM_INGOT		4
+
+#define BRONZE_ROOM		1
+#define SILVER_ROOM		2
+#define GOLD_ROOM		3
+#define CLEANERS_ROOM		4
+
+#define PUZZLE_READY		0
+#define PUZZLE_INUSE		1
+#define PUZZLE_UNREADY		2
+#define PUZZLE_RESETTING	3
+
+#define INUSE_TEXT		"The inscriptions are scrambling!"
+#define UNREADY_TEXT		"There is no inscription written here!"
+
+#define TRUTH			1
+#define LIE			0
+
+#define BEHIND_X		1
+#define NOT_BEHIND_X		2
+#define X_LIES			3
+#define X_TRUTH			4
+
+/* Global Variables
+ *******************/
+
+/* For room puzzle */
+
+island2_wizTower_02.PuzzleStat	= PUZZLE_UNREADY ;
+island2_wizTower_02.WhereIngot	= island2_wizTower_09 ;
+island2_wizTower_02.WhichIngot	= NULL_INGOT ;
+
+island2_wizTower_02.Inscription	= UNREADY_TEXT ;
+island2_wizTower_03.Inscription	= UNREADY_TEXT ;
+island2_wizTower_04.Inscription	= UNREADY_TEXT ;
+island2_wizTower_05.Inscription	= UNREADY_TEXT ;
+
+/* For NIM game */
+
+island2_beach_cave.NimStatus = PUZZLE_UNREADY ;
+island2_beach_cave.PileState = 0 ;
+island2_beach_cave.NumPiles = 0 ;
+
+/* Exit Functions
+ *****************/
+
+func island2_wizTower_02._leaveRoom
+{
+  /* If not a simple leave\n command, ignore with error */
+  if ($2>0)
+  {
+    echo (@.noGo) ;
+    return ; 
+  }
+
+  /* If someone teleported in - they will have to bloody well tp out! */
+  if ((island2_wizTower_indicator.LastActor != #actor
+     || island2_wizTower_02.PuzzleStat != PUZZLE_INUSE)
+     && !ARCH(#actor)) /* Arch's can leave */
+  {
+      echo ("You must have teleported in here, so teleport out.... :-)\n") ;
+      return ; /* That'll teach wizes! */ 
+  }
+
+  /* Leave the room */
+  echo ("\nYou open the ", $1, " door and walk through into......") ;
+  @._visEmote ("opens the door.") ;
+  @._visEmote ("leaves the ", $1, " room. The door slams shut!") ;
+  @._move(#actor, island2_wizTower_02) ;
+  @._leko ("\nThe ", $1, " door opens and ....\n") ;
+  @._visEmote("leaves the ", $1, " room") ;
+  @._leko ("The door slams shut!\n") ;
+  
+  /* Look at the room */
+  @.look() ;
+
+  /* Door slam */
+  echo ("\nThe ", $1, " door slams shut behind you!") ;
+
+  if (ARCH(#actor)) /* Arch's can leave without affecting the puzzle */
+  {
+    echo ("\n") ;
+    return ;
+  }
+
+  /* Reset the puzzle */
+  island2_wizTower_02._tidyRooms() ;
+  island2_wizTower_02.PuzzleStat = PUZZLE_RESETTING ;
+  island2_wizTower_02._resetFn() ;
+}
+  
+
+func island2_wizTower_03.leave
+{
+  island2_wizTower_02._leaveRoom("bronze", $#) ;
+}
+
+
+func island2_wizTower_04.leave
+{
+  island2_wizTower_02._leaveRoom("silver", $#) ;
+}
+
+  
+func island2_wizTower_05.leave
+{
+  island2_wizTower_02._leaveRoom("gold", $#) ;
+}
+
+
+func island2_wizTower_10.leave
+{
+  island2_wizTower_02._leaveRoom("cleaners", $#) ;
+}
+
+
+func island2_wizTower_09.leave
+{
+  /* If not a simple leave\n command, ignore with error */
+  if ($#>0)
+  {
+    echo (@.noGo) ;
+    return ; 
+  }
+
+  /* Leave the room */
+  echo ("\nYou open the cupboard door and walk through into......\n") ;
+  @._visEmote ("opens the cupboard door") ;
+  @._visEmote ("leaves the cupboard. The cupboard door slams shut!") ;
+  @._move(#actor, island2_wizTower_06) ;
+  @._leko ("The cupboard door opens\n") ;
+  @._visEmote("leaves the cupboad") ;
+  @._leko ("The cupboard door slams shut!\n\n") ;
+  
+  /* Look at the room */
+  @.look() ;
+
+  /* Door slam */
+  echo ("The door shuts behind you!\n\n") ;
+}
+
+func island2_wizTower_06._preExitFn
+{
+  if ($1 == island2_wizTower_02) /* Going down */
+  {
+    island2_wizTower_02._resetFn() ; /* Reset the puzzle */
+  }
+  else if ($1 == island2_wizTower_07 /* Going up - only mWiz! */
+         && !M_WIZ(#actor))
+  {
+    echo ("
+The magical aura up above feels too strong, you decide not to go up!\n\n") ;
+    @._visEmote("looks briefly like he might try to climb the stairs!") ;
+    return 1 ; /* Disallow */
+  }
+  else
+    return 0 ;
+} 
+
+func island2_wizTower_01._preExitFn
+{
+  if ($1 == island2_wizTower_02) /* Do puzzle reset on entry */
+    island2_wizTower_02._resetFn() ;
+  return 0 ;
+}
+
+
+func island2_wizTower_02._preExitFn
+{
+  if ($1 == island2_wizTower_06 /* Wizards only */ 
+    && !WIZ(#actor))
+  {
+    echo ("\nYou start to climb the stairs, you slip and fall. Weird!\n\n") ;
+    @._visEmote ("climbs, slips on and then falls down the stairs!") ;
+    return 1 ; /* Dissallow move */
+  }
+}
+
+/* Enter functions
+ *****************/
+
+/* Enter a puzzle room */
+func island2_wizTower_02.enter
+{
+  minArgs(1, "*** Enter <what>?") ;
+
+  bundleArgs ;
+  $howmany = (@._ambName(listnew(island2_wizTower_03, island2_wizTower_04,
+                         island2_wizTower_05, island2_wizTower_10), $arg)) ;
+  $what = @._ambMatch ;
+
+  if ($howmany == 0)
+  {
+    echo ("*** Enter <what>?\n") ;
+    return ;
+  }
+  else if ($howmany > 1)
+  {
+    echo (@.notSureWhat, "\n") ;
+    return ;
+  }
+
+  /* Check to see if you can enter the room */
+  if (island2_wizTower_02.PuzzleStat != PUZZLE_READY
+     && !ARCH(#actor))
+  {
+    echo ("You cannot open the door!\n") ;
+    @._visEmote ("trys to open the door to ", $what.name) ;
+    return ;
+  }
+  
+  /* The room may now be entered */
+  echo ("\nAs you open the door and begin to enter.......\n") ;
+
+  /* The puzzle is now in use, so set the flag */
+  if (!ARCH(#actor))
+    island2_wizTower_02._setPuzzle(PUZZLE_INUSE) ;
+  @._visEmote("opens the door to ", $what.name) ;
+  @._leko ("The door slams shut!\n") ;
+  @._move(#actor, $what) ;
+  @.leko ("The door opens...\n") ;
+  @._visEmote ("enters the room. The door slams shut!") ;
+  @.look() ;
+  echo ("\nThe door slams shut behind you!\n\n") ;
+
+  /* Check for wrong room Entry! */
+  if (#actor.location != island2_wizTower_10
+     && #actor.location != island2_wizTower_02.WhereIngot)
+    island2_wizTower_02._wrongDoor() ; /* Do not display for cleaners room! */
+
+  /* Change last player name */
+  if (!ARCH(#actor))
+    island2_wizTower_indicator.LastActor = #actor ;
+}
+
+func island2_wizTower_06.enter
+{
+  $what = island2_wizTower_09 ;
+  echo ("The door opens easily, and you enter into.......\n") ;
+  @._visEmote("opens the door and enters The", $what.name) ;
+  @._leko ("The door slams shut!\n") ;
+  @._move(#actor, $what) ;
+  @.leko ("The door opens...\n") ;
+  @._visEmote ("enters the room. The door slams shut!") ;
+  @.look() ;
+  echo ("\nThe door slams shut behind you!\n\n") ;
+}
+
+/* Zap Function :-) 
+ *******************/
+
+/* Irn, I have left this function alone for the moment. I feel that    */
+/* there should be some penalty for not doing the rooms, but not       */
+/* necessarily death. I thought you should decide what goes in here!   */
+/* If it does kill th player (or move them to another place, it must   */
+/* a call to: island2_wizTower_02._resetPuzzle afterwards or they will */
+/* leave the puzzle in use! This will only reset when someone enters   */
+/* The puzzle room. THis is to avoid problems with someone homeing     */
+
+func island2_wizTower_02._wrongDoor
+{
+  if (ARCH(#actor))
+  {
+    echo ("<!> You picked the wrong room!\n\n") ;
+    return ;
+  }
+  echo("
+An apprentice God appears before you and laughs: They say that people
+learn by their mistakes, well if you are granted another life, try to
+learn from this mistake! The God raises his hands above his head, mutters
+a few incomprehensible words, snaps his fingers.....\n\n") ;
+  @._leko("
+An apprentice God appears before ", #actor.name, "and laughs: They
+say that people learn by their mistakes, well if you are granted another
+life, try to learn from this mistake! The God raises his hands above his
+head, mutters a few incomprehensible words, snaps his fingers.....\n\n") ;
+
+  /* Notify everyone of the death */
+  @._geko ("\n<!> ",#actor.name, 
+           " has been killed by a God for making a mistake!\n") ;
+
+  /* Kill them for 1% of their score */
+  @._resurrect(1) ;
+
+#ifdef drongo
+  @._move(#actor, #2) ;
+#endif
+
+  /* Reset the puzzle */
+  island2_wizTower_02._resetFn() ;
+
+  /* Just as a quirk */
+  echo ("
+A vision of the apprentice God appears in your head, saying:
+  WOW! Thats the first time I have got that to work!\n\n") ; 
+}
+
+/* Puzzle functions
+ *******************/
+
+func island2_wizTower_02._setPuzzle
+{
+  if ($1 == PUZZLE_READY
+      && island2_wizTower_02.PuzzleStat != PUZZLE_READY)
+  {
+      @._reko (island2_wizTower_02, "
+Inscriptions start forming on the plaques!\n") ;      
+      @._reko (island2_wizTower_07, "
+The indicator has changed to ready!\n\n") ;
+      island2_wizTower_02.PuzzleStat = PUZZLE_READY ;
+  }
+  else if ($1 == PUZZLE_INUSE 
+           && island2_wizTower_02.PuzzleStat != PUZZLE_INUSE)
+  {
+      @._reko (island2_wizTower_02, "
+The inscriptions on the plaques start scrambling!\n") ;
+      @._reko (island2_wizTower_07, "
+The indicator has changed to in-use!\n\n") ;
+      island2_wizTower_02.PuzzleStat = PUZZLE_INUSE ; 
+  }
+  else if ($1 == PUZZLE_UNREADY
+           && island2_wizTower_02.PuzzleStat != PUZZLE_UNREADY) {
+      @._reko (island2_wizTower_02, "
+The inscriptions on the plaques slowly disappear!\n") ;
+      @._reko (island2_wizTower_07, "
+The indicator has changed to unready!\n\n") ;
+      island2_wizTower_02.PuzzleStat = PUZZLE_UNREADY ;
+  }
+}
+ 
+/* Reset the puzzle on an event */
+func island2_wizTower_02._resetFn
+{
+  /* Check to see if someone homed or tped out, GITS */
+  if (island2_wizTower_indicator.LastActor.location != island2_wizTower_03
+     && island2_wizTower_indicator.LastActor.location != island2_wizTower_04
+     && island2_wizTower_indicator.LastActor.location != island2_wizTower_05
+     && island2_wizTower_indicator.LastActor.location != island2_wizTower_10
+     && island2_wizTower_02.PuzzleStat == PUZZLE_INUSE)
+  {
+     island2_wizTower_02.PuzzleStat = PUZZLE_RESETTING ;
+  }
+
+  if (island2_wizTower_02.PuzzleStat == PUZZLE_READY
+      || island2_wizTower_02.PuzzleStat == PUZZLE_INUSE)
+    return ; /* The room in use or ready, do nothing */
+  else
+    island2_wizTower_02.PuzzleStat = PUZZLE_RESETTING ;
+
+  island2_wizTower_02._tidyRooms() ;
+
+  /* The room needs a reset doing */
+  /* Can we do it? Is there an ingot ready :use in increasing order of value */
+  if (island2_wizTower_bIngot.location == island2_wizTower_09)
+    $ingot = BRONZE_INGOT ;
+  else if (island2_wizTower_sIngot.location == island2_wizTower_09) 
+    $ingot = SILVER_INGOT ;
+  else if (island2_wizTower_gIngot.location == island2_wizTower_09)
+    $ingot = GOLD_INGOT ;
+  else if (island2_wizTower_pIngot.location == island2_wizTower_09)
+    $ingot = PLATINUM_INGOT ;
+  else /* Could have been RESETTING */
+  {
+    island2_wizTower_02._setPuzzle(PUZZLE_UNREADY) ; 
+    return ; /* We cannot reset - nothing to reset with */
+  }
+
+  /* Make sure room is resetting */
+  island2_wizTower_02._setPuzzle(PUZZLE_RESETTING) ;
+
+  /* Work out inscriptions, and place ingot */ 
+  island2_wizTower_02._calculateStrings($ingot) ;
+
+  /* Separate routine for platinum */
+  if ($ingot == PLATINUM_INGOT 
+      && island2_wizTower_02.PuzzleStat == PUZZLE_RESETTING) 
+  {
+    island2_wizTower_02._setPuzzle(PUZZLE_READY) ;
+    island2_wizTower_02.WhichIngot = PLATINUM_INGOT;
+  }  
+
+  /* Final stuff */
+  if (island2_wizTower_02.PuzzleStat == PUZZLE_RESETTING) /* allow for error */
+  {
+    island2_wizTower_02.WhichIngot = $ingot ;
+
+    $ingobj = island2_wizTower_02._retIngotObj($ingot) ;
+    @._reko($ingobj.location, "\nThere is a puff of blue smoke as ",
+            $ingobj.name, " disappears!\n\n") ;
+    @._move($ingobj, island2_wizTower_02.WhereIngot) ;
+    @._reko($ingobj.location, "\nThere is a puff of blue smoke which clears",
+            " revealing ", $ingobj.name, "!\n\n") ;
+
+    /* Inform people of reset */
+    island2_wizTower_02._setPuzzle(PUZZLE_READY) ;
+  } 
+}
+
+/* Remove the ingot if the last user didn't take it */
+func island2_wizTower_02._tidyRooms
+{
+  $rooms = listnew(island2_wizTower_03, island2_wizTower_04,
+                   island2_wizTower_05, island2_wizTower_10) ;
+  foreach $ingot in (listnew(island2_wizTower_bIngot, island2_wizTower_sIngot,
+                             island2_wizTower_gIngot, island2_wizTower_pIngot))
+  {
+    if (listsearch($rooms, $ingot.location) != NULL)
+    {
+      @._reko($ingot.location, "There is a puff of blue smoke as ",
+              $ingot.name," disappears!\n") ;
+      @._move($ingot, island2_wizTower_09) ;
+      @._reko (island2_wizTower_09,
+               "There is a puff of blue smoke, which clears revealing ",
+               $ingot.name, "!\n") ;
+    }
+  }
+}
+
+func island2_wizTower_02._retIngotObj
+{
+  if ($1 == BRONZE_INGOT)    return island2_wizTower_bIngot ;
+  if ($1 == SILVER_INGOT)    return island2_wizTower_sIngot ;
+  if ($1 == GOLD_INGOT)      return island2_wizTower_gIngot ;
+  if ($1 == PLATINUM_INGOT)  return island2_wizTower_pIngot ;
+}
+
+func island2_wizTower_02._retRoomObj
+{
+  if ($1 == BRONZE_ROOM)     return island2_wizTower_03 ;
+  if ($1 == SILVER_ROOM)     return island2_wizTower_04 ;
+  if ($1 == GOLD_ROOM)       return island2_wizTower_05 ;
+  if ($1 == CLEANERS_ROOM)   return island2_wizTower_10 ;
+}
+
+func island2_wizTower_02._retInsc
+{
+  if ($1 == BEHIND_X)        return (str("The ingot is behind ", 
+                               island2_wizTower_02._retRoom($2), " door.")) ;
+  if ($1 == NOT_BEHIND_X)    return (str("The ingot is not behind ", 
+                               island2_wizTower_02._retRoom($2), " door.")) ;
+  if ($1 == X_LIES)          return (str("The following plaque lies: ",
+                               island2_wizTower_02._retRoom($2), " plaque.")) ;
+  if ($1 == X_TRUTH)         return (str("The following plaque tells the " , 
+                               "truth: ", island2_wizTower_02._retRoom($2),
+                               " plaque.")) ;
+}
+
+func island2_wizTower_02._retRoom
+{
+  if ($1 == BRONZE_ROOM)     return ("the bronze") ;
+  if ($1 == SILVER_ROOM)     return ("the silver") ;
+  if ($1 == GOLD_ROOM)       return ("the gold") ;
+  if ($1 == CLEANERS_ROOM)   return ("the cleaners") ;
+}
+
+/* I need to implement a 4d array - 3x2x2x2, this has been kludged */
+/* by allocating a set of variables: ._0000 -> ._1111              */
+/* The array looks something like:                                 */
+/*
+          |   Rm 1  |   Rm 2  |  Rm 3
+          | 1t | 1f | 1t | 1f | 1t | 1f
+       ---+----+----+----+----+----+----
+3f  {  2f |    |    |    |    |    |
+    {  2t |    |    |    |    |    | 
+       ---+----+----+----+----+----+----
+3t  {  2f |    |    |    |    |    |
+    {  2t |    |    |    |    |    |
+       ---+----+----+----+----+----+----
+*/
+
+func island2_wizTower_02._calculateStrings
+{
+  $ingot = $1 ;
+
+  /* Reset the calculation array */
+  island2_wizTower_02._resetArray() ;
+
+  /* Pick the first two things from the first 2 */
+  /*  1:The ingot is behind door X              */
+  /*  2:The ingot is not behind door X          */
+  /*  3:Door X lies                             */
+  /*  4:Door X tells the truth                  */ 
+
+  /* Remove 2 random possibilities from the array */
+  $stat1 = random(NOT_BEHIND_X)+1 ;
+  $loc1 = random(3)+1 ;
+  $stat2 = random(NOT_BEHIND_X)+1 ;
+  $loc2 = random(3)+1 ;
+
+  /* Check for trivial solutions */
+  /* Case: First two doors talk about the same room! */
+  if ($loc2 == $loc1)
+  {
+    $loc2=$loc2+1 ;
+    if ($loc2 > 3)
+      $loc2 = 1 ;
+  }
+
+  /* And a third */
+  if ($ingot > 1) /* Make slightly easier */
+    $stat3 = random(X_TRUTH)+1 ;
+  else
+    $stat3 = random(NOT_BEHIND_X)+1 ;
+
+  /* Avoid a paradox - ie I am lying! */
+  if ($stat3 == X_LIES)
+    $loc3 = random(3)+1 ;
+  else
+    $loc3 = random(2)+1 ; /* Gold lies is not possible here */
+
+  /* Remove trivial cases */
+  /* Case : Two doors say eg B: Behind S ; S: Behind B ; */
+  if (($stat1 == $stat2 == $stat3 == BEHIND_X
+     || $stat1 == $stat2 == $stat3 == NOT_BEHIND_X))
+  {
+    $stat2=$stat2+1 ;
+    if ($stat2 > 2)
+      $stat2 = 1 ;
+    $stat1=$stat1-1 ;
+    if ($stat1 < 1) ;
+      $stat1 = 2;
+  }
+  
+  /* Case: Two doors saying identical things */
+  if ($loc1 == $loc3 && $stat1 == $stat3)
+  {
+    $loc1=$loc1+1 ;
+    if ($loc1 > 3)
+      $loc1 = 1 ;
+    if ($loc2 == $loc3 && $stat2 == $stat3)
+    {
+      $loc3=$loc3+1 ;
+      if ($loc3 > 3)
+        $loc3 = 1 ;
+    }
+  }
+
+  /* Shuffle the solution, and avoid paradox */
+  if (random(2) == 0)
+  {
+    if ($loc2 != $loc3)
+    { 
+      /* swap silver and gold */
+      $rtmp = $loc3 ;
+      $stmp = $stat3 ;
+      $loc3 = $loc2 ;
+      $stat3 = $stat2 ;
+      $loc2 = $rtmp ;
+      $stat2 = $stmp ;
+    }
+    else
+    { 
+      /* swap bronze and gold */
+      $rtmp = $loc3 ;
+      $stmp = $stat3 ;
+      $loc3 = $loc1 ;
+      $stat3 = $stat1 ;
+      $loc1 = $rtmp ;
+      $stat1 = $stmp ;
+    }
+  }
+   
+  /* Check for NULL cases - hopefully never! */
+  if ($stat1 == NULL || $stat2 == NULL || $stat3 == NULL
+     || $loc1 == NULL || $loc2 == NULL || $loc3 == NULL)
+    island2_wizTower_02._setPuzzle(PUZZLE_UNREADY) ;
+
+  /* Remove Possibilities */      
+  island2_wizTower_02._removeAllPoss($stat1, $loc1, 1) ;
+  island2_wizTower_02._removeAllPoss($stat2, $loc2, 2) ;
+
+  /* Remove last stat */ 
+  island2_wizTower_02._removeAllPoss($stat3, $loc3, 3) ;
+  
+  /* Select needle possibilities */
+  island2_wizTower_02._resetConds() ;
+  island2_wizTower_02._resetCounters() ;
+  island2_wizTower_02._workOutLeft() ;
+
+  /* Make strings */
+  island2_wizTower_02._putStringsTogether($ingot) ;
+  island2_wizTower_03.Inscription = 
+    island2_wizTower_02._retInsc($stat1, $loc1) ;
+  island2_wizTower_04.Inscription = 
+    island2_wizTower_02._retInsc($stat2, $loc2) ;
+  island2_wizTower_05.Inscription = 
+    island2_wizTower_02._retInsc($stat3, $loc3) ;
+
+#ifdef DEBUG
+  echo ("\nThe three constraints:\n",
+         " - :", island2_wizTower_03.Inscription, "\n",
+         " - :", island2_wizTower_04.Inscription, "\n",
+         " - :", island2_wizTower_05.Inscription, "\n\n") ;
+#endif
+}
+
+/* Reset the array */
+func island2_wizTower_02._resetArray
+{
+  /* Default values of arrays are the number of doors telling the truth */
+  /* _(Rm No)(Rm1_t)(Rm2_t)(Rm3_t) 1 = true, 0 = false                  */
+  island2_wizTower_02._1000 = 0 ;
+  island2_wizTower_02._1001 = 1 ;
+  island2_wizTower_02._1010 = 1 ;
+  island2_wizTower_02._1011 = 2 ;
+  island2_wizTower_02._1100 = 1 ;
+  island2_wizTower_02._1101 = 2 ;
+  island2_wizTower_02._1110 = 2 ;
+  island2_wizTower_02._1111 = 3 ;
+  island2_wizTower_02._2000 = 0 ;
+  island2_wizTower_02._2001 = 1 ;
+  island2_wizTower_02._2010 = 1 ;
+  island2_wizTower_02._2011 = 2 ;
+  island2_wizTower_02._2100 = 1 ;
+  island2_wizTower_02._2101 = 2 ;
+  island2_wizTower_02._2110 = 2 ;
+  island2_wizTower_02._2111 = 3 ;
+  island2_wizTower_02._3000 = 0 ;
+  island2_wizTower_02._3001 = 1 ;
+  island2_wizTower_02._3010 = 1 ;
+  island2_wizTower_02._3011 = 2 ;
+  island2_wizTower_02._3100 = 1 ;
+  island2_wizTower_02._3101 = 2 ;
+  island2_wizTower_02._3110 = 2 ;
+  island2_wizTower_02._3111 = 3 ;
+}
+
+/* Some definitions to save space ! */
+#define DT	island2_wizTower_needle.Door
+#define GN	island2_wizTower_needle.Gold
+#define SN	island2_wizTower_needle.Silver
+#define BN	island2_wizTower_needle.Bronze
+
+func island2_wizTower_02._resetCounters
+{
+  /* To count doors telling the truth */
+  island2_wizTower_02.ZerosT = 0 ;
+  island2_wizTower_02.OnesT = 0 ;
+  island2_wizTower_02.TwosT = 0 ;
+  island2_wizTower_02.ThreesT = 0 ;
+}
+
+
+func island2_wizTower_02._removeAllPoss
+{
+  island2_wizTower_02._resetConds() ;
+  island2_wizTower_02._removePoss($1, $2, $3) ;
+}
+
+func island2_wizTower_02._removePoss
+{
+
+#ifdef DEBUG
+  echo ("\nDoing: _", str(DT, GN, SN, BN), " (",$1,",",$2,",",$3,")   ; ") ;  
+#endif
+
+  /* $1 = Statement, $2 = about door, $3 = made by door */
+  if (  ($1 == BEHIND_X
+         && DT == $2 
+         && !island2_wizTower_02._isTruth($3))
+     || ($1 == BEHIND_X
+         && DT != $2 
+         && island2_wizTower_02._isTruth($3))
+     || ($1 == NOT_BEHIND_X
+         && DT != $2 
+         && !island2_wizTower_02._isTruth($3))
+     || ($1 == NOT_BEHIND_X
+         && DT == $2
+         && island2_wizTower_02._isTruth($3))
+     || ($1 == X_LIES
+         && !island2_wizTower_02._isTruth($3)
+         && !island2_wizTower_02._isTruth($2))
+     || ($1 == X_LIES
+         && island2_wizTower_02._isTruth($3)
+         && island2_wizTower_02._isTruth($2))
+     || ($1 == X_TRUTH
+         && !island2_wizTower_02._isTruth($3)
+         && island2_wizTower_02._isTruth($2))
+     || ($1 == X_TRUTH
+         && island2_wizTower_02._isTruth($3)
+         && !island2_wizTower_02._isTruth($2)) 
+     )
+  {
+    island2_wizTower_02.Temporary = str("_", DT, GN, SN, BN) ;
+    island2_wizTower_02.(island2_wizTower_02.Temporary) = NULL ;
+    
+#ifdef DEBUG
+    echo ("Removing: _", str(DT, GN, SN, BN), " (", $2, ",", $3, ")") ;
+#endif
+  }
+
+  island2_wizTower_02._incConds() ;
+  if (DT < 4)
+    island2_wizTower_02._removePoss($1, $2, $3) ;
+}
+
+func island2_wizTower_02._workOutLeft
+{
+  island2_wizTower_02.Temporary = str("_", DT, GN, SN, BN) ;
+
+#ifdef DEBUG
+  if (island2_wizTower_02.(island2_wizTower_02.Temporary) != NULL)
+  {
+    echo ("\nPossible choice remaining: ",
+          island2_wizTower_02.Temporary, " (",
+          island2_wizTower_02.(island2_wizTower_02.Temporary),")") ;
+  }
+#endif
+  
+  if (island2_wizTower_02.(island2_wizTower_02.Temporary) == 0)
+  {
+    island2_wizTower_02.ZerosT = island2_wizTower_02.ZerosT + 1 ;
+    island2_wizTower_02.n0 = DT ;
+  }
+  else if (island2_wizTower_02.(island2_wizTower_02.Temporary) == 1)
+  {
+    island2_wizTower_02.OnesT = island2_wizTower_02.OnesT + 1 ;
+    island2_wizTower_02.n1 = DT ;
+  }
+  else if (island2_wizTower_02.(island2_wizTower_02.Temporary) == 2)
+  {
+    island2_wizTower_02.TwosT = island2_wizTower_02.TwosT + 1 ;
+    island2_wizTower_02.n2 = DT ;
+  }
+  else if (island2_wizTower_02.(island2_wizTower_02.Temporary) == 3)
+  {
+    island2_wizTower_02.ThreesT = island2_wizTower_02.ThreesT + 1 ;
+    island2_wizTower_02.n3 = DT ;
+  }
+    
+  island2_wizTower_02._incConds() ;
+ 
+  if (DT < 4)
+    island2_wizTower_02._workOutLeft() ;
+}
+
+func island2_wizTower_02._resetConds
+{
+  DT = 1 ;
+  BN = LIE ;
+  SN = LIE ;
+  GN = LIE ;
+}
+
+func island2_wizTower_02._incConds
+{
+  if (BN == TRUTH)
+  {
+    BN = LIE ;
+    if (SN == TRUTH)
+    {
+      SN = LIE ;
+      if (GN == TRUTH)
+      {
+        GN = LIE ;
+        DT=DT+1 ;
+      }
+      else
+        GN = TRUTH ;
+    }
+    else
+      SN = TRUTH ;
+  }
+  else
+    BN = TRUTH ;
+}
+
+func island2_wizTower_02._isTruth
+{
+  if ($1 == 1) return (BN == TRUTH) ;
+  if ($1 == 2) return (SN == TRUTH) ;
+  if ($1 == 3) return (GN == TRUTH) ;
+}
+
+func island2_wizTower_02._putStringsTogether
+{
+  if ($1 == BRONZE_INGOT)    island2_wizTower_02._bronzeStrings() ;
+  if ($1 == SILVER_INGOT)    island2_wizTower_02._silverStrings() ;
+  if ($1 == GOLD_INGOT)      island2_wizTower_02._goldStrings() ;
+  if ($1 == PLATINUM_INGOT)  island2_wizTower_02._platinumStrings() ;
+
+#ifdef DEBUG
+  echo ("\n\nThe ingot is in ", island2_wizTower_02.WhereIngot.name, ".\n\n") ;
+#endif
+}
+
+/* Set needle inscriptions and ingot location*/
+func island2_wizTower_02._setNeedleAndPlace
+{
+  island2_wizTower_02.WhereIngot = island2_wizTower_02._retRoomObj($1) ;
+  if ($3 == NULL) /* No random element in inscription */
+    island2_wizTower_02.Inscription = $2 ;
+  else
+    if (random(2) == 0)
+      island2_wizTower_02.Inscription = $2 ;
+    else
+      island2_wizTower_02.Inscription = $3 ;
+}
+  
+func island2_wizTower_02._bronzeStrings
+{
+  if (island2_wizTower_02.OnesT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n1
+      ,"Exactly one plaque is telling the truth.") ;
+  else if (island2_wizTower_02.TwosT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n2
+      ,"Exactly two plaques are telling the truth.") ;
+  else if (island2_wizTower_02.ZerosT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n0
+      ,"No doors are telling the truth.") ;
+  else if (island2_wizTower_02.ThreesT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n3
+      ,"All doors are telling the truth.") ;
+  else /* Something has gonewrong - so do not reset! */
+    island2_wizTower_02._setPuzzle(PUZZLE_UNREADY) ;
+}
+
+/* To grade difficulty the following will need implementing */
+/* At mo though, the simply call the bronefunction          */
+func island2_wizTower_02._silverStrings
+{
+  if (island2_wizTower_02.TwosT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n2
+      ,"Exactly one plaque is lying.") ;
+  else if (island2_wizTower_02.OnesT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n1
+      ,"Exactly two plaques are lying.") ;
+  else if (island2_wizTower_02.ThreesT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n3
+      ,"None of the plaques is lying.") ;
+  else if (island2_wizTower_02.ZerosT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n0
+      ,"All of the plaques are lying.") ;
+  else /* Something has gone wrong - so do not reset! */
+    island2_wizTower_02._setPuzzle(PUZZLE_UNREADY) ;
+}
+
+func island2_wizTower_02._goldStrings
+{
+  if (island2_wizTower_02.OnesT == 1 && island2_wizTower_02.ThreesT == 0)
+   island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n1
+     ,"An odd number of doors are telling the truth."
+     ,"An even number of doors are lying.");
+  else if (island2_wizTower_02.OnesT == 0 && island2_wizTower_02.ThreesT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n3
+      ,"An odd number of doors are telling the truth."
+      ,"An even number of doors are lying.");
+  else if (island2_wizTower_02.ZerosT == 1 && island2_wizTower_02.TwosT == 0)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n0
+      ,"An even number of doors are telling the truth."
+      ,"An odd number of doors are lying.");
+  else if (island2_wizTower_02.ZerosT == 0 && island2_wizTower_02.TwosT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n2
+      ,"An even number of doors are telling the truth."
+      ,"An odd number of doors are lying.");
+  else if (island2_wizTower_02.ZerosT == 1 && island2_wizTower_02.OnesT == 0)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n0
+      ,"At most one door is telling the truth."
+      ,"At least two doors are lying.");
+  else if (island2_wizTower_02.ZerosT == 0 && island2_wizTower_02.OnesT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n1
+      ,"At most one door is telling the truth."
+      ,"At least two doors are lying.");
+  else if (island2_wizTower_02.TwosT == 1 && island2_wizTower_02.ThreesT == 0)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n2
+      ,"One door may be lying."
+      ,"At least two doors are telling the truth.");
+  else if (island2_wizTower_02.TwosT == 0 && island2_wizTower_02.ThreesT == 1)
+    island2_wizTower_02._setNeedleAndPlace(island2_wizTower_02.n3
+      ,"One door may be lying."
+      ,"At least two doors are telling the truth.");
+  else /* Fall through in case can't be done */
+    island2_wizTower_02._silverStrings(); 
+}
+
+func island2_wizTower_02._platinumStrings
+{
+  if (island2_wizTower_02.TwosT != 1)
+    island2_wizTower_02._setNeedleAndPlace(CLEANERS_ROOM
+      ,"Exactly two plaques are telling the truth.") ;
+  else if (island2_wizTower_02.OnesT != 1)
+    island2_wizTower_02._setNeedleAndPlace(CLEANERS_ROOM
+      ,"Exactly two plaques are lying.") ;
+  else if (island2_wizTower_02.ZerosT != 1)
+    island2_wizTower_02._setNeedleAndPlace(CLEANERS_ROOM
+      ,"All the plaques are lying.") ;
+  else if (island2_wizTower_02.ZerosF != 1)
+    island2_wizTower_02._setNeedleAndPlace(CLEANERS_ROOM
+      ,"None of the plaques are lying.") ;
+  else /* If you get here something wrong - set puzzle to unready! */
+    island2_wizTower_02._setPuzzle(PUZZLE_UNREADY) ;
+}
+
+
+/* Other Functions
+ *****************/
+
+/* For use debugging or when the thing dies in Drogon */
+
+func island2_wizTower_07.ready
+{ 
+  mWizardCommand;
+  island2_wizTower_02._setPuzzle(PUZZLE_READY) ;
+  echo ("The puzzle is now ready!\n") ;
+}
+
+func island2_wizTower_07.inuse
+{
+  mWizardCommand;
+  island2_wizTower_02._setPuzzle(PUZZLE_INUSE) ;
+  echo ("The puzzle is now in use!\n") ;
+}
+
+func island2_wizTower_07.unready
+{
+  mWizardCommand;
+  island2_wizTower_02._setPuzzle(PUZZLE_UNREADY) ;
+  echo ("The puzzle is now unready!\n") ;
+}
+
+func island2_wizTower_07.reset
+{
+  mWizardCommand;
+  island2_wizTower_02._setPuzzle(PUZZLE_UNREADY) ;
+  echo ("The puzzle is about to reset:\n") ; 
+  island2_wizTower_02._resetFn();
+}
+
+/* Search function to enable you to see the platinum */
+func island2_wizTower_10.search
+{
+  if (island2_wizTower_pIngot.location == island2_wizTower_09
+      && island2_wizTower_02.WhichIngot == PLATINUM_INGOT)
+  {
+    echo (
+"You search the room, and you find nothing. As you are about to give up
+you notice something shiny under the broom. You move the broom and find
+a platinum ingot.\n") ;
+    @._visEmote("moves the broom revealing a platinum ingot!") ;
+    @._reko(island2_wizTower_pIngot.location,"
+There is a puff of blue smoke as ", 
+island2_wizTower_pIngot.name, " disappears!\n\n") ;
+    @._move(island2_wizTower_pIngot, island2_wizTower_10) ;
+  }
+  else
+  {
+    echo (
+"You search the room (even under the duster) but you find nothing
+of interest.\n") ;
+    @._visEmote("moves the feather duster!") ;
+  }
+}   
+
+/**************\
+* Village Code *
+\**************/
+
+func island2_gravelPath._preExitFn
+{
+  if ($1 == island2_village_01)
+  {
+    echo ("The rockfall prevents going that direction!\n") ;
+    return 1 ;
+  }
+}
+
+
+/**********\
+* NIM CODE *
+\**********/
+
+#define MOD(a,b)	((a) - ((a)/(b) * (b)))
+#define PS		island2_beach_cave.PileState
+
+/* You cannot leave while a game is in progress */
+island2_beach_cave.CurrentPlayer = NULL ;
+island2_beach_cave.NimStatus == PUZZLE_UNREADY ;
+
+/* Initialte a game of NIM */
+
+func island2_beach_cave.play
+{
+  /* Is the player trying to reset? */
+  if (island2_beach_cave.NimStatus == PUZZLE_READY
+     && island2_beach_cave.CurrentPlayer == #actor)
+  {
+    echo ("You are already playing!\n") ;
+    return ;
+  }
+
+  /* Is someone already playing */
+  if (island2_beach_cave.CurrentPlayer.location == island2_beach_cave
+      && island2_beach_cave.NimStatus == PUZZLE_READY)
+  { /* Someone is playing */
+    echo ("
+Sorry, the wizard cannot play two games at once.... \nHe is already playing ",
+island2_beach_cave.CurrentPlayer.name, "!\n") ;
+    return ;
+  }
+ 
+  /* Reset Player flag */
+  island2_beach_cave.CurrentPlayer = #actor ;
+
+  /* Reset piles */
+  island2_beach_cave.NumPiles = 3 + random(5) ;
+  island2_beach_cave.PileState =
+    island2_beach_cave._generatePiles(island2_beach_cave.NumPiles, 1) ;
+
+  /* Set puzzle state */
+  island2_beach_cave.NimStatus = PUZZLE_READY;
+
+  /* Inform player */
+  @._visEmote("asks the wizard for a new game of NIM.") ;
+  echo ("You ask the wizard for a new game of NIM.\n") ;
+  @._reko(island2_beach_cave, "The wizard arranges some pebbles into ",
+           island2_beach_cave.NumPiles, " piles on the sand.\n") ; 
+}
+
+/* Generate Piles */
+
+func island2_beach_cave._generatePiles
+{
+  if ($1 == 0)
+    return 0 ;
+  else
+    return ((random(15)+1)*$2+island2_beach_cave._generatePiles($1-1, $2*16)) ;
+}
+
+/* Remove some pebbles */
+
+func island2_beach_cave.remove
+{
+  /* Is the correct person playing playing */
+  if (island2_beach_cave.CurrentPlayer != #actor)
+  { /* Someone is playing */
+    echo ("You have to start to play a game first ....\n") ;
+    return ;
+  }
+ 
+  if ($# == 2)
+  {
+    $num = /* number to remove */ atoi($1) ;
+    $pile = /* Pile number */ atoi($2) ;
+  }
+  else if ($2 == "from")
+  {
+    $num = /* number to remove */ atoi($1) ;
+    $pile = /* Pile number */ atoi($3) ;
+  }
+  else
+  {
+    echo ("*** remove <how many> from <which pile>?\n") ;
+    return ;
+  }
+  
+  if ($num < 1)
+  {
+    echo ("You must remove at least one pebble!\n") ;
+    return ;
+  }
+  
+  if ($pile < 1 || $pile > island2_beach_cave.NumPiles)
+  {
+    echo ("There is no pile ", $pile, "!\n") ;
+    return ;
+  }
+
+  /* Remove pebbles */
+  $new = island2_beach_cave.recurseRemove($pile, 1, $num) ;   
+
+  if ($new == 0)
+  { 
+    if ($num != 1)
+    {
+      echo ("You remove ", $num, " pebbles from pile ", $pile, ".\n") ;
+      @._visEmote ("removes ", $num, " pebbles from pile ", $pile, ".") ;
+    }
+    else
+    {
+      echo ("You remove a pebble from pile ", $pile, ".\n") ;
+      @._visEmote ("removes a pebble from pile ", $pile, ".") ;
+    }
+
+    echo ("
+'Congratulations' says the wizard, 'You have won!'
+The wizard takes the shiny pebble and gives it to you as a reward!\n") ;
+    @._leko ("\nThe wizard says: 'Congratulations!' You have won!\n") ;
+    @._visEmote ("has won the game and is given a shiny pebble.") ;
+    @._move (island2_beach_pebble, #actor) ;
+    island2_beach_cave.NimStatus = PUZZLE_UNREADY ;
+    island2_beach_cave.CurrentPlayer = NULL ;
+  }
+  else if ($new == PS)
+    return ; /* Illegal move */
+  else
+  {
+    PS = $new ;
+    if ($num != 1)
+    {
+      echo ("You remove ", $num, " pebbles from pile ", $pile, ".\n") ;
+      @._visEmote ("removes ", $num, " pebbles from pile ", $pile, ".") ;
+    }
+    else
+    {
+      echo ("You remove a pebble from pile ", $pile, ".\n") ;
+      @._visEmote ("removes a pebble from pile ", $pile, ".") ;
+    }
+    island2_beach_cave._computerMove() ;
+  }
+}
+
+func island2_beach_cave.recurseRemove
+{
+  if ($1 == 1) /* PS % $2*16 - PS % $2 */ 
+    if ($2*$3 <= (MOD(PS,$2*16) - MOD(PS,$2)))
+    {
+      return PS - $2*$3 ;
+    }
+    else
+    {
+      echo ("You cannot remove that number of pebbles!\n") ;
+      return PS ;
+    } 
+  else
+    return island2_beach_cave.recurseRemove($1-1, $2*16, $3) ;
+}
+
+/* Examine state of play */
+
+func island2_beach_cave.piles
+{
+  if (island2_beach_cave.NimStatus == PUZZLE_READY)
+    island2_beach_cave.recursePiles(1, PS) ;
+  else
+    echo ("The pebbles are scattered randomly over the sand!\n") ;
+}
+
+func island2_beach_cave.recursePiles
+{
+  echo ("Pile ", $1," contains ", MOD($2,16),
+        " pebbles.\n") ;
+  if ($1 < island2_beach_cave.NumPiles)
+    island2_beach_cave.recursePiles($1+1, $2/16) ; 
+}
+
+/* The wizards move */
+
+func island2_beach_cave._power
+{
+  if ($2 == 0)
+    return 1 ;
+  else
+    return ($1 * island2_beach_cave._power($1, $2-1)) ;
+}
+
+func island2_beach_cave._getBit
+{ /* $2 = bit no[27..0], $1 = PileState[6..0] */
+  if ($2 == 0)
+    return (MOD($1,2)) ;
+  else
+    return island2_beach_cave._getBit($1/2,$2-1) ;
+}
+
+func island2_beach_cave._toggleBit
+{ /* $2 = bit no[27..0], $1 = PileState[6..0] */
+  if (island2_beach_cave._getBit($1, $2) == 1)
+    return ($1 - island2_beach_cave._power(2, $2)) ;
+  else
+    return ($1 + island2_beach_cave._power(2, $2)) ;
+}
+
+func island2_beach_cave._sumBits
+{ /* $1 bit to add to sums */
+  if ($1 > 27)
+    return 0 ;
+  else
+    return (island2_beach_cave._getBit(PS, $1) +
+            island2_beach_cave._sumBits($1+4)) ;
+}
+
+func island2_beach_cave._pickPile
+{
+  if (island2_beach_cave._getBit(PS, $1+$2*4) == 1)
+    return $2 ;
+  else
+    return (island2_beach_cave._pickPile($1, $2+1)) ;
+}
+
+func island2_beach_cave._computerMove
+{
+  $prepiles = PS ;
+  
+  $suma = island2_beach_cave._sumBits(0) ;
+  $sumb = island2_beach_cave._sumBits(1) ;
+  $sumc = island2_beach_cave._sumBits(2) ;
+  $sumd = island2_beach_cave._sumBits(3) ;
+
+  $sum0 = MOD($suma,2) ;
+  $sum1 = MOD($sumb,2) ;
+  $sum2 = MOD($sumc,2) ;
+  $sum3 = MOD($sumd,2) ;
+
+  if ($sum3 == 1)
+  {
+    $pick = island2_beach_cave._pickPile(3, 0) ;
+    PS = island2_beach_cave._toggleBit(PS, $pick*4+3) ;
+    if ($sum2 == 1) PS = island2_beach_cave._toggleBit(PS, $pick*4+2) ;
+    if ($sum1 == 1) PS = island2_beach_cave._toggleBit(PS, $pick*4+1) ;
+    if ($sum0 == 1) PS = island2_beach_cave._toggleBit(PS, $pick*4+0) ;
+  }
+  else if ($sum2 == 1)
+  {
+    $pick = island2_beach_cave._pickPile(2, 0) ;
+    PS = island2_beach_cave._toggleBit(PS, $pick*4+2) ;
+    if ($sum1 == 1) PS = island2_beach_cave._toggleBit(PS, $pick*4+1) ;
+    if ($sum0 == 1) PS = island2_beach_cave._toggleBit(PS, $pick*4+0) ;
+  }
+  else if ($sum1 == 1)
+  {
+    $pick = island2_beach_cave._pickPile(1, 0) ;
+    PS = island2_beach_cave._toggleBit(PS, $pick*4+1) ;
+    if ($sum0 == 1) PS = island2_beach_cave._toggleBit(PS, $pick*4+0) ;
+  }
+  else if ($sum0 == 1)
+  {
+    $pick = island2_beach_cave._pickPile(0, 0) ;
+    PS = island2_beach_cave._toggleBit(PS, $pick*4+0) ;
+  }
+  else /* We are losing */
+  {
+    if ($suma == 2) 
+    {
+      $pick = island2_beach_cave._pickPile(0, 0) ;
+      PS = island2_beach_cave._toggleBit(PS, $pick*4) ;
+    }
+    else if ($sumb == 2) 
+    {
+      $pick = island2_beach_cave._pickPile(1, 0) ;
+      PS = island2_beach_cave._toggleBit(PS, $pick*4+1) ;
+    }
+    else if ($sumc == 2) 
+    {
+      $pick = island2_beach_cave._pickPile(2, 0) ;
+      PS = island2_beach_cave._toggleBit(PS, $pick*4+2) ;
+    }
+    else if ($sumd == 2) 
+    {
+      $pick = island2_beach_cave._pickPile(3, 0) ;
+      PS = island2_beach_cave._toggleBit(PS, $pick*4+3) ;
+    }
+    else
+    {
+      if ($suma > 0) 
+      {
+       $pick = island2_beach_cave._pickPile(0, 0) ;
+       PS = island2_beach_cave._toggleBit(PS, $pick*4) ;
+      }
+      else if ($sumb > 0) 
+      {
+       $pick = island2_beach_cave._pickPile(1, 0) ;
+       PS = island2_beach_cave._toggleBit(PS, $pick*4+1) ;
+      }
+      else if ($sumc > 0)
+      {
+       $pick = island2_beach_cave._pickPile(2, 0) ;
+       PS = island2_beach_cave._toggleBit(PS, $pick*4+2) ;
+      }
+      else if ($sumd > 0) 
+      {
+       $pick = island2_beach_cave._pickPile(3, 0) ;
+       PS = island2_beach_cave._toggleBit(PS, $pick*4+3) ;
+      }
+    } 
+  }
+
+  /* Find out how many the wizard removed from which pile */
+
+  $previous = island2_beach_cave._getBit($prepiles, $pick*4) +
+              island2_beach_cave._getBit($prepiles, $pick*4+1)*2 +  
+              island2_beach_cave._getBit($prepiles, $pick*4+2)*4 + 
+              island2_beach_cave._getBit($prepiles, $pick*4+3)*8 ;
+  $now = island2_beach_cave._getBit(PS, $pick*4) +
+         island2_beach_cave._getBit(PS, $pick*4+1)*2 +  
+         island2_beach_cave._getBit(PS, $pick*4+2)*4 + 
+         island2_beach_cave._getBit(PS, $pick*4+3)*8 ;
+  $diff = $previous - $now ;
+  if ($diff == 1)
+  {
+    @._reko(island2_beach_cave, "The wizard removes a pebble from pile ",
+            $pick+1,".\n") ;
+  }
+  else
+  {
+    @._reko (island2_beach_cave,
+             "The wizard removes ", $diff, " pebbles from pile ", 
+             $pick+1, ".\n") ;
+  }
+  if (PS == 0)
+    {
+    /* We've won! CHEER! */
+    echo ("
+'I have won!' says the wizard, 'Only the thousandth time today.'\n") ;
+    @._leko ("\nThe wizard says to ", island2_beach_cave.CurrentPlayer.name, ":
+'I have won! Only the thousandth time today.\n") ;
+    island2_beach_cave.NimStatus = PUZZLE_UNREADY ;
+    island2_beach_cave.CurrentPlayer = NULL ;
+    } 
+}
+
+/* Leave function to reset code */
+func island2_beach_cave._preExitFn
+{
+  if (#actor == island2_beach_cave.CurrentPlayer
+      && island2_beach_cave.NimStatus == PUZZLE_READY)
+  { /* The player is trying to leave without finishing their game ! */
+    echo ("
+The wizard pleads with you not to leave before you have finished
+your game with him. Somehow he manages to change your mind!\n\n") ;
+    @._leko ("The wizard pleads with ", #actor.name, " not to go, who stays!") ;
+    return 1 ; /* do net execute leave code */
+  }
+}
+
+func island2_beach_cave._postEnterFn
+{
+  if (#actor == island2_beach_cave.CurrentPlayer
+      && island2_beach_cave.NimStatus == PUZZLE_READY)
+    /* The player was playing a game! */
+  {
+    echo("\nThe wizard says to you! We are in the middle of a game!\n") ;
+    @._leko ("The wizard says something to ", #actor.name, ".") ;
+  }
+}
+
+    
+  
+
+
+
+
+

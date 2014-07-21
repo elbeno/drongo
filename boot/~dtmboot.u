@@ -1,0 +1,676 @@
+/* mode: -*- c -*- */
+#include <drogon.h>
+#include "/homes/rws13/mud/game/misc/players.h"
+#include "/homes/dtm10/drongo/defines.h"
+
+#define DEBUG(text) echo(text,"\n");
+#define echoFETCHalready(WTYPE) @._echoToArchesHere(\
+         " - already carrying ", $obj, " - WTYPE)\n"); \
+     echo("*** You are already carrying ", $obj.name, " (WTYPE)\n");
+
+#define echoFETCHfailure(WTYPE) @._echoToArchesHere(\
+         " - failure on ", $obj, " - WTYPE)\n"); \
+    echo("*** You cannot fetch ", $obj, " (WTYPE)\n");
+
+#define echoFETCHmoving(WTYPE) @._echoToArchesHere(\
+        " - fetching ", $obj, " - WTYPE)\n"); \
+    echo("*** Fetching ", $obj.name, " (WTYPE) from ", \
+        $obj.location.name, " (", $obj.location,")\n");
+
+
+#define echoRESETtime(WTYPE) @._echoToArchesHere(\
+         " - restoring ", $obj, " - WTYPE)\n"); \
+     echo("*** Setting restoreTime of ", $obj.name, " (WTYPE) to now.\n");
+
+#define echoRESETalready(WTYPE,WPLACE) @._echoToArchesHere(\
+         " - ", $obj, " - WTYPE - already in ", WPLACE, ")\n"); \
+     echo("*** ", $obj.name, ", ", $obj, " (WTYPE) is already in ", \
+         WPLACE.name, " (", WPLACE, ")\n");
+
+#define echoRESETfailure(WTYPE) @._echoToArchesHere(\
+         " - failure on ", $obj, " - WTYPE)\n"); \
+     echo("*** You cannot reset ", $obj.name, " (WTYPE)\n");
+
+#define echoRESETmoving(WTYPE,WPLACE) @._echoToArchesHere(\
+         " - restoring ", $obj, " - WTYPE)\n"); \
+     echo("*** Moving ", $obj.name, " (WTYPE) back to ", WPLACE.name, \
+         " (", WPLACE, ")\n");
+
+func @._pageFile
+{
+  $1._pagerName = $2;
+  $1._pagerSection = 0;
+  $file = str($2,".0");
+  return (catfile ($1, $file));
+} ACCESS(@._pageFile)
+
+func @.more
+{
+  if (#actor._pagerName  == NULL) {
+    echo("No file to view..");
+    return;
+  }
+  #actor._pagerSection = #actor._pagerSection + 1;
+  $file=str(#actor._pagerName,".",#actor._pagerSection);
+  $ret = catfile(#actor, $file);
+  if ($ret == NULL)
+    { #actor._pagerSection = #actor._pagerSection - 1; }
+  return $ret;
+} ACCESS(@.more)
+
+func @.set
+{
+  mWizardCommand;
+  numArgs(3, "*** set <object> <element> <value>");
+  if (!($obj=atoobj($1))) { 
+    echo("*** set <object> <element> <value>\n");
+    return;	
+  }
+  
+  if (@._cannotChange($1)) {
+    echo("You cannot change that object.\n");
+    return;
+  }
+
+  if (regcmp($3, "^[0-9]+$")) {
+    echo("Setting to a number..\n");
+    $arg = atoi($3);
+  }
+  else {
+    if ($arg=atoobj($3)) 
+      echo("Setting to an object.\n");
+    else {
+      echo("Setting to text.\n");
+      $arg = $3;
+    } 
+  }
+  $obj.($2)=$arg;
+  @.see($obj, $2);
+} ACCESS(@.set)
+  
+func @.nullify
+{
+  mWizardCommand;
+  numArgs(2, "*** nullify <object> <element> ");
+
+  if (!($obj=atoobj($1))) {
+    echo("bad object number.\n");
+    return;
+  }
+
+  if (@._cannotChange($1)) {
+    echo("You cannot change that object.\n");
+    return;
+  }
+
+  if (!($obj.($2))) {
+    @.see($obj,$2);
+    return;
+  }
+
+  echo("Previously : ");
+  @.see($obj, $2);
+  $obj.($2) = NULL;
+  echo("       Now : ");
+  @.see($obj, $2);
+} ACCESS(@.nullify)
+  
+func @.fetch
+{
+  mWizardCommand;
+  minArgs(1, "*** fetch <object number> / <widget> / <player> / <mobile>");
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Marzabetch, do a fetch\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Marzabetch, do a fetch\" ...");
+  @._echoToArchesHere("  ('", $arg, "'");
+
+  if (!($obj = @._matchAnything($arg))) { /*** assignment not comparison ***/
+    @._echoToArchesHere(" - can't match)\n");
+    return;
+  }
+
+  if (@._cannotAccess($obj)) {
+    echo("You cannot access that object.\n");
+    @._echoToArchesHere(" -- can't access)\n");
+    return;
+  }
+
+  if ($obj.mobile) {
+    if ($obj.location == #actor) {
+      echoFETCHalready(mobile);
+      return;
+    }
+
+    if (($obj.location.rxfetch >= #actor.level) || ($obj.xFetch >= #actor.level)) {
+      echoFETCHfailure(mobile);
+      return;
+    }
+
+    echoFETCHmoving(mobile);
+    $obj.hp = $obj.maxhp;
+    $obj.restoreTime = NULL;
+    @._reko($obj.location, $obj.name, " suddenly disappears!\n");
+    @._move($obj, #actor);
+
+    if ($obj.fighting) {
+      if ($obj.fighting.fighting == $obj)
+	$obj.fighting.fighting = NULL;
+      $obj.fighting = NULL;
+    }
+ 
+    return;
+  }
+  
+  if ($obj.widget) {
+    if ($obj.location == #actor) {
+      echoFETCHalready(widget);
+      return;
+    }
+
+    if (($obj.location.rxfetch >= #actor.level) || ($obj.xFetch >= #actor.level)) {
+      echoFETCHfailure(widget);
+      return;
+    }
+    
+    echoFETCHmoving(widget);
+    @._reko($obj.location, $obj.name, " suddenly disappears!\n");
+    @._move($obj, #actor);
+    return;
+  }
+
+  if ($obj.player) {
+    if ($obj.level >= #actor.level) {
+      echoFETCHfailure(player)
+      return;
+    }
+    
+    if ($obj.location == #actor) {
+      echoFETCHalready(player);
+      return;
+    }
+    
+    if (($obj.location.rxfetch >= #actor.level) || ($obj.xFetch >= #actor.level)) {
+      echoFETCHfailure(player);
+      return;
+    }
+
+    echoFETCHmoving(player);
+
+    if(listsearch(@.onlinePlayers, $obj)) {
+      becomePlayer($obj);
+      @._visEmote("suddenly disappears!\n");
+      becomeMyself($obj);
+    }
+
+    @._move($obj, #actor);
+    echoto($obj, "You have just been fetched.  Feel afraid, feel very afraid...\n");
+
+    if ($obj.fighting) {
+      if ($obj.fighting.fighting == $obj)
+	$obj.fighting.fighting = NULL;
+      $obj.fighting = NULL;
+    } 
+
+    return;
+  }
+
+  if ($obj.link) {
+    echoFETCHfailure(link);
+    return;
+  }
+  
+  if ($obj.scenery) {
+    echoFETCHfailure(scenery);
+    return;
+  }
+
+  if ($obj.room) {
+    echoFETCHfailure(room);
+    return;
+  }
+
+  echo("*** I don't know what it is, so you certainly can't fetch it!\n");
+  @._echoToArchesHere(" - invalid object)\n");
+
+} chmod(&@.fetch, "W:rs");
+
+
+func @.reset
+{
+  mWizardCommand;
+
+  minArgs(1, "*** reset <anything>");
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Tarkaset, do a reset\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Tarkaset, do a reset\" ...");
+  @._echoToArchesHere("  ('", $arg, "'");
+
+  if (!($obj = @._matchAnything($arg))) { /*** assignment not comparison ***/
+    @._echoToArchesHere(" - can't match)\n");
+    return;
+  }
+  
+  if (@._cannotAccess($obj)) {
+    echo("You cannot access that object.\n");
+    @._echoToArchesHere(" - can't access)\n");
+    return;
+  }
+
+  $from = $obj.location;
+  
+  if ($obj.mobile) {
+    if (($from == specialStore) || ($from == generalStore)) {
+      echoRESETtime(mobile);
+      $obj.restoreTime = time();
+      return;
+    }
+    
+    if ($from == $obj.home) {
+      echoRESETalready(mobile,$from);
+      return;
+    }
+
+    if (($from.rxfetch >= #actor.level) || ($obj.xFetch)) {
+      echoRESETfailure(mobile);
+      return;
+    }
+
+    echoRESETmoving(mobile,$obj.home);
+    $obj.hp = $obj.maxhp;
+    @._reko($from, $obj.name, " suddenly disappears!\n");
+    @._move($obj, $obj.home);
+    @._reko($obj.home, $obj.name, " suddenly appears!\n");
+    
+    if ($obj.fighting) {
+      if ($obj.fighting.fighting == $obj)
+	$obj.fighting.fighting = NULL;
+      $obj.fighting = NULL;
+    }
+    
+    return;
+  }
+  
+  if ($obj.widget)  {
+    if ($obj.special) {
+      if ($from == specialStore) {
+        echoRESETtime(widget);
+	$obj.restoreTime = time();
+	return;
+      }
+      
+      echoRESETtime(widget);
+      @._reko($from, $obj.name, " suddenly disappears!\n");
+      @._move($obj, specialStore);
+      $obj.restoreTime = time();
+      return;
+    }
+    
+    if ($from == $obj.home) {
+      echoRESETalready(widget,$from);
+      $obj.restoreTime = time();
+      return;
+    }
+    
+    if (($from.rxfetch >= #actor.level) || ($obj.xFetch)) {
+      echoRESETfailure(widget);
+      return;
+    }
+    
+    echoRESETmoving(widget,$obj.home);
+    $obj.restoreTime = time();
+    @._reko($from, $obj.name, " suddenly disappears!\n");
+    @._move($obj, $obj.home);
+    @._reko($obj.home, $obj.name, " suddenly appears!\n");
+    return;
+  }
+  
+  
+  if ($obj.player) {
+    if ($obj.level >= #actor.level) {
+      echoRESETfailure(player);
+      return;
+    }
+    
+    if (!listsearch(@.onlinePlayers, $obj)) {
+      if (!($from)) {
+        echoRESETalready(player,#0);
+	return;
+      }
+
+      echoRESETmoving(player,#0);
+      @._move($obj, #0);
+      @._reko($from, $obj.name, " suddenly disappears!\n");
+      return;
+    }
+    
+    if ($from.noSummonOut >= #actor.level) {
+      echoRESETfailure(player);
+      return;
+    }
+
+    if (!($home = $obj.home))      /** assignment not comparison **/
+      $home = #2;
+    
+    echoRESETmoving(player,$obj.home);
+    echoto($obj, "You have been sent home.\n");
+
+    @._reko($home, $obj.name, " suddenly appears!\n");
+    @._move($obj, $home);
+    @._reko($from, $obj.name, " suddenly disappears!\n");
+    @._resetitems(#actor);
+
+    if ($obj.fighting) {
+      if ($obj.fighting.fighting == $obj)
+	$obj.fighting.fighting = NULL;
+      $obj.fighting = NULL;
+    }
+ 
+    return;
+  }
+
+  if ($obj.link) {
+    if ($from) {
+      echoRESETmoving(link,#0);
+      @._move($obj, #0);
+      return;
+    } else {
+      echoRESETalready(link,#0);
+    }
+    return;
+  }
+  
+  if ($obj.scenery)  {
+    if ($from) {
+      echoRESETmoving(scenery,#0);
+      @._move($obj, #0);
+    } else {
+      echoRESETalready(scenery,#0);
+    }
+    return;
+  }
+
+  if ($obj.room)  {
+    if ($from) {
+      echoRESETmoving(room,#0)
+      @._move($obj, #0);
+    } else {
+      echoRESETalready(room,#0);
+    }
+    return;
+  }
+
+  echo("*** That is an invalid object\n");
+  @._echoToArchesHere(" - invalid object)\n");
+  
+} chmod(&@.reset, "W:rs");
+
+func @.listp
+{
+  archWizCommand;
+  echo(@._listp_showplay());
+  $plist = NULL;
+  foreach $pl in (Util.players) {
+    if (@._iCanSeeYou($pl)) 
+      $plist=listadd($plist,$pl);
+  }
+  if ($1=="ll") 
+    $plist = @._insertionSort($plist, @._compLogins);
+  if ($1=="lv")
+    $plist = @._insertionSort($plist, @._compLevels);
+  
+  foreach $pl in ($plist) {
+    echo(@._listp_showplay($pl));
+  }
+  
+  echo("Total of ", listcount($plist), " players  --  NOTE : all times shown are now correct!\n");
+}
+  
+/* returns true if $1 has logged on since $2 */
+func @._compLogins  
+{
+  if (!$1.loginTime)
+    return 1;
+  if (!$2.loginTime)
+    return 0;
+
+  return ($1.loginTime<$2.loginTime);
+}
+
+/* returns true if $1 is a lower level than $2 */
+func @._compLevels
+{
+  return ($1.level<$2.level);
+}
+
+func @._insertionSort
+{
+  $result=listnew();
+  $num = 1;
+  foreach $it in ($1) {
+    $pos = 1;
+    $ct = 1;
+    foreach $that in ($result) {
+      if ($2($that,$it))    /* if feature($that) 'is above' feature ($it) */ 
+	$pos = $ct+1;
+      $ct=$ct+1;
+    }
+    if ($pos==$num) {
+      $result=listappend($result, $it);
+    } else {
+      $ct = 1;
+      $result2==listnew();
+      foreach $that in ($result) {
+	if ($ct==$pos)
+	  $result2=listappend($result2,$it);
+
+	$result2=listappend($result2,$that);
+	$ct=$ct+1;
+      }
+      $result=$result2;
+      $result2=NULL;
+    }
+    $num=$num+1;
+  }
+  return ($result);
+}
+	  
+func @._listp_showplay
+{
+  $uptonumber=5;
+  $uptodate=28;
+  $uptolevel=22;
+  if ($1==NULL) {
+    $arg = str(@._repeatText(6," "), "Player");
+    $arg = str($arg, @._repeatText($uptolevel-strlen($arg)," "), "Level");
+    $arg = str($arg, @._repeatText($uptodate-strlen($arg)," "), "Last login time");
+    return str($arg, "\n");
+ } else {
+   $arg = str(@._repeatText($uptonumber-strlen(str($1)), " "), $1,": ", $1.name);
+   $arg = str($arg, @._repeatText($uptolevel-strlen($arg),"."), @._repeatText(3-strlen(str($1.level)),"."),$1.level);
+
+   $arg = str($arg, @._repeatText($uptodate-strlen($arg), " "));
+   return str($arg,@._listp_getdate($1),"\n"); 
+   return;
+
+ }
+} ACCESS(@._listp_showplay)
+
+func @._listp_getdate 
+{
+  if (!$1.loginTime)
+    return "Never!";
+  else if (listsearch(@.onlinePlayers,$1))
+    return "  Online";
+  else {
+    $day = 60*60*24;
+    $starttime=strtime(0);
+    $startofday=(time()/$day)*$day;
+    if (regcmp($starttime,"01:00"))
+	$startofday=$startofday-3600;
+
+    if ((time()-$1.loginTime)<$day) { /* within the past 24 hours */
+      if ($1.loginTime>$startofday)
+	return str("  ",@._hmmss($1.loginTime-$startofday));
+      else
+	return str("  ",@._hmmss($1.loginTime-($startofday-$day)), " Y");
+
+    } else {                       /* not within the past 24 hours */
+
+      $daysago=($startofday+$day-$1.loginTime)/$day;
+      if ($daysago==1)
+	return str("  Yesterday");
+      else if ($daysago<7)
+	return str($daysago," days");
+      else {
+	$weeksago=$daysago/7;
+	if ($weeksago==1)
+	  return "1 week";
+	else if ($weeksago<4)
+	  return str($weeksago, " weeks");
+	else 
+	  return "ancient..";
+      }
+    }
+  }
+} ACCESS(@._listp_getdate)
+
+
+func @._repeatText
+{
+  if ($1<=0)
+    return ($3);
+  else 
+    return (@._repeatText($1-1,$2,str($3,$2)));
+}
+
+func @.mmatch
+{
+  wizardCommand;
+  minArgs(1, "*** mmatch what?");
+  bundleArgs;
+  @._matchlist(Util.mobiles, $arg, "Mobiles");
+} ACCESS(@.mmatch)
+
+func @.pmatch
+{
+  wizardCommand;
+  minArgs(1, "*** pmatch what?");
+  bundleArgs;
+  @._matchlist(Util.players, $arg, "Players");
+} ACCESS(@.pmatch)
+
+func @.omatch
+{
+  wizardCommand;
+  minArgs(1, "*** omatch what?");
+  bundleArgs;
+  @._matchlist(Util.widgets, $arg, "Objects");
+} ACCESS(@.omatch)
+
+func @._matchlist
+{
+  $mat = 0;
+
+  foreach $w in ($1)
+  {
+    if (match($2,$w,"name"))
+    {
+      if ($mat==0)
+        echo($3," matched:\n");
+
+      echo("  ", $w, ", ", $w.name, "\n");
+      $mat = $mat + 1;
+    }
+  }
+
+  if ($mat==0)
+    echo("No matches found.\n");
+  else {
+    if ($mat==1)
+      echo("1 match found.\n");
+    else
+      echo($mat, " matches found.\n");
+  }
+} chmod(&@._matchlist, "W:rs");
+
+func @._notExitName
+{
+  if (($1=="north") || ($1=="south") || ($1=="east") || ($1=="west") || ($1=="ne") || ($1=="nw") || ($1=="se") || ($1=="sw"))
+    return 0;
+  return 1;
+} ACCESS(@._notExitName)
+
+func @.removeLink
+{
+  archWizCommand;
+  numArgs(1,"*** removeLink <direction>");
+  if ($exit=match($1,#actor.location.exits,"name")) { /* assignment */
+    #actor.location.exits=listdrop(#actor.location.exits,$exit);
+    echo("Exit to the ",$1," removed.\n");
+  } else {
+    echo("Exit ", $1, " does not exist.\n");
+  }
+} ACCESS(@.removeLink)
+  
+func #2._postLookFn
+{
+  if (!CREATOR(#actor))
+    return;
+
+  if (#actor.buginformed==#actor.loginTime)
+    return 0;
+  #actor.buginformed=#actor.loginTime;
+  echo("\n");
+  if(!($num=listcount(Util.buglist)))
+    $num="None.";
+  echo("   Bug reports : ",$num,"\n");
+  if(!($num=listcount(Util.idealist)))
+    $num="None.";
+  echo("  Idea reports : ",$num,"\n");
+  if(!($num=listcount(Util.typolist)))
+    $num="None.";
+  echo("  Typo reports : ",$num,"\n");
+  echo("\n");
+}
+
+func @._cannotChange
+{
+  if (!($obj=atoobj($1)))
+    return 1;
+
+  if (#actor.level>=29)
+    return;
+
+  if ($obj.owner==#actor)
+    return;
+
+  return 1;
+}
+
+func @._cannotAccess
+{
+  if (!($obj=atoobj($1)))
+    return 1;
+
+  if (#actor.level>=25)
+    return;
+
+  if ($obj.owner==#actor)
+    return;
+
+  if ($obj.owner)
+    return 1;
+
+  if ($obj.player)
+    return 1;
+
+  if (($obj.from) && ($obj.sub) && ($obj.text))
+    return 1;
+
+  if (($obj.where) && ($obj.from) && ($obj.subtime) && ($obj.text))
+    return 1;
+
+  return;
+}

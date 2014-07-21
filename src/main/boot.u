@@ -1,0 +1,1461 @@
+/*
+Ubermud Semi-Tiny-like universe rules.
+
+By Jerry_C, bob, Chrysalis, Mutant, and Random
+	(not necessarily in that order)
+*/
+
+/*
+RCS version: $Header: /atreus/mjr/hacks/mud/main/RCS/boot.u,v 1.3 90/06/09 23:36:34 mjr Exp $
+*/
+
+
+			
+/* ---------INITIALIZE SERVER INTERNAL VARIABLES---------- */
+/* set the server uptime - used in WHO and welcome */
+@.uptime = time();
+
+
+
+
+/* --------------GENERAL UTILITY FUNCTIONS---------------- */
+/*
+FIND:
+searches the contents of the second parameter, and the contents of each thing
+in  the second parameter etc.. (recursively) for the first parameter.
+
+Returns:
+	0 if not found
+	1 if found
+	the NULL containing the error if an error occurs.
+	
+*/
+func @._find
+{
+	/* First check the contents list */
+
+	if($2._cnt == NULL)
+		return(0);
+
+	$ret = listsearch($2._cnt,$1);
+	if($ret >= 1){
+		return(1); /* Found it!! */
+	}
+
+	/* Go recursive */
+
+	foreach $thing in ($2._cnt){
+		$ret = @._find($1,$thing);
+		if($ret == 1 || $ret == NULL){
+			return($ret);
+		}
+	}
+	return(0);
+}
+
+
+
+
+/*
+WHATSIT:
+a utility function for finding something in the vicinity.
+*/
+func @._whatsit
+{
+	$here = #actor._loc;
+	if($1 == "here")
+		return($here);
+
+	$at = match($1,#actor._cnt,"nam",#actor._use,"nam",$here.ex,"nam",
+		$here._cnt,"nam",$here._ply,"nam");
+
+	/* If no luck, try it as a raw object number */
+
+	if($at == NULL){
+		$at = atoobj($1);
+	}
+	return($at);
+}
+
+
+/*
+ANNOUNCE:
+send text to everyone in the #caller's room
+if the caller's location is undefined, use the
+actor's location. if that, too, is undefined,
+then nothing happens.
+*/
+func @._announce
+{
+	$here = #caller._loc;
+	if($here == NULL)
+		return;
+
+	foreach $guy in ($here._ply) {
+		foreacharg $tmp
+			echoto($guy,$tmp," ");
+		echoto($guy,"\n");
+	}
+}
+
+
+/*
+OBJGO:
+the object (#caller) is attempting to go in the specified direction.
+returns NULL if it fails, otherwise returns NUM 1.
+this is much less simple than the player go, since the object
+doesn't need (or care about) all the @succ messages.
+*/
+func @._objgo
+{
+	/* if object is being carried do not permit this evil */
+	if(#caller._c)
+		return;
+
+	$here = #caller._loc;
+
+	if($here == NULL || $# != 1)
+		return;
+
+	$to = match($1,$here.ex,"nam");
+	if($to == NULL)
+		return;
+
+	/* make sure the door has a destination */
+	if($to.dst == NULL)
+		return;
+
+	/* check to see if the other side has a link */
+	$linked = listsearch($to.dst.ent,$to);
+	if($linked == 0 || $linked == NULL)
+		return;
+
+	/* We have a valid exit == valid attempt to leave. Call the .olv() */
+	$here.olv(#caller);
+
+	/* call the lock function, if one */
+	if($to.lck(#caller)) {
+
+		/* print the ofail, if one */
+		if($to.ofl != NULL && #caller.nam != NULL)
+			foreach $guy in ($here._ply)
+				echoto($guy,#caller.nam," ",$to.ofl,"\n");
+		return(NULL);
+	}
+
+	/* announce arrival in the destination */
+	if($to.arr != NULL){
+		$arrive = $to.arr;
+	} else {
+		$arrive = "has arrived.";
+	}
+	foreach $guy in ($to.dst._ply)
+		echoto($guy,#caller.nam," ",$arrive,"\n");
+
+	/* perform the actual move */
+	$to.dst._cnt = listadd($to.dst._cnt,#caller);
+	#caller._loc = $to.dst;
+	$here._cnt = listdrop($here._cnt,#caller);
+
+	/* display an osucc if there is one */
+	if($to.osuc != NULL && #caller.nam != NULL)
+		foreach $player in ($here._ply)
+			echoto($player,#caller.nam," ",$to.osuc,"\n");
+
+	/* announce departure */
+	foreach $guy in ($here._ply)
+		echoto($guy,#caller.nam," has left\n");
+
+	/* Call the destination room's .oarr() (if it exists) */
+	$to.dst.oarr(#caller);
+	return(1);
+}
+chmod(&@._objgo,"W:rs");
+
+
+
+
+/*
+QUIT:
+called when a player quits by the dispatcher
+or iobuf library. update the who's on list,
+and so on.
+*/
+func @._quit
+{
+	@.who = listdrop(@.who,#actor);
+	foreach $guy in (#actor._loc._ply)
+		if($guy != #actor)
+			echoto($guy,#actor.nam," has disconnected.\n");
+}
+
+
+
+
+/*
+WELCOME:
+called when a player first connects by the
+dispatcher. print message of the day information, etc.
+*/
+func @._welcome
+{
+	echoto(#actor,"welcome to Ubermud 0.9 alpha\n");
+	echoto(#actor,"Server booted at: ",strtime(@.uptime),"\n");
+	echoto(#actor,"Use the WHO command to see who is on.\n\n");
+
+	if(#actor.nam != NULL)
+		@.who = listadd(@.who,#actor);
+
+	foreach $guy in (#actor._loc._ply)
+		if($guy != #actor)
+			echoto($guy,#actor.nam," has connected.\n");
+}
+
+
+
+
+/*
+NEWPLAYER: (wizard only)
+create a new player and add them to the current room.
+*/
+func @._newplayer
+{
+	if($1 == NULL) {
+		echo("create who, please ?\n");
+		return;
+	}
+
+	if(geteuid() != #0) {
+		echo("only the Creator can bring forth new life!\n");
+		return;
+	}
+
+	$new = objectnew();
+	if($new == NULL) {
+		echo("sorry, I can't do that: ",error($new),"\n");
+		return;
+	}
+
+	/* we retain ownership of the player's name */
+	$new.nam = $1;
+	chmod(&$new.nam,"O:rw,I:r,W:r");
+
+	$new._loc = #actor._loc;
+
+	/* let them own themselves */
+	chown($new,$new);
+
+	#actor._loc._ply = listappend(#actor._loc._ply,$new);
+	echo("created ",$1," with object ID",$new,"\n");
+
+	$new.home = #actor._loc;
+	chown(&$new.home,$new);
+}
+/* make _newplayer hard to get at */
+chmod(&@._newplayer,"O:rw");
+
+
+/*
+deadsay: for players who are 'dead' this can be attached to them as 
+as say() function.
+*/
+func @._deadsay
+{
+	echo("you are dead - lie still and shut up!\n");
+
+	foreach $guy in (#actor._loc._ply)
+		if($guy != #actor )
+			echoto($guy,#actor.nam,
+				" tries to send messages from the spirit world.\n");
+}
+
+
+
+/*
+deademote: for players who are 'dead' this can be attached to them as 
+as emote() function.
+*/
+func @._deademote
+{
+	echo("you are dead - you just lie there.\n");
+
+	foreach $guy in (#actor._loc._ply)
+		if($guy != #actor )
+			echoto($guy,#actor.nam,
+				" rolls over in the grave.\n");
+}
+
+
+
+
+
+/* -------------------PLAYER COMMANDS--------------------- */
+
+/*
+WHO:
+print the "WHO is on" list in a simple format
+*/
+func @.WHO
+{
+	if(!islist(@.who)) {
+		echo("nobody logged on (so what are you doing here ?)\n");
+		return(1);
+	}
+
+	$count = 0;
+	echo("Server booted at: ",strtime(@.uptime),"\n");
+	echo("Current Users:\n");
+	foreach $user in (@.who) {
+		if($user.nam != NULL) {
+			$count = $count + 1;
+			echo("\t",$user.nam,"\n");
+		}
+	}
+	echo("total users: ",$count,"\n");
+	return($count);
+}
+
+
+
+
+/*
+HELP:
+currently help is somewhat minimalist
+if called with no parameters, print the help/help
+file. if called with a parameter, try to print a
+file by that name.
+*/
+func @.help
+{
+	if($# == 0) {
+		if(catfile(#actor,"help/help") == NULL)
+			echoto(#actor,"help seems to be unavailable...\n");
+		return;
+	}
+
+	foreacharg $hlp
+		if(catfile(#actor,str("help/",$hlp)) == NULL)
+			echoto(#actor,"no help for \"",$hlp,"\"\n");
+}
+
+
+
+
+/*
+CREATE:
+create an object, and add it into the player's inventory
+the object name is given as the first parameter. this is
+somewhat TinyMUD-like
+*/
+func @.create
+{
+	if($1 == NULL) {
+		echo("create what, please ?\n");
+		return;
+	}
+
+	$new = objectnew();
+	if($new == NULL) {
+		echo("sorry, I can't do that: ",error($new),"\n");
+		return;
+	}
+
+	$new.nam = $1;
+	chown($new,#actor);
+	chown(&$new.nam,#actor);
+	#actor._cnt = listappend(#actor._cnt,$new);
+	echo("created ",$1," (",$new,")\n");
+	return($new);
+}
+/* create needs to be setuid wiz to add to the player's inventory */
+chmod(&@.create,"W:rs");
+
+
+
+
+/*
+NAME:
+name a thing in the current surrounds. permissions returns are checked.
+this is intended to be somewhat TinyMUD-like. do not make this setuid.
+names of objects are in the ".nam" element of the object.
+*/
+func @.name
+{
+	if($# != 2) {
+		echo("usage: name thing \"name\"\n");
+		return;
+	}
+	$nam = @._whatsit($1);
+	if($nam != NULL) {
+		$ret = $nam.nam = $2;
+		if($ret == NULL) {
+			echo("sorry, I can't do that: ",error($new),"\n");
+			return;
+		}
+		echo("name set\n");
+	} else {
+		echo("I don't see what you want to rename\n");
+	}
+}
+
+
+
+
+/*
+DESCRIBE:
+describe something in the player's vicinity. descriptions are in the
+".dsc" element of an object.
+*/
+func @.describe
+{
+	if($1 == NULL || $2 == NULL) {
+		echo("describe what as what? (don't use a TinyMUD '=')\n");
+		return;
+	}
+	if( $1 == "here"){
+		$at = #actor._loc;
+	}
+	else {
+		$at = @._whatsit($1);
+	}
+
+	if($at != NULL) {
+		$ok = $at.dsc = $2;
+		if($ok == NULL)
+			echo("cannot set description: ",error($ok),"\n");
+		else
+			echo("described ",$at.nam,"\n");
+	} else {
+		echo("I see no \"",$1,"\" here.\n");
+	}
+}
+
+
+
+
+/* 
+SET:
+function for setting the suc/osuc/fl/ofl/drp/odrp string fields of objects
+Player should type
+
+set success <thing> "<string>"
+*/
+func @.set
+{
+	if($# < 2){
+		echo("usage: set <message_type> <thing> [<string>]\n");
+		return;
+	}
+
+	$at = @._whatsit($2);
+	if($at == NULL){
+		echo("I see no \"",$2,"\" here.\n");
+		return;
+	}
+
+	if($1 == "success") {
+		$ret = $at.suc = $3;
+	} else if ($1 == "osuccess") {
+		$ret = $at.osuc = $3;
+	} else if ($1 == "fail") {
+		$ret = $at.fl = $3;
+	} else if ($1 == "ofail") {
+		$ret = $at.ofl = $3;
+	} else if ($1 == "drop") {
+		$ret = $at.drp = $3;
+	} else if ($1 == "odrop") {
+		$ret = $at.odrp = $3;
+	} else {
+		echo("No such field, sorry...\n");
+		return;
+	}
+
+	if($ret == NULL && errno($ret) != 0) {
+		echo("Could not set ",$1," field on ",$at.nam," :",
+			error($ret),".\n");
+	} else {
+		if ($ret == NULL){
+			echo("Unset ",$1," field on ",$at.nam,".\n");
+		} else {
+			echo("Set ",$1," field on ",$at.nam,".\n");
+		}
+	}
+}
+
+
+/*
+DARKEN:
+Moves an object from the ._cnt list of the current room to the ._drk list.
+	#actor must own the room, and the object.
+*/
+func @.darken
+{
+	if( #actor != objectowner(#actor._loc)){
+		echo("You do not own this room.\n");
+		return;
+	}
+
+	$cont = #actor._loc._cnt;
+	$it = match($1,$cont,"nam");
+
+	if( $it == NULL ){
+
+		/* Maybe it's an object number */
+
+		$it = atoobj($1);
+		if( $it == NULL || listsearch($cont,$it) == 0 ||
+					listsearch($cont,$it) == NULL ){
+			echo("I see no ",$1," here.\n");
+			return;
+		}
+	}
+
+	/* At this point, $it should be the thing to darken, */
+	/* and should be in the contents list. */
+
+	if( #actor != objectowner($it)){
+		echo("You do not own ",$it.nam,".\n");
+		return;
+	}
+	#actor._loc._cnt = listdrop($cont,$it);
+	#actor._loc._drk = listadd(#actor._loc._drk,$it);
+
+	echo("Darkened ",$it.nam,".\n");
+}
+/* Has to be setuid, to fiddle these lists */
+chmod(&@.darken,"W:rs");
+
+
+
+/*
+LIGHTEN:
+Moves an object from the ._drk list of the current room to the ._cnt list.
+	#actor must own the room, and the object.
+*/
+func @.lighten
+{
+	if( #actor != objectowner(#actor._loc)){
+		echo("You do not own this room.\n");
+		return;
+	}
+
+	$dark = #actor._loc._drk;
+	$it = match($1,$dark,"nam");
+
+	if( $it == NULL ){
+
+		/* Maybe it's an object number */
+
+		$it = atoobj($1);
+		if( $it == NULL || listsearch($dark,$it) == 0 ||
+					listsearch($dark,$it) == NULL ){
+			echo("I see no dark ",$1," here.\n");
+			return;
+		}
+	}
+
+	/* At this point, $it should be the thing to lighten, */
+	/* and should be in the ._drk list. */
+
+	if( #actor != objectowner($it)){
+		echo("You do not own ",$it.nam,".\n");
+		return;
+	}
+	#actor._loc._drk = listdrop($dark,$it);
+	#actor._loc._cnt = listadd(#actor._loc._cnt,$it);
+
+	echo("Lightened ",$it.nam,".\n");
+}
+/* Has to be setuid, to fiddle these lists */
+chmod(&@.lighten,"W:rs");
+
+
+
+
+/*
+USE:
+use something. try to move a single matched object from the player's
+carried inventory "._cnt" to their "._use" field. "._use" is a single
+object, and cannot be a list. this is hard-wired checked for a function
+in the monitor.
+*/
+func @.use
+{
+	if($1 == NULL) {
+		if(#actor._use == NULL) {
+			echo("you are already empty-handed.\n");
+			return;
+		}
+		@.emote("stops using",#actor._use.nam);
+		#actor._cnt = listadd(#actor._cnt,#actor._use);
+		#actor._use = NULL;
+		return;
+	}
+	if(#actor._use != NULL) {
+		echo("Stop using ",#actor._use.nam," first.\n");
+		return;
+	}
+
+	$us = match($1,#actor._cnt,"nam");
+	if($us != NULL) {
+		#actor._use = $us;
+		#actor._cnt = listdrop(#actor._cnt,$us);
+		@.emote("uses",$us.nam);
+	} else {
+		echo("I don't see what you want to use\n");
+	}
+}
+/* use must be setuid since it manages the player's inventory */
+chmod(&@.use,"W:rs");
+
+
+
+/*
+DROP:
+drop an object. modified and fixed by Chrysalis
+*/
+func @.drop
+{
+	if($1 == NULL) {
+		echo("drop what?\n");
+		return;
+	}
+	$dump = match($1,#actor._cnt,"nam");
+	if($dump != NULL) {
+		#actor._loc._cnt = listappend(#actor._loc._cnt,$dump);
+		#actor._cnt = listdrop(#actor._cnt,$dump);
+
+		/* set its new location */
+		$dump._loc = #actor._loc;
+
+		/* unmark it as being carried */
+		$dump._c = NULL;
+		if($dump.drp != NULL) {
+			echo($dump.drp,"\n");
+		} else {
+			echo("You dropped ",$dump.nam,".\n");
+		}
+		if($dump.odrp != NULL) {
+			$odrop = str(#actor.nam," ",$dump.odrp);
+		} else {
+			$odrop = str(#actor.nam," dropped ",$dump.nam,".");
+		}
+		foreach $guy in (#actor._loc._ply) {
+			if($guy != #actor) {
+				echoto($guy,$odrop,"\n");
+			}
+		}
+	} else {
+		echo("I don't see what you want to drop.\n");
+	}
+}
+chmod(&@.drop,"W:rs");
+
+
+
+
+/*
+EXAMINE:
+Mutant's examine
+*/
+func @.examine
+{
+	if($# < 1) {
+		echo("examine what ?\n");
+		return;
+	}
+
+	if(($thing = @._whatsit($1)) == NULL) {
+		echo("I don't see what you want to examine here..\n");
+		return;
+	}
+
+	echo($thing.nam," (",$thing,")\n");
+	$tmp = objectowner($thing);
+	echo("Owner: ",$tmp.nam," (",$tmp,")\n");
+
+	if($thing._loc != NULL) {
+		echo("location: ",$thing._loc.nam);
+		echo(" (",$thing._loc,")\n");
+	}
+
+	if($thing.strt != NULL) {
+		echo("starting: ",$thing.strt.nam);
+		echo(" (",$thing.strt,")\n");
+	}
+
+	if($thing.dst != NULL) {
+		echo("destination: ",$thing.dst.nam);
+		echo(" (",$thing.dst,")\n");
+	}
+
+	if($thing.dsc != NULL)
+		echo("description: ",$thing.dsc,"\n");
+
+	if($thing.txt != NULL)
+		echo("text: ",$thing.txt,"\n");
+
+	if($thing.suc != NULL)
+		echo("success: ",$thing.suc,"\n");
+
+	if($thing.osuc != NULL)
+		echo("osuccess: ",$thing.osuc,"\n");
+
+	if($thing.fl != NULL)
+		echo("fail: ",$thing.fl,"\n");
+
+	if($thing.ofl != NULL)
+		echo("ofail: ",$thing.ofl,"\n");
+
+	if($thing.arr != NULL)
+		echo("arrive: ",$thing.arr,"\n");
+
+	if($thing.drp != NULL)
+		echo("drop: ",$thing.drp,"\n");
+
+	if($thing.odrp != NULL)
+		echo("odrop: ",$thing.odrp,"\n");
+
+	if($thing._use != NULL)
+		echo("using: ",$thing._use.nam," (",$thing._use,")\n");
+
+	if($thing.lckdag != NULL) {
+		echo("locked against: ");
+		foreach $key in ($thing.lckdag)
+			echo("\"",$key.nam,"\" (",$key,"), ");
+		echo("\n");
+	}
+
+	if($thing.lckdto != NULL) {
+		echo("locked to: ");
+		foreach $key in ($thing.lckdto)
+			echo("\"",$key.nam,"\" (",$key,"), ");
+		echo("\n");
+	}
+
+	if($thing.ent != NULL) {
+		echo("Entrances: ");
+		foreach $ent in ($thing.ent)
+			echo("\"",$ent.nam,"\" (",$ent,"), ");
+		echo("\n");
+	}
+
+	if($thing.ex != NULL) {
+		echo("Exits: ");
+		foreach $ex in ($thing.ex)
+			echo("\"",$ex.nam,"\" (",$ex,"), ");
+		echo("\n");
+	}
+
+	if($thing._ply != NULL) {
+		echo("Players: ");
+		foreach $ply in ($thing._ply)
+			echo("\"",$ply.nam,"\" (",$ply,"), ");
+		echo("\n");
+	}
+
+	if($thing._cnt != NULL) {
+		echo("Contents: ");
+		foreach $cnt in ($thing._cnt)
+			echo("\"",$cnt.nam,"\' (",$cnt,"), ");
+		echo("\n");
+	}
+}
+
+
+
+
+/*
+HAND:
+Chrysalis' hand function syntax: hand <player> <thing>
+*/
+func @.hand
+{
+	if($# < 2) {
+		echo("hand who what ?\n");
+		return;
+	}
+
+	$who = match($1,#actor._loc._ply,"nam");
+	if($who == NULL) {
+		echo("I don't see anyone named \"",$1,"\" here.\n");
+		return;
+	}
+
+	$item = match($2,#actor._use,"nam");
+	if($item != NULL) {
+		echo("Stop using it first.\n");
+		return;
+	}
+
+	$item = match($2,#actor._cnt,"nam");
+	if($item == NULL) {
+		echo("I don't see what you want to give to ",$who.nam,".\n");
+		return;
+	}
+	$who._cnt=listappend($who._cnt,$item);
+	#actor._cnt=listdrop(#actor._cnt,$item);
+	echo("You hand ",$item.nam," to ",$who.nam,".\n");
+	echoto($who,#actor.nam," hands you ",$item.nam,".\n");
+}
+/* Make it work.. */
+chmod(&@.hand,"W:rs");
+
+
+/*
+TAKE:
+Chrysalis' take() function
+*/
+func @.take
+{
+	if($1 == NULL) {
+		echo("take what?\n");
+		return;
+	}
+
+	$grab=match($1,#actor._loc._cnt,"nam");
+	if($grab == NULL) {
+		echo("I don't see what you want to take.\n");
+		return;
+	}
+	if($grab.lck(#actor)) {
+		if($grab.fl != NULL)
+		   echo($grab.fl,"\n");
+		else
+		   echo("You can't take that.\n");
+		if($grab.ofl != NULL) {
+		   $ofail = str(#actor.nam," ",$grab.ofl);
+		   foreach $guy in (#actor._loc._ply) {
+			if($guy != #actor) {
+			   echoto($guy,$ofail,"\n");
+			}
+		   }
+		}
+		return;
+	}
+
+	#actor._cnt=listadd(#actor._cnt,$grab);
+	#actor._loc._cnt=listdrop(#actor._loc._cnt,$grab);
+	$grab._loc = #actor;
+
+	/*set the _c field to indicate the object is being carried */
+	$grab._c = &#1.true;
+
+	if($grab.osuc != NULL) {
+		$osucc = str(#actor.nam," ",$grab.osuc);
+	} else {
+		$osucc = str(#actor.nam," picked up ",$grab.nam);
+	}
+
+	foreach $guy in (#actor._loc._ply)
+		if($guy != #actor)
+		   echoto($guy,$osucc,"\n");
+
+	if($grab.suc != NULL)
+		$suc = $grab.suc;
+	else
+		$suc = str("You picked up ",$grab.nam,".");
+	echo($suc,"\n");
+}
+chmod(&@.take,"W:rs");
+
+
+/*
+SAY:
+babble meaningless nothings - TinyMUD compatibility is enforced here.
+*/
+func @.say
+{
+	$here = #actor._loc;
+	if($here == NULL) {
+		echo("You scream into the endless nothingness!\n");
+		return;
+	}
+
+	/* loop on everyone in the room */
+	foreach $guy in ($here._ply) {
+
+		/* handle the player differently */
+		if($guy == #actor) {
+			if($# == 1)
+				echo("You say, \"",$1,"\"\n");
+			else {
+				echo("You say, \"");
+				foreacharg $tmp
+					echo($tmp," ");
+				echo("\"\n");
+			}
+		} else {
+			if($# == 1)
+				echoto($guy,#actor.nam," says, \"",$1,"\"\n");
+			else {
+				echoto($guy,#actor.nam," says, \"");
+				foreacharg $tmp
+					echoto($guy,$tmp," ");
+				echoto($guy,"\"\n");
+			}
+		}
+	}
+}
+
+
+
+
+/*
+WHISPER:
+whisper to someone in the room.
+*/
+func @.whisper
+{
+	if($# != 2) {
+		echo("whisper what to whom ?\n");
+		return;
+	}
+
+	$who = match($1,#actor._loc._ply,"nam");
+	if($who != NULL) {
+		if(listsearch(@.who,$who) == 0) {
+			echo("I think ",$who.nam," is asleep...\n");
+			return;
+		}
+		echoto($who,#actor.nam," whispers, \"",$2,"\"\n");
+		echo("You whisper, \"",$2,"\" to ",$who.nam,"\n");
+	} else {
+		echo("I don't see \"",$1,"\" here.\n");
+	}
+}
+
+
+
+
+/*
+EMOTE:
+flail about at Random - and maybe poke him in the eye.
+*/
+func @.emote
+{
+	$here = #actor._loc;
+
+	if($here == NULL) {
+		echo("You flail about wildly in limbo!\n");
+		return;
+	}
+
+	foreach $guy in ($here._ply) {
+		echoto($guy,#actor.nam);
+		foreacharg $tmp
+			echoto($guy," ",$tmp);
+		echoto($guy,"\n");
+	}
+}
+
+
+
+/*
+LOOK:
+peer at something, bob-like. here a lot of processing is done based
+on how many parameters are passed.
+	0 parameters = list stuff here
+	1 parameter = match things here, and look at something
+	2 paramters = match things here, and look at the contents of it
+*/
+func @.look
+{
+	$here = #actor._loc;
+	if($here == NULL) {
+		echo("you aren't anywhere, so you see nothing\n");
+		return;
+	}
+
+	if($# == 0) {
+		if($here.nam != NULL)
+			echo($here.nam,":\n");
+		if($here.dsc != NULL)
+			echo($here.dsc,"\n");
+		if($here._ply != NULL) {
+			echo("People here:\n");
+			foreach $person in ($here._ply)
+				echo($person.nam,"\n");
+		}
+
+		if($here._cnt != NULL) {
+			echo("Things here:\n");
+			foreach $thing in ($here._cnt)
+				echo($thing.nam,"\n");
+		}
+		return;
+	}
+
+	if($# == 1) {
+		$at = match($1,$here._ply,"nam",$here.ex,"nam",$here._cnt,"nam",
+			$here._drk,"nam",#actor._cnt,"nam",#actor._use,"nam");
+
+		if($at != NULL) {
+			if($at.dsc != NULL)
+				echo($at.dsc,"\n");
+			else
+				echo("you see nothing special.\n");
+
+			if($at._cnt != NULL) {
+				echo("Carrying:\n");
+				foreach $thing in ($at._cnt)
+					echo($thing.nam,"\n");
+			}
+			if($at._use != NULL)
+				echo("Using:",$at._use.nam,"\n");
+		} else {
+			echo("I see no \"",$1,"\" here.\n");
+		}
+		return;
+	}
+
+	if($# == 2) {
+		$who = match($1,$here._ply,"nam",$here._cnt,"nam",
+			#actor._cnt,"nam");
+		if($who != NULL) {
+			$at = match($2,$who._cnt,"nam",$who._use,"nam");
+	
+			if($at != NULL) {
+				if($at.dsc != NULL)
+					echo($at.dsc,"\n");
+				else
+					echo("you see nothing special.\n");
+			} else {
+				echo("I see no \"",$2,
+					"\" being carried by ",$who.nam,"\n");
+			}
+		} else {
+			echo("I see no \"",$1,"\" here.\n");
+		}
+		return;
+	}
+
+	echo("I don't quite understand you.\n");
+}
+
+
+
+/*
+WRITE:
+write on something... - create a ".txt" element
+*/
+func @.write
+{
+	if($1 == NULL || $2 == NULL) {
+		echo("write what on what?\n");
+		return;
+	}
+
+	$on = @._whatsit($1);
+	if($on != NULL) {
+		$ok = $on.txt = $2;
+		if($ok == NULL)
+			echo("cannot write on that: ",error($ok),"\n");
+		else
+			echo("wrote on ",$on.nam,"\n");
+	} else {
+		echo("I see no \"",$1,"\" here.\n");
+	}
+}
+
+
+
+/*
+READ:
+look at an object, and try to see if it has a '.txt' elment
+*/
+func @.read
+{
+	$here = #actor._loc;
+	if($here == NULL) {
+		echo("you aren't anywhere; there is nothing to read\n");
+		return;
+	}
+
+	if($# < 1) {
+		echo("read what ?\n");
+		return;
+	}
+
+	if($# == 1) {
+		$at = @._whatsit($1);
+
+		if($at != NULL) {
+			if($at.txt != NULL)
+				echo($at.txt,"\n");
+			else
+				echo("there is nothing written there.\n");
+		} else {
+			echo("I see no \"",$1,"\" here.\n");
+		}
+		return;
+	}
+
+	if($# == 2) {
+		$who = match($1,$here._ply,"nam",$here._cnt,"nam",
+			#actor._cnt,"nam");
+
+		if($who != NULL) {
+			$at = match($2,$who._cnt,"nam");
+	
+			if($at != NULL) {
+				if($at.txt != NULL)
+					echo($at.txt,"\n");
+				else
+					echo("there is nothing written there.\n");
+			} else {
+				echo("I see no \"",$2,
+					"\" being carried by ",$who.nam,"\n");
+			}
+		} else {
+			echo("I see no \"",$1,"\" here.\n");
+		}
+		return;
+	}
+	echo("I don't quite understand you.\n");
+}
+
+
+
+/*
+INV:
+see what the player is carrying, and using, etc.
+*/
+func @.inv
+{
+	if(#actor._cnt != NULL) {
+		echo("You Are Carrying:\n");
+		foreach $thing in (#actor._cnt)
+			echo($thing.nam,"\n");
+	} else {
+		echo("You aren't carrying anything.\n");
+	}
+	if(#actor._use != NULL) {
+		echo("You Are Using:",#actor._use.nam,"\n");
+	}
+}
+
+
+
+/*
+GO:
+attempt to stumble about.
+this function gets complex, as it must handle announcing the
+arrival and departure of the player, matching the exit, going
+through the exit, checking locks, etc.
+*/
+func @.go
+{
+	$here = #actor._loc;
+	if($here == NULL) {
+		echo("you aren't anywhere, how can you leave ?\n");
+		return;
+	}
+
+	/* if no params, just list the current exits */
+	if($# == 0) {
+		if($here.ex != NULL) {
+			echo("Where would you like to go? :\n");
+			echo("Exits here:");
+			foreach $xit in ($here.ex)
+				echo(" ",$xit.nam);
+			echo("\n");
+		} else {
+			echo("I see no way out of here.\n");
+		}
+		return;
+	}
+
+	/* single param - match and try to go through it */
+	if($# == 1) {
+		$to = match($1,$here.ex,"nam");
+		if($to == NULL) {
+			echo($1," is ambiguous or nonexistent\n");
+		} else {
+			/* make sure the door has a destination */
+			if($to.dst == NULL) {
+				echo("that door goes nowhere\n");
+				return;
+			}
+
+			/* check to see if the other side has a link */
+			$linked = listsearch($to.dst.ent,$to);
+			if($linked == 0) {
+				echo("that door is not linked\n");
+				return;
+			} else if ($linked == NULL) {
+				echo("that door is not linked\n");
+				return;
+			}
+
+			/* Valid exit. Valid attempt to leave */
+
+			$here.plv(#actor);
+
+			/* call the lock function, if one */
+			if($to.lck(#actor)){
+				if($to.fl != NULL)
+					echo($to.fl,"\n");
+				else
+					echo("That door is locked\n");
+
+				/* print the ofail */
+				if($to.ofl != NULL)
+					foreach $guy in ($here._ply)
+						echoto($guy,#actor.nam," ",
+							$to.ofl,"\n");
+				return;
+			}
+
+			/* announce arrival in the destination */
+			if($to.arr != NULL){
+				$arrive = $to.arr;
+			} else {
+				$arrive = "has arrived.";
+			}
+			foreach $guy in ($to.dst._ply)
+				echoto($guy,#actor.nam," ",$arrive,"\n");
+
+
+			/* perform the actual move */
+			$to.dst._ply = listadd($to.dst._ply,#actor);
+			#actor._loc = $to.dst;
+			$here._ply = listdrop($here._ply,#actor);
+
+			/* display an osucc if there is one */
+			if($to.osuc != NULL)
+				foreach $player in ($here._ply)
+					echoto($player,#actor.nam," ",
+						$to.osuc,"\n");
+
+			/* announce departure */
+			foreach $guy in ($here._ply)
+				echoto($guy,#actor.nam," has left\n");
+
+			/* echo succ if there is one */
+			if($to.suc != NULL)
+				echo($to.suc,"\n");
+
+			/* Call the destinations player arrive fn. */
+
+			$to.dst.parr(#actor);
+
+			/* Look around the new room */
+
+			@.look();
+		}
+		return;
+	}
+	echo("I don't quite understand you.\n");
+}
+/* go definitely has to be setuid wiz. */
+chmod(&@.go,"W:rs");
+
+                        
+
+/*
+WHICH:
+say which thing is which - basically a raw indicator of what matches
+what in the vicinity
+*/
+func @.which {
+	$here = #actor._loc;
+	if($# == 0) {
+		echo("which what?\n");
+		return;
+	}
+	foreacharg $thing {
+		$mat = match($thing,$here._ply,"nam",$here.ex,"nam",
+			#actor._cnt,"nam",#actor._use,"nam",$here._cnt,"nam");
+
+		if($mat == NULL) {
+			echo("nothing matches \"",$thing,"\"\n");
+		} else {
+			echo("\"",$thing,"\" is \"",$mat.nam,
+			"\"  (Id:",$mat,", Owner:",objectowner($mat),")\n");
+		}
+	}
+}
+
+
+/*
+HOME:
+quick function (temporary) for getting a hapless non-wiz the hell out of
+wherever they got stuck.
+*/
+func @.home
+{
+	if($# > 0) {
+		if($1 == "here") {
+			echo("home is now here!\n");
+			$new = #actor._loc;
+		} else {
+			$new = atoobj($1);
+			if($new == #0 || $new == NULL) {
+				echo("I don't know where ",$1," is\n");
+				return;
+			}
+			if(objectowner($new) != #actor) {
+				echo("you don't own ",$new,"\n");
+				return;
+			}
+		}
+		#actor.home = $new;
+		chown(&#actor.home,#actor);
+		return;
+	}
+
+	if(#actor.home == NULL) {
+		echo("you have no home!\n");
+		return;
+	}
+
+	$here = #actor.loc;
+	$here._ply = listdrop($here._ply,#actor);
+	@.emote("goes home");
+	#actor.home._ply = listadd(#actor.home._ply,#actor);
+	#actor._loc = #actor.home;
+}
+chmod(&@.home,"W:rs");
+
+
+
+
+/*
+WALL:
+Random's wall function.
+*/
+func @.wall {
+	if ($# == 0) {
+		echo("usage: wall message\n");
+		return;
+	}
+
+	if(geteuid(#actor) != #0) {
+		echo("only the Wiz can Wall\n");
+		return;
+	}
+
+	foreach $who in (@.who) {
+		echoto($who,#actor.nam," shouts, \"");
+		$bar = 0;
+		foreacharg $tmp {
+			$bar = $bar + 1;
+			if ($bar > 1) {
+				echoto($who," ");
+			}
+			echoto($who,$tmp);
+		}
+		echoto($who,"\"\n");
+	}
+}
+
+
+
+/*
+PAGE:
+Random's page function.
+*/
+func @.page {
+	if ($# == 0) {
+		echo("usage: page person [message]\n");
+		return;
+	}
+
+	$who = match($1,@.who,"nam");
+	if ($who == NULL) {
+		echo($1," is not a connected player.\n");
+		return;
+	}
+
+	if ($# == 1) {
+		echoto($who,"You sense that ",#actor.nam," is looking for you in ",#actor._loc.nam,".\n");
+	} else {
+		echoto($who,#actor.nam," pages: ");
+		$bar = 0;
+		foreacharg $tmp {
+			$bar = $bar + 1;
+			if ($bar != 1) {
+				if ($bar > 2) {
+					echoto($who," ");
+				}
+				echoto($who,$tmp);
+			}
+		}
+		echoto($who,"\n");
+	}
+	echo("Your message is sent.\n");
+}
+
+
+/*
+KILL:
+mjr's hack kill function
+*/
+func @.kill
+{
+	if(#actor._dead != NULL) {
+		echo("none of that zombie stuff, now, mate!\n");
+		return;
+	}
+
+	$who = match($1,#actor._loc._ply,"nam");
+	if($who == NULL) {
+		echo("I don't see \"",$1,"\" here.\n");
+		return;
+	}
+
+	if(random(100) > 20) {
+		@.emote("tried to kill",$who.nam,"!!");
+		echo("your attempted murder failed!\n");
+		return;
+	}
+
+	$who._osay = $who.say;
+	$who._oemote = $who.emote;
+
+	$who._dead = &#1.true;
+
+	$who.say = @._deadsay;
+	$who.emote = @._deademote;
+	@.emote("killed",$who.nam,"!!");
+
+	$who._onam = $who.nam;
+	$who.nam = str("the corpse of ",$who.nam);
+}
+chmod(&@.kill,"W:rs");
+
+
+
+/*
+RESURRECT:
+mjr's hack un-kill function
+*/
+func @.resurrect
+{
+	if(#actor._dead != NULL) {
+		echo("you're bloody dead, mate!\n");
+		return;
+	}
+
+	$who = match($1,#actor._loc._ply,"nam");
+	if($who == NULL) {
+		echo("I don't see \"",$1,"\" here.\n");
+		return;
+	}
+
+	if($who._dead == NULL) {
+		echo("that person is alive and well already\n");
+		return;
+	}
+
+	$who.say = $who._osay;
+	$who.emote = $who._oemote;
+
+	if($who._onam != NULL)
+		$who.nam = $who._onam;
+
+	$who._dead = NULL;
+	@.emote("resurrects",$who.nam);
+}
+chmod(&@.resurrect,"W:rs");

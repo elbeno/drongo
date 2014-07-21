@@ -1,0 +1,852 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@._setArea (str("default",atoobj(#actor))) ;
+
+echo ("Start of compile\n");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func @.nod
+{
+  @.emote("nods.");
+} 
+
+func @.nod1
+{
+  @.emote("nods sagely.");
+} 
+
+func @.nod2
+{
+  @.emote("nods solemnly.");
+} 
+
+func @.nod3
+{
+  @.emote("nods in agreement.");
+} 
+
+func @.nod4
+{
+  @.emote("smiles and nods pleasantly, feigning interest.");
+} 
+
+func @.beam
+{
+  @.emote("beams like a ray of sunshine.");
+} 
+
+func @.smile
+{
+  @.emote("smiles happily.");
+}
+
+func @.grin
+{
+  @.emote("grins like a maniac.");
+}
+
+func @.grin0
+{
+  @.emote("grins like an axe-wielding maniac.");
+}
+
+func @.chuckle
+{
+  @.emote("chuckles heartily.");
+} 
+
+func @.cheer
+{
+  @.emote("cheers wildly.");
+} 
+
+func @.boffin
+{
+  @.emote("starts to go on about hyperbolic nangle brongs, modulated with",
+          "\nyellow dots on the inside of the instability curve.");
+} 
+
+func @.shrug
+{
+  @.emote("shrugs non-commitally.");
+} 
+
+func @.blush
+{
+  @.emote("blushes a nice shade of red.");
+} 
+
+func @.boggle
+{
+  @.emote("boggles at the enormity of the situation.");
+} 
+
+func @.bsy
+{
+  @.emote("waves enigmatically and says: \"Be seeing you.\"");
+} 
+
+func @.hnd
+{
+  @.emote("smiles and says: \"Have a nice day.\"");
+} 
+
+func @.brb
+{
+  @.emote("gives a quick wave and says: \"I'll be right back!\"");
+} 
+
+func @.wink
+{
+  @.emote("winks conspiratorially.");
+} 
+
+func @.hi
+{
+  @.emote("greets everyone warmly.");
+} 
+
+func @.wave
+{
+  @.emote("waves in a friendly manner.");
+} 
+
+func @.bye
+{
+  @.emote("waves goodbye.");
+} 
+
+func @.hello
+{
+  @.emote("mumbles \"Hello\" to all and sundry.");
+} 
+
+func @.lag
+{
+  @.emote("apologises for the slow response as", @._heShe(#actor), "is lagging.");
+} 
+
+func @.giggle
+{
+  @.emote("giggles like a little schoolgirl.");
+} 
+
+func @.spock
+{
+  @.emote("raises an eyebrow.");
+} 
+
+func @.clap
+{
+  @.emote("claps vigorously.");
+} 
+
+func @.jump
+{
+  @.emote("jumps up and down, before collapsing tiredly on the floor.");
+} 
+
+func @.wait
+{
+  @.emote("waits patiently.");
+} 
+
+func @.mutter
+{
+  @.emote("mutters quietly.");
+} 
+
+func @.heh
+{
+  @.emote("chuckles under", @._hisHer(#actor), "breath.");
+} 
+
+func @.hehe
+{
+  @.emote("sniggers like Mutley the dog (hehehehee).");
+} 
+
+func @.ponder
+{
+  @.emote("ponders the problem for a moment.");
+} 
+
+func @.sob
+{
+  @.emote("sobs sorrowfully.");
+} 
+
+func @.cry
+{
+  @.emote("bursts into tears.");
+} 
+
+func @.think
+{
+  @.emote("thinks about the problem.");
+} 
+
+func @.yawn
+{
+  @.emote("yawns tiredly.");
+} 
+
+func @.zzz
+{
+  @.emote("snores loudly.");
+} 
+
+func @.laugh
+{
+  @.emote("rolls around the floor, laughing hysterically.");
+} 
+
+func @.howl
+{
+  @.emote("howls with laughter and ends up a wheezing mess on the floor!");
+} 
+
+func @.yes
+{
+  @.emote("nods frantically in agreement.");
+} 
+
+func @.no
+{
+  @.emote("shakes", @._hisHer(#actor),"head in disagreement.");
+} 
+
+func @.bark
+{
+  @.emote("barks like a dog.");
+} 
+
+func @.meow
+{
+  @.emote("meows seductively.");
+} 
+
+func @.purr
+{
+  @.emote("purrs softly.");
+} 
+
+func @.frown
+{
+  @.emote("frowns pensively.");
+} 
+
+func @.gasp
+{
+  @.emote("gasps with surprise.");
+} 
+
+func @.jaw
+{
+  @.emote("'s jaw drops in amazement.");
+} 
+
+func @.maybe
+{
+  @.shrug();
+} 
+
+func @.blow
+{
+  @.emote("blows", @._hisHer(#actor), "nose noisily then wipes the mess on",
+          @._hisHer(#actor), "sleeve.");
+} 
+
+func @.burp
+{
+  @.emote("burps noisily.");
+} 
+
+func @.cackle
+{
+  @.emote("cackles evilly.");
+} 
+
+func @.cavort
+{
+  @.emote("cavorts about maniacally.");
+} 
+
+func @.chortle
+{
+  @.emote("chortles with joy.");
+} 
+
+func @.collapse
+{
+  @.emote("collapses in a heap.");
+} 
+
+func @.cough
+{
+  @.emote("coughs politely.");
+} 
+
+func @.cringe
+{
+  @.emote("cringes nervously.");
+} 
+
+func @.curtsey
+{
+  @.emote("curtseys gracefully.");
+} 
+
+func @.flip
+{
+  @.emote("does a back-flip!");
+} 
+
+func @.flop
+{
+  @.emote("flops about like a rag doll.");
+} 
+
+func @.eyes
+{
+  @.emote("rolls", @._hisHer(#actor), "eyes in disgust.");
+} 
+
+func @.ugh
+{
+  @.eyes();
+} 
+
+func @.frood
+{
+  @.emote("attempts to be as cool as Zaphod Beeblebrox.");
+} 
+
+func @.darn
+{
+  @.emote("snaps", @._hisHer(#actor), "fingers and says: \"Darnit!\"");
+} 
+
+func @.disco
+{
+  @.emote("strikes a stunning disco pose (check out those platforms and flares)!");
+} 
+
+func @.dolp
+{
+  @.emote("smacks", @._hisHer(#actor), "forehead with",
+          @._hisHer(#actor), "hand and says: \"Dolp!\"");
+} 
+
+func @.drool
+{
+  @.emote("drools stupidly.");
+} 
+
+func @.enquire
+{
+  @.emote("enquires about the general health and well-being of everyone present.");
+} 
+
+func @.envy
+{
+  @.emote("goes green with envy.");
+} 
+
+func @.faint
+{
+  @.emote("falls to the ground in a dead faint!");
+} 
+
+func @.goof
+{
+  @.emote("apologoses for the typo.");
+} 
+
+func @.spell
+{
+  @.emote("needs to go back to primary school and learn how to spell.");
+} 
+
+func @.groan
+{
+  @.emote("groans loudly.");
+} 
+
+func @.groovy
+{
+  @.emote("makes a peace sign with ",@._hisHer(#actor), 
+          "fingers and says: \"Groovy, man!\"");
+} 
+
+func @.grovel
+{
+  @.emote("grovels pleadingly, begging for mercy.");
+} 
+
+func @.sniff
+{
+  @.emote("sniffs pathetically.");
+} 
+
+func @.growl
+{
+  @.emote("growls dangerously.");
+} 
+
+func @.guffaw
+{
+  @.emote("guffaws heartily.");
+} 
+
+func @.gurgle
+{
+  @.emote("gurgles gently.");
+} 
+
+func @.notme
+{
+  @.emote("looks around and whistles innocently.");
+} 
+
+func @.ok
+{
+  @.emote("nods and says: \"OK.\"");
+} 
+
+func @.peer
+{
+  @.emote("peers about, nervously.");
+} 
+
+func @.phew
+{
+  @.emote("wipes", @._hisHer(#actor), "brow and says: \"Phew!\"");
+} 
+
+func @.pout
+{
+  @.emote("sticks out", @._hisHer(#actor), "lower lip and pouts beseechingly.");
+} 
+
+func @.pray
+{
+  @.emote("prays to the gods of Drongo for help.");
+} 
+
+func @.rasp
+{
+  @.emote("sticks out", @._hisHer(#actor), "tongue and spits: ",
+          "\"Ptptptptptptptptptp!\"");
+} 
+
+func @.salute
+{
+  @.emote("salutes smartly.");
+} 
+
+func @.sigh
+{
+  @.emote("sighs sorrowfully.");
+} 
+
+func @.sigh0
+{
+  @.emote("sighs contentedly.");
+} 
+
+func @.scream
+{
+  @.emote("gives a high pitched scream of terror.");
+} 
+
+func @.stomp
+{
+  @.emote("stomps up and down loudly.");
+} 
+
+func @.sulk
+{
+  @.emote("goes into a corner to sulk.");
+} 
+
+func @.smirk
+{
+  @.emote("smirks and looks at you smugly.");
+} 
+
+func @.sneeze
+{
+  @.emote("sneezes violently!");
+} 
+
+func @.sneeze0
+{
+  @.emote("breaks into a violent sneezing fit!");
+} 
+
+func @.snigger
+{
+  @.emote("sniggers evilly.");
+} 
+
+func @.soapbox
+{
+  @.emote("gets down off", @._hisHer(#actor), "soapbox and cools off a bit.");
+} 
+
+func @.swoon
+{
+  @.emote("swoons with the sheer excitement of it all!");
+} 
+
+func @.tip
+{
+  @.emote("tips", @._hisHer(#actor), "hat and smugly says: \"At your service.\"");
+} 
+
+func @.shiver
+{
+  @.emote("shivers coldly.");
+} 
+
+func @.violin
+{
+  @.emote("plays a mournful violin at your heart-wrenching tale of woe.");
+} 
+
+func @.whistle
+{
+  @.emote("whistles a happy tune.");
+} 
+
+func @.wobble
+{
+  @.emote("wobbles unsteadily.");
+} 
+
+
+
+func @.agree
+{
+  if ($# < 1) { echo ("*** agree (with) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You agree with ", ".\n", " agrees with you.\n",
+             " agrees with ", ".\n") ;
+}
+
+func @.bat
+{
+  if ($# < 1) { echo ("*** bat (your eyelashes at) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You bat your eyelashes seductively at ", ".\n", 
+             str(" bats ", @._hisHer(#actor), " eyelashes seductively at you!\n"),
+             str(" bats ", @._hisHer(#actor), " eyelashes seductively at "), 
+             ".\n") ;
+}
+
+func @.bow
+{
+  if ($# < 1) { echo ("*** bow (towards) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You bow towards ", ".\n", " bows towards you.\n",
+             " bows towards ", ".\n") ;
+}
+
+func @.comfort
+{
+  if ($# < 1) { echo ("*** comfort whom?","\n") ; return ; } ;
+  @._emote2p($1,"You comfort ", ".\n", " comforts you.\n",
+             " comforts ", ".\n") ;
+}
+
+func @.cuddle
+{
+  if ($# < 1) { echo ("*** cuddle whom?","\n") ; return ; } ;
+  @._emote2p($1,"You cuddle ", " lovingly.\n", " gives you a loving cuddle!\n",
+             " lovingly cuddles ", ".\n") ;
+}
+
+func @.dance
+{
+  if ($# < 1) { echo ("*** dance (with) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You dance merrily with ", "!\n", " dances merrily with you!\n",
+             " dances merrily with ", "!\n") ;
+}
+
+func @.fives
+{
+  if ($# < 1) { echo ("*** fives (high-five) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You high-five ", ".\n", " high-fives you!\n",
+             " high-fives ", ".\n") ;
+}
+
+func @.flirt
+{
+  if ($# < 1) { echo ("*** flirt (with) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You blow a kiss and wink at ", ".\n", 
+             " blows a kiss and winks at you!\n",
+             " blows a kiss and winks at ", ".\n") ;
+}
+
+func @.french
+{
+  if ($# < 1) { echo ("*** french (kiss) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You rather sloppily french kiss ", ".\n", 
+             " gives you a rather sloppy french kiss!\n",
+             " french kisses ", ".\n") ;
+}
+
+func @.hug
+{
+  if ($# < 1) { echo ("*** hug whom?","\n") ; return ; } ;
+  @._emote2p($1,"You warmly hug ", ".\n", " gives you a warm hug!\n",
+             " warmly hugs ", ".\n") ;
+}
+
+func @.kick
+{
+  if ($# < 1) { echo ("*** kick whom?","\n") ; return ; } ;
+  @._emote2p($1,"You kick ", " in the shins!\n", " kicks you in the shins!\n",
+             " kicks ", " in the shins!\n") ;
+}
+
+func @.kiss
+{
+  if ($# < 1) { echo ("*** kiss whom?","\n") ; return ; } ;
+  @._emote2p($1,"You gently kiss ", ".\n", " gives you a gentle kiss!\n",
+             " gently kisses ", ".\n") ;
+}
+
+func @.knee
+{
+  if ($# < 1) { echo ("*** knee whom?","\n") ; return ; } ;
+  @._emote2p($1,"You knee ", " in the groin!\n", 
+             " knees you painfully in the groin!\n",
+             " knees ", " in the groin!\n") ;
+}
+
+func @.pat
+{
+  if ($# < 1) { echo ("*** pat whom?","\n") ; return ; } ;
+  @._emote2p($1,"You pat ", " on the head.\n", " pats you on the head!\n",
+             " pats ", " on the head.\n") ;
+}
+
+func @.poke
+{
+  if ($# < 1) { echo ("*** poke whom?","\n") ; return ; } ; 
+
+  $who=@._singleVis(#actor.location.contents, $1, @.noOneHere);
+  if (!$who)
+    return;
+
+  @._emote2p($1,"You poke ", str(" in ", @._hisHer($who), " ribs.\n"), 
+             " pokes you in the ribs!\n",
+             " pokes ", str(" in ", @._hisHer($who), " ribs.\n")) ;
+}
+
+func @.pkiss
+{
+  if ($# < 1) { echo ("*** pkiss (passionately kiss) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You passionately kiss ", ".\n", 
+             " kisses you tenderly and passionately!\n",
+             " passionately kisses ", ".\n") ;
+}
+
+func @.shand
+{
+  if ($# < 1) { echo ("*** shand (shake the hand of) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You vigorously shake ", " by the hand.\n", 
+             " shakes your hand vigorously!\n",
+             " vigorously shakes ", "'s hand.\n") ;
+}
+
+func @.slap
+{
+  if ($# < 1) { echo ("*** slap whom?","\n") ; return ; } ;
+  @._emote2p($1,"You slap ", "'s face!\n", " slaps your face!\n",
+             " gives ", " a slap in the face!\n") ;
+}
+
+func @.slkiss
+{
+  if ($# < 1) { echo ("*** slkiss (give a long slow french kiss to) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You give ", " a long slow french kiss!\n", 
+                " gives you a long slow french kiss!\n",
+             " gives ", " a long slow french kiss.\n") ;
+}
+
+func @.tango
+{
+  if ($# < 1) { echo ("*** tango (with) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You dance the tango with ", "!\n", 
+             " dances the tango with you!\n",
+             " dances the tango with ", "!\n") ;
+}
+
+func @.thank
+{
+  if ($# < 1) { echo ("*** thank whom?","\n") ; return ; } ;
+  @._emote2p($1,"You thank ", ".\n", " thanks you profusely!\n",
+             " thanks ", ".\n") ;
+}
+
+func @.tickle
+{
+  if ($# < 1) { echo ("*** tickle whom?","\n") ; return ; } ;
+  @._emote2p($1,"You tickle ", ", who collapses in a fit of laughter!\n",
+             " tickles you! You collapse in fits of laughter!\n",
+             " tickles ", ", who collapses in a fit of laughter!\n") ;
+}
+
+func @.wkiss
+{
+  if ($# < 1) { echo ("*** wkiss (warmly kiss) whom?","\n") ; return ; } ;
+  @._emote2p($1,"You warmly kiss ", " on the cheek.\n", 
+             " gives you a warm kiss on the cheek!\n",
+             " warmly kisses ", " on the cheek.\n") ;
+}
+
+func @.mhug
+{
+  if (!( #actor.level >= 20 )) { echo (@.Huh);return; };
+  if ($# < 1) { echo ("*** mhug (give a huge hug to) whom?","\n") ; return ; } ;
+
+  $who=@._singleVis(#actor.location.contents, $1, @.noOneHere);
+  if (!$who)
+    return;
+
+  @._emote2p($1,"You give ", " a HUGE hug.\n", 
+             " gives you a great big...\n",
+             " gives ", " a HUGE hug.\n") ;
+
+  echoto($who,
+"                  #     # #     #  #####\n",
+"    #   #         #     # #     # #     #         #   #\n",
+"     # #          #     # #     # #                # #\n",
+"   #######        ####### #     # #  ####        #######\n",
+"     # #          #     # #     # #     #          # #\n",
+"    #   #         #     # #     # #     #         #   #\n",
+"                  #     #  #####   #####\n") ;
+
+}
+
+

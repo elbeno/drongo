@@ -1,0 +1,127 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include  "drogon.h"
+#include   "rooms.h"
+#include "widgets.h"
+#include "mobiles.h"
+
+#define MON_STONE_TIME  Mins(5)
+
+
+/***************************************************************************/
+/* Pulling the rope                                                        */
+/***************************************************************************/
+
+func mon_bellRope._pullFn
+{
+  echo ("You pull the rope with a mighty heave!\n") ;
+  @._visEmote ("pulls the rope with a mighty heave!") ;
+
+  if (mon_crown.location == specialStore)
+    @._reko (mon_bell_05, "The bell makes a loud clunking noise then nothing more.\n") ;
+  else
+  {
+    echo ("The bell makes an almighty BOINGGGGG sound!\n") ;
+    @._geko ("You hear the BOINGGGGG of a large bell in the distance!\n") ;
+    if ( (#actor.taskPending) && (#actor.level == 7) )
+      { catfile (#actor, "Tasks/task7end") ; #actor.taskPending = 0 ; }
+  }
+
+}
+
+/***************************************************************************/
+/* Search the bell                                                         */
+/***************************************************************************/
+
+func mon_bell._searchFn
+{
+  if (mon_crown.location != specialStore)
+    return 0 ;
+
+  echo ("Searching the bell reveals a golden crown stuck inside!\n") ;
+  @._move (mon_crown, #actor.location) ;
+
+
+/** Wake the bat! **/
+
+  if (mon_bat.location == generalStore)
+  {
+    @._move (mon_bat, mon_bat.home) ;
+    mon_bat.hp = @._maxHp (mon_bat) ;
+  }
+
+  return 1 ;
+}
+
+
+/***************************************************************************/
+/* Getting the chalice                                                     */
+/***************************************************************************/
+
+func mon_chalice._specialGetFn
+{
+  if (!mon_chalice.onTable)
+    return 0 ;
+
+  if (#actor.kneeling)
+    { echo ("You can't reach it from there.\n") ; return 1 ; }
+
+  if (!mon_stone.active) /** we can get it if it's not too heavy **/
+  {
+    mon_chalice.dName   = NULL ;
+    mon_chalice.onTable =    0 ;
+    return 0 ;
+  }
+
+  echo ("
+As you step forward, you feel a stone shift slightly, under your foot. You
+hear a whooshing noise followed by a sharp pain in the back of your neck.
+One of the statues has shot a poison dart at you from its mouth! You
+collapse on the floor and die.\n") ;
+
+  @._visLeko ("
+You hear a whooshing noise and see ", #actor.name, " collapse onto the
+floor and vanish in a puff of greasy black smoke!\n") ;
+
+  @._geko ("\n<!> ", #actor.name, " has been killed by a poison dart.\n") ;
+
+  @._resurrect (1) ;
+
+  return 1 ;
+
+}
+
+
+/***************************************************************************/
+/* Turning the stone switch                                                */
+/***************************************************************************/
+
+func mon_stone._turnFn
+{
+  if (!#actor.kneeling)
+    { echo ("You must kneel down to do this.\n") ; return ; }
+
+  if (mon_stone.active)
+  {
+    mon_stone.active     = 0 ;
+    mon_stone.reArm_time = time () + MON_STONE_TIME ;
+    echo ("The stone turns clockwise, makes a slight click then stops.\n") ;
+  }
+  else
+  {
+    mon_stone.active     = 1 ;
+    echo ("The stone turns anti-clockwise, makes a slight click then stops.\n") ;
+  }
+
+  @._visEmote ("fiddles with something on the floor.\n") ;
+}

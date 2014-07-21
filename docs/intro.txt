@@ -1,0 +1,330 @@
+
+
+
+
+
+
+Ubermud - Introduction
+
+     Ubermud is a multi-user-dungeon server, with a program-
+ming  language to allow users and implementors as much lati-
+tude as possible in creating objects in a  virtual  universe
+to interact with. Currently Ubermud is implemented as a sin-
+gle program, incorporating a small compiler, a machine  emu-
+lator,  a  network  interface,  and a simple user interface.
+The software is implemented in  C,  designed  to  run  under
+Berkeley UNIX, or versions of System V that support Berkeley
+networking protocols.
+
+     Ubermud's design goals are threefold: 1) To provide  an
+environment  in  which  complex and fun-to-play-with objects
+can be reasonably easily created and modified. 2) To provide
+an environment that can be tailored at a variety of levels -
+allowing modification of the underlying rules of a  universe
+or  simply  modification  of individual objects and how they
+behave in their universe. 3) To provide a  decent  path  for
+future  evolution  - to expand well as hardware gets faster,
+and databases get large, and to provide a framework to build
+upon. To meet these goals, Ubermud is a based on a low-level
+programming language that allows basic object  manipulation,
+creation,  simple math, random number generation, basic I/O,
+and list manipulation. Objects are stored  in  a  reasonably
+efficient  database  format,  intended  to  strike a balance
+between performance in the short term,  and  scalability  in
+the  long  term.  It  is  expected that the performance of a
+Ubermud universe will stay roughly the same, no  matter  how
+large it grows.
+
+     A Ubermud universe will consist of nothing but a  quan-
+tity  of  objects  in  limbo.  The relationships, types, and
+interactions between the objects is determined by the system
+functions, or rules of the universe.  These system functions
+are written in the internal programming language of Ubermud,
+'U', which allows a great deal of leeway as far as modifica-
+tion of the rules of the universe. A permissions  system  is
+built  into the basic object manipulation functions of the U
+programming language, and still more complex types  of  per-
+missions interactions can be synthesized from these building
+blocks. There are  special  optimizations  in  the  code  to
+ensure  that  the system functions of a universe are as fast
+as possible, to allow universes to  be  complicated  without
+becoming slow. A universe's Wizard will have a great deal of
+leeway in breaking the  rules  of  the  universe  (hereafter
+breaking  the  rules  of  a  universe will be referred to as
+'magic') or creating objects that  allow  others  to  selec-
+tively  break  the  rules.  In this manner, it is hoped that
+universes may wind up behaving quite differently,  depending
+on  the  goals of the Wizard and players, yet still be based
+on the same software system, allowing at least a  degree  of
+portability and flexibility as new things are added to Uber-
+mud. Ideally,  Ubermud  will  allow  Wizards  the  joys  and
+
+
+
+                       June 22, 1990
+
+
+
+
+
+Ubermud Introduction
+
+
+sorrows of customizing the rules of their universes, without
+having to modify and recompile tons of C code.
+
+     From the player's standpoint, a Ubermud universe  could
+look  very  much  like  a tinyMUD universe, with some varia-
+tions. For trusted users (or, at  the  Wizard's  discretion,
+any users) access to the U programming language will be per-
+mitted, allowing users to create complex  objects  that  may
+interact  with eachother, other players, and so on. The per-
+missions system is designed to make it somewhat difficult to
+destroy  another  player's  work,  though  the potential for
+creating complicated and puzzling objects exists. Users with
+programming  access  would  write  the source code for their
+objects (source code written in the U  programming  language
+will  be  referred to as Ucode, or just U.) and submit it to
+the server for automatic  compilation  and  execution.  This
+design  is  intended to permit users to have access to their
+favorite  text  editors,  to  offload  processing  from  the
+server,  and,  possibly most importantly, to encourage users
+to maintain their own libraries  of  Ucode  for  complicated
+objects.   Databases  may  come  and  go, and it is vital to
+encourage users to take responsibility for  archiving  their
+own  valuable  material,  so  that  in  the  event of server
+crashes, or database rollbacks, work is not lost.
+
+Overview of the Implementation
+
+     Ubermud is a single program, incorporating a small com-
+piler,  a  machine emulator, a network interface, and a user
+interface. The compiler  reads  Ucode  through  the  network
+interface,  and  compiles  it  into operations for a virtual
+machine. The compiled Ucode is either executed  immediately,
+if  it is a simple command, or is stored in the database, if
+it represents the data of an object, or a function.  When  a
+function  or  command  is executed, it is run by the machine
+emulator, and interpreted. Errors are handled to as great  a
+degree  possible, but certain types of errors will cause the
+interpreter to cease running  the  offending  command.   The
+interpreted  commands  are the part of Ubermud that does all
+the work, manipulating data elements, echoing  text  to  the
+users, etc.
+
+     A user typically will not interact  directly  with  the
+compiler,  since  it  is  unreasonable  to  force players to
+'talk' in Ucode. The  user  interface  (hereafter  sometimes
+referred  to  as  the  'monitor') is responsible for reading
+plain-text input, and trying to match  words  in  the  input
+with  functions  in the database and universe's rules. Thus,
+when a player types: 'take cat' the monitor  is  responsible
+for  analyzing the input and generating a call to the take()
+function, with appropriate parameters ('cat' in this  case).
+The  monitor's function is to do as little work as possible,
+before invoking a compiled Ucode function. The  monitor  is,
+unfortunately,  static,  and is one of the only parts of the
+
+
+
+                       June 22, 1990
+
+
+
+
+
+Copyright, Marcus J. Ranum, 1990
+
+
+universe that cannot be re-programmed without a source  code
+change.   The  design of Ubermud is such that multiple moni-
+tors is not out of the question, or even hard to  implement,
+should there be divergence in the evolution of the monitor's
+parser.
+
+     The network interface acts at the glue holding the mon-
+itor, compiler, and interpreter together. Its sole responsi-
+bility is moving bits between these functional members in  a
+reasonably  efficient  manner.  The  network interface is as
+separate from the functional elements as possible, to  avoid
+making Ubermud totally UNIX-specific.
+
+Data-Base Methods
+
+     The database of Ubermud is  stored  in  several  files,
+which  are  keyed  to  unique  object  numbers. These object
+numbers are logical only, and are  mapped  to  real  storage
+locations  through  a  b+tree index. The details of the disk
+storage layout are not germane  here,  but  permit  multiple
+references  to  the same basic object, with reference count-
+ing. This permits a fair amount of  data  compaction  to  be
+used,  and  the  U syntax takes advantage of this in several
+ways, allowing 'pointers' to be set to basic objects as well
+as  permitting  direct changes to the contents of a multiply
+referenced basic object. A large  cache  is  maintained,  at
+both the level of the basic objects and the b+tree index. It
+is unavoidable that there will be disk I/O aplenty, but from
+the  author's  observations  and  testing  of tinyMUD, it is
+expected that cacheing will greatly  reduce  the  amount  of
+I/O.  To  prevent  databases from becoming inconsistent, the
+disk is kept up to date with the cache at all times, a major
+performance hit, but worthwhile in view of the alternative.
+
+The U Programming Language
+
+     The U language resembles C, in its  syntax,  but  takes
+advantage  of  its  interpreted nature to save the user from
+having  to  do  type-checking  and  declaration.  Additional
+differences  between  U  and  C  are  an  absence of arrays,
+pointers, and all flow control constructs that can  be  used
+to  implement  an  unbreakable  loop.  U has a list iterator
+for-loop, which can be used to  emulate  limited  loops,  or
+traverse elements in a list, but it is intended to be impos-
+sible to write Ucode that would loop endlessly.   Ucode  has
+two  types  of  variables:  object elements, and local vari-
+ables. An object element is a value that is  stored  in  the
+permanent  database,  whereas  a local variable is fast, but
+does not get preserved. Local variables are useful  as  list
+iterators,  temporaries,  and  values  that are deliberately
+intended to vanish at the end of  a  function  call.  Object
+elements  are  the  basic building blocks of a universe, and
+are frozen and thawed to and from disk as needed. A  special
+class  of object element is the system object element, which
+
+
+
+                       June 22, 1990
+
+
+
+
+
+Ubermud Introduction
+
+
+is stored in main memory all the time for  performance  rea-
+sons, as well as to ease modification of a universe's rules.
+When  a  Ubermud  server  is   booted,   it   is   typically
+bootstrapped  with  a  file of Ucode that will set such tem-
+porary system object elements as the 'who is  on'  list  and
+make copies of very frequently used functions to speed their
+use.
+
+     U has several data types: integers, strings, functions,
+object numbers, errors, and NULL. Variables are typeless, to
+the extent that they 'adapt' to whatever they  are  assigned
+to.  In some cases, variables may be operated on in an ille-
+gal manner (such as dividing two strings) which results in a
+conversion  of  the value to an error. Error values in U are
+primary data types, and can be manipulated by a user (though
+there is little reason to). Typically, error values are used
+to test conditions:
+
+func #33.foo {
+        if(badcall() == error) {
+                echo("I'm afraid I can't do that\n");
+                return(error);
+        }
+        ...
+}
+
+The special value NULL is used similarly to compare  against
+nonexisting  things.  Additionally,  NULL is used in assign-
+ments to cause a thing to cease to exist. Certain  types  of
+errors  can  return  NULL,  and  users  can define functions
+returning NULL. Thus:
+
+/* correctly handle a nonexisting value */
+if(#33.desc == NULL)
+        echo("You see nothing special.\n");
+else
+        echo(#33.desc);
+
+/* destroy a value */
+#33.name = NULL;
+
+
+     Integer data permits the usual types of simple  integer
+math,  and  string data can be manipulated with BASIC and C-
+like string builtin functions.  Unlike some languages  (such
+as  awk) strings and numbers cannot be coerced transparently
+into eachother. Type conversion builtin functions  are  pro-
+vided,  as well as type checking functions such as isstr and
+isnum. Functions are a primary data type, but are unique  in
+that  there are no operations that can be performed on them,
+other than calling them. The syntax of U permits a  program-
+mer  to  attempt  to call any data as if it were a function.
+This is obviously an error, and returns7 Ierror.
+
+
+
+
+                       June 22, 1990
+
+
+
+
+
+Copyright, Marcus J. Ranum, 1990
+
+
+     Another data type that is crucial  to  Ubermud  is  the
+list.  A  list  can  contain a set of object numbers (making
+lists capable of containing any data type may  be  a  future
+enhancement).  A  list  iterator  syntax  is  built into the
+language, which permits all the elements of  a  list  to  be
+accessed in turn:
+
+/* a sample WHO function */
+func WHO {
+        $users = 0;
+        foreach $tmp in (system.WHOlist) {
+                echo($tmp.name,"\n");
+                $users = $users + 1;
+        }
+        echo("total users: ",$users,"\n");
+}
+
+Lists will play a large role in  the  creation  of  universe
+rules. Typically, something like a 'room' will be modeled as
+an object with a string description, a list of  contents,  a
+list  of  players,  and  a  list  of exits.  There are major
+advantages to this approach, since adding new elements to  a
+database  is  easy  (though you have to program the logic of
+what to do with them) and, more  importantly,  it  allows  a
+universe builder to optimize the rules to support frequently
+used operations.  To make conversation more  efficient,  for
+example,  all  the  players in a room can be maintained on a
+separate list from the 'dead' objects. In this  manner,  the
+logic  of  the  'say'  function  is simplified, since it can
+ignore the 'dead' objects and only  look  at  what  matters.
+This will tend to improve performance, since things that are
+not used often will seldom be thawed from  disk,  but  rooms
+where  active  conversations  are  being held will typically
+have their player-lists in active cache.
+
+     The design of Ubermud's stack machine  and  interpreter
+is  such  that adding a new data type is not very difficult.
+Clearly, introducing new data types or syntax is not  to  be
+untaken  lightly,  but to allow the software to survive over
+time, every effort has been made to make it easy to add  new
+functionality.
+
+     For a more detailed description of  the  U  Programming
+Language,  there  is documentation describing the syntax and
+built-in functions, which contains  more  examples  and  the
+reasoning behind some aspects of the language's design.
+
+
+
+
+
+
+
+
+
+
+
+                       June 22, 1990
+
+

@@ -1,0 +1,4 @@
+include/externs.h:46: Changed declaration of yyerrflag from extern short to extern int to match declaration in y.tab.c
+include/externs.h:29: Removed declaration of sprintf because it didn't match decl in stdio.h. Why was it there in the first place, one wonders...
+main/misc.c:25ish: Definitions of itoa and ltoa seemed to expect sprintf to return a pointer to a string, whereas it in fact returns an integer... these functions were doing return(sprintf(buf...)) - changed to sprintf followed by return buf
+

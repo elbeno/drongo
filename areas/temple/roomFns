@@ -1,0 +1,28 @@
+#include <drogon.h>
+#include "rooms.h"
+
+func ps_temple.offer
+{
+  $item = @._singleName (#actor.contents, $1,
+                "You aren't holding that.") ;
+  if (!$item)
+    return ;
+
+  @._offerObject($item) ;
+  @._giveMoney($item.value) ;
+  echo("You offer ", $item.name, ".\n") ;
+  @._visEmote("offers ", $item.name, ".\n") ;
+}
+
+/* swirling void enter function takes you to the temple,
+   so it's defined here */
+
+func swirlingVoid.enter
+{
+  @._visEmote("enters the Drongo!\n") ;
+  echo("The swirling void seems to slow down and stop. You feel yourself standing\n",
+       "on what appears to be solid ground. The void drifts away, revealing ...\n") ;
+  @._moveply(ps_temple) ;
+}
+
+

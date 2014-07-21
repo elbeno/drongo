@@ -1,0 +1,334 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @._doDmFns			/* XW	Handle system reset stuff	*/
+{
+/*  @.dm_monastery();
+  @.dm_mansion();
+*/
+
+  @.dm_winker();
+
+  if (@._reobjcnt==NULL)
+    @._reobjcnt=1;
+
+  $ems=listcount(Util.widgets);
+
+  $end=@._reobjcnt+20;
+
+  if ($end>$ems)
+    $end=$ems;
+
+  @._reobj(@._reobjcnt, $end);
+  if ($end==$ems)
+    @._reobjcnt=1;
+  else
+    @._reobjcnt=$end+1;
+} chmod(&@._doDmFns, "W:rs");
+
+func @._reobj			/* XW	Test objects $1-$2 for reset	*/
+{
+  if ($1>$2)
+    return;
+
+  $obj=listelem(Util.widgets,$1);
+
+  if ($obj.location.room) {
+    if ($obj.location!=$obj.home) {
+      if ($obj.location!=specialStore && $obj.location!=generalStore) {
+        if (time()>$obj.restoreTime) {
+          @._resetObject($obj);
+        }
+      }
+    }
+  }
+  @._reobj($1+1, $2);
+} chmod(&@._reobj, "W:rs");
+
+
+func @.gen_tick			/* XW	The system tick 		*/
+{
+  creatorCommand; 
+
+  foreach $mob in (Util.mobiles) {
+    if ($mob.hp>0) {
+      if ($mob.tickFn) {
+        $mob.tickFn();
+        @._mobcheckattack($mob);
+      }
+      else @._mobilejolt($mob);
+    }
+  }
+
+  foreach $wid in (generalStore.contents) {
+    if (time()>$wid.restoreTime) {
+      @._resetObject($wid);
+      $wid.restoreTime=NULL;
+    }
+  }
+
+  if (!@._threecount) {
+    @._threecount=3;
+    @._fifteencheck();
+  } else @._threecount=@._threecount-1;
+
+  if (@._shutdownMins!=NULL) 
+  {
+    @._shutdownTicks=@._shutdownTicks-1;
+    if (@._shutdownTicks<0) 
+    {
+      @._shutdown();
+      @._shutdownTicks=10;
+    }
+  }
+} chmod(&@.gen_tick, "W:rs");
+
+
+/* Serious stuff follows: */
+func @._fifteencheck
+{
+  foreach $plr in (@.onlinePlayers) 
+  {
+    $tmp = time();
+
+/* the mana restoration */
+    if ($plr.mana<@._maxMana($plr.level)) 
+    {
+      $plr.mana=$plr.mana+@._manaRestore($plr.level);
+      if ($plr.mana>@._maxMana($plr.level))
+        $plr.mana=@._maxMana($plr.level);
+    }
+
+/* the hp restoration - hpRestoreBoost allows for things like the truffle */
+    if ($plr.hp<@._maxHp($plr.level))
+    {
+      $plr.hp=$plr.hp+@._hpRestore($plr.level) + $plr.hpRestoreBoost;
+      if ($plr.hp>@._maxHp($plr.level))
+        $plr.hp=@._maxHp($plr.level);
+    }
+
+/* check to see if disabilities have worn off */
+    if ($tmp > $plr.healBlindTime && $plr.blind)
+    {
+      $plr.blind = NULL;
+      $plr.healBlindTime = NULL;
+      becomePlayer($plr);
+      echo("Your eyelids open and you find you can see again!\n");
+      @._visEmote("'s eyelids open!\n");
+      becomeMyself;
+    }
+
+    if ($tmp > $plr.healDeafTime && $plr.deaf)
+    {
+      $plr.deaf = NULL;
+      $plr.healDeafTime = NULL;
+      becomePlayer($plr);
+      echo("Your ears open up and you find you can hear again!\n");
+      @._visEmote("'s ears open up!\n");
+      becomeMyself;
+    }
+
+    if ($tmp > $plr.healDumbTime && $plr.dumb)
+    {
+      $plr.dumb = NULL;
+      $plr.healDumbTime = NULL;
+      becomePlayer($plr);
+      echo("The sock that was obstructing your mouth vanishes!\n");
+      @._visEmote("regains the power of speech!\n");
+      becomeMyself;
+    }
+
+    if ($tmp > $plr.healParalysedTime && $plr.paralysed)
+    {
+      $plr.paralysed = NULL;
+      $plr.healParalysedTime = NULL;
+      becomePlayer($plr);
+      echo("The roots holding you in one place wither away!\n");
+      @._visEmote("is freed as the restricting roots wither away!\n");
+      becomeMyself;
+    }
+
+/* check idle time */
+    if ($tmp-$plr.idleTime > 600 && !$plr.poked && !ARCH($plr))
+    {
+      echoto($plr,"\a*** The Dungeon Master appears, pokes you in the ribs",
+             " to see if you are still\n    alive then vanishes!\n");
+      $plr.poked = 1;
+    }
+
+    if ($tmp-$plr.idleTime > 900 && !ARCH($plr))
+    {
+      echoto($plr,"You have been idle for too long.\n",
+          "A huge jet-powered boot descends screaming from above, catches you, and\n",
+          "kicks you right out of the universe!\n");
+      $plr.poked = NULL;
+      becomePlayer($plr);
+      @._leko("\nA huge jet-powered boot descends screaming from above, catches ");
+      @._lekoNAME();
+      @._leko("\nand kicks ", @._himHer($plr), " right out of the ", 
+              "universe!\n") ;
+      becomeMyself;
+      
+      @._boot($plr);
+    }
+
+  }
+  @._doDmFns();
+}
+
+func @._mobilejolt
+{
+  if ($1.fighting) {
+    @._mobilefight($1) ; return ;
+  }
+  if ($1.map) {
+    if (!$1.moveprob || (random(100)<$1.moveprob)) {
+      if (!$1._movemap) $mapelem=1; else $mapelem=$1._movemap;
+      $newloc=listelem($1.map, $mapelem);
+      $mapelem=$mapelem+1;
+      if ($mapelem>listcount($1.map)) $mapelem=1;
+      $1._movemap=$mapelem;
+      if ($newloc!=$1.location) {
+        @._mobcheckattack($1);
+        if (!$1.fighting) {
+          @._reko($1.location, $1.exitTxt, "\n");
+          @._reko($newloc, $1.enterTxt, "\n");
+
+          @._move($1, $newloc);
+        }
+      }
+    }
+  }
+  @._mobcheckattack($1);
+}
+
+func @._mobilefight
+{
+  if ($1.fighting.fighting != $1)
+    { $1.fighting = NULL; return; }
+
+  $vict = $1.fighting;
+
+  if ($vict.location != $1.location)
+    { $1.fighting = NULL; return; }
+
+  becomePlayer($vict);
+
+  if ($1.myturn) {
+    /** mobile makes an attack on its victim **/
+    $1.myturn = NULL;
+
+    $baseDamage = $1.weapon.power - $vict.totalArmour;
+    if ($baseDamage > 0) {
+      $spread =1 +  ($1.weapon.power)/5;
+      $addDamage = random($spread) - ($spread)/2;
+      $damage = $baseDamage + $addDamage;
+
+      if ($damage < 0)
+        $damage = 0;
+    } else $damage = 0;
+
+    $vict.hp = $vict.hp - $damage;
+    echo("<!> ", $1.name, " attacks you with ", $1.weapon.name, " doing ",
+	 $damage, " points of damage.\n");
+    @._leko("<!> ", $1.name, " attacks ", $vict.name, " with ",
+	 $1.weapon.name, ".\n");
+
+    if ($vict.hp <= 0)
+      @._mobileWins($1);
+  }
+  else
+    /** victim makes an attack upon the mobile **/
+  {
+    $1.myturn = 1;
+
+    $baseDamage = $vict.weapon.power - $1.totalArmour;
+    if ($baseDamage > 0) {
+      $spread = 1 + ($vict.weapon.power)/5;
+      $addDamage = random($spread) - ($spread)/2;
+      $damage = $baseDamage + $addDamage;
+      if ($damage < 0) {
+        $damage = 0;
+      }
+    } else {
+      $damage = 0;
+    }
+
+    $1.hp = $1.hp - $damage;
+
+    echo("<!> You attack ", $1.name, " with ", $vict.weapon.name, " doing ",
+		 $damage, " points of damage.\n");
+    @._leko("<!> ", $vict.name, " attacks ", $1.name, " with ",
+		 $vict.weapon.name, ".\n");
+
+    if (!($1.hp > 0))
+      @._playerWins($1);
+  }
+  becomeMyself;
+} chmod(&@._mobilefight, "W:rs");
+
+
+func @._mobileWins
+{
+  $vict = $1.fighting;
+  $vict.fighting = NULL;
+  $1.fighting = NULL;
+
+  echo("You have been killed by ", $1.name, ".\n");
+  @._geko("\n<!> ", $vict.name, " has been killed by ", $1.name, " with ",
+	 $1.weapon.name, ".\n");
+  @._leko($vict.name, " disappears in a cloud of dust.\n");
+
+  foreach $item in ($vict.contents)
+    @._move($item, $vict.location);
+
+  @._resurrect(10);
+
+} chmod(&@._mobileWins, "W:rs");
+
+func @._playerWins
+{
+  $vict = $1.fighting;
+  $vict.fighting = NULL;
+  $1.fighting = NULL;
+
+  echo("\n<!> You have killed ", $1.name, ".\n");
+  @._geko("\n<!> ", $1.name, " has been killed by ", $vict.name, " with ",
+	 $vict.weapon.name, "!\n");
+  @._reko($vict.location, $1.name,
+	 " disappears in a cloud of greasy black smoke.\n");
+
+  foreach $item in ($1.contents) {
+    if ($item.diedrop)
+      @._move($item, $1.location);
+  }
+  @._offerObject($1);
+
+} chmod(&@._playerWins, "W:rs");
+
+func @._mobcheckattack
+{
+  if ($ma=$1.attack) /* Assignment, not comparison */
+    if (random(100)<$ma) {
+      foreach $pl in ($1.location.contents)
+        if ($pl.player)
+          if ((!$pl.invis) && (!$pl.fighting))
+            $targlist=listadd($targlist, $pl);
+      if ($targlist) {
+        $vict=listelem($targlist, random(listcount($targlist))+1);
+        @._reko($1.location, "<!> ", $1.name, " attacks ", $vict.name, "!\n");
+        $1.fighting = $vict;
+        $vict.fighting = $1;
+        $1.myturn = 1;
+        @._mobilefight($1);
+      }
+    }
+} chmod(&@._mobcheckattack, "W:rs");
+
+func @._updateidle
+{
+  #actor.idleTime = time();
+  if(#actor.poked)
+    #actor.poked = NULL;
+}

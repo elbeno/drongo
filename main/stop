@@ -1,0 +1,49 @@
+#!/bin/sh
+if [ ! $MUDROOT ]; then
+  echo Run 'pathset' first
+  exit
+fi
+
+SERVERPID=$MUDDIR/server_pid
+
+if [ ! -f $MUDSERVERHOST ]; then
+  echo "Don't know what machine Drongo is running on!"
+  echo "(Is it running?)"
+  exit 3
+fi
+
+THISHOST=`hostname`
+HOST=`cat <$MUDSERVERHOST`
+if [ $HOST != $THISHOST ]; then
+  echo "Not running on same machine!"
+  echo "Log into $HOST and try again."
+  exit 3
+fi
+
+if [ ! -f $SERVERPID ]; then
+  echo "no server process id in $SERVERPID"
+  exit 2
+fi
+
+# server pid is in the file, created at boot-time
+SPID=`cat $SERVERPID`
+
+echo "sending a kill -QUIT to pid $SPID"
+kill -QUIT $SPID
+
+if [ $? != 0 ]; then
+  echo "kill failed."
+  rm $SERVERPID
+  exit 1
+fi
+
+(
+  if [ -f $MUDSERVERHOST ]; then
+    mv $MUDSERVERHOST "$MUDSERVERHOST"~
+    echo Renaming file $MUDSERVERHOST
+  fi
+) &
+
+rm $SERVERPID
+exit 0
+

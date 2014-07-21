@@ -1,0 +1,10 @@
+if [ -f fridge/serverhost ]; then
+  echo "Drongo is currently running - please stop it first!"
+  echo "(or delete file \'fridge/serverhost\')"
+  exit 1
+fi
+echo Wiping server files...
+rm fridge/inodes
+rm fridge/chunks
+rm fridge/free_index
+rm fridge/index

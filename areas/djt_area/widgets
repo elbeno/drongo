@@ -1,0 +1,348 @@
+/***************************************************************\
+* Object description file for Logic Island 			*
+* Submitted by Bugblatter djt1000@uk.ac.cam.hermes		*
+\***************************************************************/
+
+/* Revision History
+ 
+ Date   | Modifications
+--------+-------------------------------------------------------
+31Jan94 | Wizards Tower objects created
+04Feb94 | Stone inscription added
+05Feb94 | Platinum Stuff added
+10Feb94 | Indicator added
+18Feb94 | Crossroads sign added
+21Feb94 | Added my staff and removed
+03Mar94 | Tidied it up!
+04Mar94 | Paper added
+05Mar94 | Widgets descs split into proper format
+        | Added treasure for winning NIM game ans inscription
+--------+-------------------------------------------------------
+05Mar94 | Submitted to Irn-Bru(2)
+--------+-------------------------------------------------------
+*/
+
+#include <drogon.h>
+#include "rooms.h"	
+
+/**************\
+* Path Objects *
+\**************/
+
+/* Crossroads sign */
+{
+  WIDGET 
+  (
+    "a wooden signpost", "island2_signpost",
+    0,0, 0,0, 0, 
+    island2_crossRoads
+  ) ;
+  WDESC = "
+  A wooden signpost, standing about 6 ft tall. It has for directions
+  labelled, which may be read." ;
+  WFIXED = "The signpost stubbonly refuses to move." ;
+  WTEXT = "
+  There are four arms pointing in the directions:
+     North: Woodland
+     South: Beach
+     East:  Wizards Tower
+     West:  Village" ;
+}
+
+/***************************\
+* The Wizards Tower Objects *
+\***************************/
+
+/* Wizard Stone */
+{
+  WIDGET 
+  (
+    "a stone needle", "island2_wizTower_needle",
+    0,0, 0,0, 0, 
+    island2_wizTower_02
+  ) ;
+  WDESC = "
+  The stone needle has a magical aura about it, and there are magical
+  blue tinges to the stone itself. There is an inscription in the stone
+  facing the three doors." ;
+  WFIXED = "The needle will not budge." ;
+}
+
+/* Puzzle Plaques */
+{
+  WIDGET 
+  (
+    "a bronze plaque", "island2_wizTower_bPlaque",
+    0,0, 0,0, 0,
+    island2_wizTower_02
+  ) ;
+  WDESC = "
+  The bronze plaque has an inscription on it." ;
+  WFIXED = "The plaque is afixed to the wall magically." ;
+}
+
+{
+  WIDGET 
+  (
+    "a silver plaque", "island2_wizTower_sPlaque",
+    0,0, 0,0, 0, 
+    island2_wizTower_02
+  ) ;
+  WDESC = "
+  The silver plaque has an inscription on it." ;
+  WFIXED = "The plaque is afixed to the wall magically." ;
+}
+
+{
+  WIDGET 
+  (
+    "a gold plaque", "island2_wizTower_gPlaque",
+     0,0, 0,0, 0,
+     island2_wizTower_02
+  ) ;
+  WDESC = "
+  The gold plaque has an inscription on it." ;
+  WFIXED = "The plaque is afixed to the wall magically." ;
+}
+
+/* The Ingots - Prize for Puzzles */
+{
+  WIDGET 
+  (
+    "a bronze ingot", "island2_wizTower_bIngot",
+    250,200, 0,0, -1, 
+    island2_wizTower_09
+  ) ;
+  WDESC = "
+  An ingot of purest bronze." ;
+  WDNAME = "A bronze ingot is lying on the floor." ;
+  WSPECIAL ;
+}
+
+{
+  WIDGET 
+  (
+   "a silver ingot", "island2_wizTower_sIngot",
+    500,350, 0,0, -1, 
+    island2_wizTower_09
+  ) ;
+  WDESC = "
+  An ingot of purest silver." ;
+  WDNAME = "A silver ingot is lying on the floor." ;
+  WSPECIAL ;
+}
+
+{
+  WIDGET 
+  (
+    "a gold ingot", "island2_wizTower_gIngot",
+     1000,500, 0,0, -1, 
+     island2_wizTower_09
+  ) ;
+  WDESC = "
+  An ingot of purest gold." ;
+  WDNAME = "A gold ingot is lying on the floor." ;
+  WSPECIAL ;
+}
+
+{
+  WIDGET 
+  (
+    "a platinum ingot", "island2_wizTower_pIngot",
+    1500,650, 0,0, -1, 
+    island2_wizTower_09
+  ) ;
+  WDESC = "
+  An ingot of purest platinum." ;
+  WDNAME = "A platinum ingot is lying on the floor." ;
+  WSPECIAL ;
+}
+
+/* the cleaning Cupboard */
+{
+  WIDGET 
+  (
+    "a wooden broom", "island2_wizTower_broom",
+    50,20, 10,0, -1, 
+    island2_wizTower_10
+  ) ;
+  WDESC = "
+  A simple wooden broom." ;
+  WDNAME = "There is a broom standing against a wall." ;
+}
+
+{
+  WIDGET 
+  (
+    "a feather duster", "island2_wizTower_duster",
+    50,20, 0,0, -1,
+    island2_wizTower_10
+  ) ;
+  WDESC = "
+  A multicoloured feather duster." ;
+  WDNAME = "There is a feather duster on the floor." ;
+}
+
+/* Bug's Lounge */
+{
+  WIDGET 
+  (
+    "a sofa", "island2_wizTower_sofa",
+    0,0, 0,0, 0, 
+    island2_wizTower_06
+  ) ;
+  WDESC = "
+  The sofa is semicirular and made of something, although you cannot tell
+  what, occupying half of the wall space in the room. It is swirling in
+  what can only be described as a blue-ish vapour!" ;
+  WDNAME = "There is a sofa against the wall." ;
+  WFIXED = "Are you trying to injure yourself." ;
+}
+
+{
+  WIDGET 
+  (
+    "a coffee table", "island2_wizTower_table",
+    0,0, 0,0, 0, 
+    island2_wizTower_06
+  ) ;
+  WDESC = "
+  Made of pine, this table fits blend into the room well." ;
+  WDNAME = "There is a coffee table here." ;
+  WFIXED = "Its rather large!" ;
+}
+
+{
+  WIDGET 
+  (
+    "an indicator", "island2_wizTower_indicator",
+    0,0, 0,0, 0, 
+    island2_wizTower_07
+  ) ;
+  WDNAME = "There is an indicator on the wall." ;
+  WFIXED = "It won't budge from the wall!" ;
+}
+
+/* Bugs Study */
+{
+  WIDGET 
+  (
+    "an oak desk", "island2_wizTower_desk",
+    0,0, 0,0, 0, 
+    island2_wizTower_07
+  ) ;
+  WDESC = "
+  This large oak desk sits infront of a leaded window. The desk has
+  padded green leather in places for decoration." ;
+  WDNAME = "There is a large oak desk against the wall." ;
+  WFIXED = "Its a bit too heavy, just a bit!" ;
+}
+
+{
+  WIDGET 
+  (
+    "an oak chair", "island2_wizTower_chair",
+    50,100, 0,0, -1, 
+    island2_wizTower_07
+  ) ;
+  WDESC = "
+  This oak chair matches the desk. It is quite heavy, and is place neatly
+  by the desk." ;
+  WDNAME = "There is a chair placed tidily by the desk." ;
+}
+
+{
+  WIDGET 
+  (
+    "a drinks cabinet", "island2_wizTower_cabinet",
+    0,0, 0,0, 0,
+    island2_wizTower_07
+  ) ;
+  WDESC = "
+  The drinks cabinet is extensively stocked with many liquors and
+  spirits. The likes of Baileys, Drambuie, Glenfiddich, Southern Comfort
+  and Tia Maria." ;
+  WDNAME = "There is a drinks cabinet against the wall." ;
+  WFIXED = "Are you mad!?" ;
+}
+
+{
+  WIDGET 
+  (
+    "a magical piece of paper", "island2_wizTower_paper",
+    0,10, 0,0, 0, 
+    island2_wizTower_07
+  ) ;
+  WDESC = "
+  This is a small scrap of paper with some writing on it. The writing is
+  glowing faintly blue." ;
+  WDNAME = "A piece of paper is sitting on the desk." ;
+  WTEXT = "You cannot quite make out the words!" ;
+}
+
+
+/*******************\  
+* The Beach Objects *
+\*******************/
+
+{
+  WIDGET 
+  (
+    "a wooden sign", "island2_sign",
+    0,0, 0,0, 0, 
+    island2_beach_02
+  ) ;
+  WDESC = "
+  A small wooden sign. The sort of sign you might see in a road runner
+  cartoon! It is about 4 foot tall with some writing on the flat part of
+  it! You know, do I really need to describe one to you?" ;
+  WDNAME = "There is a wooden sign standing here in the sand." ;
+  WFIXED = "It stubbornly refuses to be moved!" ;
+  WTEXT = "
+                      The sign reads:
+               WELCOME TO THE  ISLAND OF LOGIC!
+                 Beware: There is much to be 
+                 gained but more to be lost." ;
+}
+
+
+/**********************\
+* The NIM game objects *
+\**********************/
+
+{
+  WIDGET
+  (
+    "a shiny pebble", "island2_beach_pebble",
+    500,150, 0,0, -1,
+    island2_beach_cave
+  ) ;
+  WDESC = "
+  This pebble is small but it may be of some value!" ;
+  WDNAME = "There is a shiny pebble in front of the man." ;
+}
+
+{
+  WIDGET
+  (
+    "an inscription", "island2_beach_inscription",
+    0,0, 0,0, 0, 
+    island2_beach_cave
+  ) ;
+  WDNAME = "There is an inscription carved into the rock here." ;
+  WDESC = "
+  It says something!" ;
+  WFIXED = "Its carved into the wall! What a concept!" ;
+  WTEXT = "
+The inscription reads:
+
+                  INSTRUCTIONS FOR PLAYING NIM
+
+When you ask the wizard in this cave to play a game of NIM he will
+arrange a number of piles, each of which has any number of pebbles in.
+You have the first move, where a move consists of removing any number
+of pebbles from a single pile. This can be done by saying remove n from
+m. To win the game you must remove the last pebble.  You may see the
+state of play at any time during the game by typing piles." ;
+}
+

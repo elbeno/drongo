@@ -1,0 +1,91 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include "drogon.h"
+#include  "rooms.h"
+
+#include "../tyrogSu/rooms.h"
+
+BI_CONNECT (ts_irnBru_03,    mansion_road_01, "east", "west" ) ;
+
+BI_CONNECT (mansion_road_01, mansion_road_02, "east", "west" ) ;
+BI_CONNECT (mansion_road_02, mansion_road_03, "east", "west" ) ;
+
+BI_CONNECT (mansion_road_03, mansion_loHall_03, "east",  "west"  ) ;
+BI_CONNECT (mansion_road_03, mansion_grass_01,  "north", "south" ) ;
+BI_CONNECT (mansion_road_03, mansion_grass_02,  "south", "north" ) ;
+BI_CONNECT (mansion_road_03, mansion_grass_03,  "se",    "nw"    ) ;
+BI_CONNECT (mansion_road_03, mansion_flowers,   "ne",    "sw"    ) ;
+
+BI_CONNECT (mansion_grass_01, mansion_flowers,  "east", "west" ) ;
+BI_CONNECT (mansion_grass_02, mansion_grass_03, "east", "west" ) ;
+BI_CONNECT (mansion_grass_03, mansion_grass_04, "east", "west" ) ;
+
+BI_CONNECT (mansion_grass_03, mansion_herbs, "ne",    "sw"    ) ;
+BI_CONNECT (mansion_grass_04, mansion_herbs, "north", "south" ) ;
+
+BI_CONNECT (mansion_folly, mansion_grass_04, "west", "east" ) ;
+BI_CONNECT (mansion_folly, mansion_herbs,    "nw",   "se"   ) ;
+
+BI_CONNECT (mansion_flowers, mansion_herbs, "se", "nw" ) ;
+
+BI_CONNECT (mansion_topiary_01, mansion_topiary_02, "east",  "west"  ) ;
+BI_CONNECT (mansion_topiary_01, mansion_topiary_03, "se",    "nw"    ) ;
+BI_CONNECT (mansion_topiary_01, mansion_topiary_04, "south", "north" ) ;
+BI_CONNECT (mansion_topiary_02, mansion_topiary_03, "sw",    "ne"    ) ;
+BI_CONNECT (mansion_topiary_02, mansion_topiary_05, "south", "north" ) ;
+BI_CONNECT (mansion_topiary_03, mansion_topiary_04, "sw",    "ne"    ) ;
+BI_CONNECT (mansion_topiary_03, mansion_topiary_05, "se",    "nw"    ) ;
+BI_CONNECT (mansion_topiary_04, mansion_topiary_05, "east",  "west"  ) ;
+BI_CONNECT (mansion_topiary_04, mansion_flowers,    "west",  "east"  ) ;
+BI_CONNECT (mansion_topiary_04, mansion_herbs,      "south", "north" ) ;
+
+BI_CONNECT (mansion_herbs, mansion_kitchen, "west", "east" ) ;
+
+BI_CONNECT (mansion_loHall_01, mansion_loHall_02,  "west",  "east"  ) ;
+BI_CONNECT (mansion_loHall_02, mansion_loHall_03,  "west",  "east"  ) ;
+
+BI_CONNECT (mansion_loHall_01, mansion_lounge,     "north", "south" ) ;
+BI_CONNECT (mansion_loHall_01, mansion_diningRoom, "south", "north" ) ;
+BI_CONNECT (mansion_loHall_02, mansion_library,    "north", "south" ) ;
+BI_CONNECT (mansion_loHall_02, mansion_ballRoom,   "south", "north" ) ;
+BI_CONNECT (mansion_ballRoom,  mansion_stage,       "west", "east"  ) ;
+
+BI_CONNECT (mansion_cellar_01, mansion_cellar_02,  "east",  "west"  ) ;
+BI_CONNECT (mansion_cellar_01, mansion_cellar_03,  "north", "south" ) ;
+
+@._hideExit (mansion_cellar_01, "north") ;
+
+BI_CONNECT (mansion_kitchen, mansion_pantry,     "south", "north" ) ;
+BI_CONNECT (mansion_kitchen, mansion_diningRoom, "west",  "east"  ) ;
+BI_CONNECT (mansion_kitchen, mansion_cellar_01,  "down",  "up"    ) ;
+
+BI_CONNECT (mansion_diningRoom, mansion_ballRoom, "west", "east" ) ;
+
+BI_CONNECT (mansion_lounge,  mansion_conservatory, "north", "south" ) ;
+BI_CONNECT (mansion_library, mansion_study,        "north", "south" ) ;
+
+BI_CONNECT (mansion_upHall_01, mansion_upHall_02,     "west",  "east"  ) ;
+BI_CONNECT (mansion_upHall_02, mansion_upHall_03,     "west",  "east"  ) ;
+
+BI_CONNECT (mansion_upHall_01, mansion_guestRoom,     "east",  "west"  ) ;
+BI_CONNECT (mansion_upHall_01, mansion_nursery,       "north", "south" ) ;
+BI_CONNECT (mansion_upHall_01, mansion_ladiesBedroom, "south", "north" ) ;
+BI_CONNECT (mansion_upHall_02, mansion_kidsBedroom,   "north", "south" ) ;
+BI_CONNECT (mansion_upHall_02, mansion_masterBedroom, "south", "north" ) ;
+BI_CONNECT (mansion_upHall_03, mansion_nannyBedroom,  "north", "south" ) ;
+
+BI_CONNECT (mansion_loHall_03, mansion_upHall_03,     "up",    "down"  ) ;
+
+BI_CONNECT (mansion_masterBedroom, mansion_ladiesBedroom, "east", "west" ) ;
+BI_CONNECT (mansion_nannyBedroom,  mansion_kidsBedroom,   "east", "west" ) ;
+BI_CONNECT (mansion_kidsBedroom,   mansion_nursery,       "east", "west" ) ;

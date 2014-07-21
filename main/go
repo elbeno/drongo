@@ -1,0 +1,30 @@
+#!/bin/sh
+if [ ! $MUDROOT ]; then
+  echo Run 'pathset' first
+  exit
+fi
+
+if [ -f $MUDSERVERHOST ]; then
+  echo Server still running on `cat <$MUDSERVERHOST`?
+  echo Remove $MUDSERVERHOST if not.
+  exit
+fi
+
+echo Running: um -d $MUDDIR -f $MUDBOOTFILE
+$MUDROOT/main/um -d $MUDDIR -f $MUDBOOTFILE -l $MUDLOGFILE &
+
+echo I got this far!
+
+echo `hostname` >$MUDSERVERHOST
+
+if [ ! -f $MUDLOGFILE ]; then
+  sleep 2
+fi
+
+echo Server running!
+
+if [ -f $MUDLOGFILE ]; then
+  echo Viewing $MUDLOGFILE: \^c to abort.
+  tail -f $MUDLOGFILE
+fi
+

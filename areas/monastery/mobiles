@@ -1,0 +1,114 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include "drogon.h"
+#include  "rooms.h"
+
+
+/***************************************************************************/
+/* The oyster in the cave and its pearl                                    */
+/***************************************************************************/
+
+{
+  MOBILE
+  (
+    "a giant oyster", "mon_oyster", FEMALE,
+    0,0,0,
+    mon_cave
+  )
+  MFIXED   = "It's far too heavy for you to lift!" ;
+  MXATTACK = "The oyster is impervious to your attacks." ;
+  MDNAME   = "A giant oyster sits on the sand at the back of the cave." ;
+  MDESC    = "
+  This has to be the largest oyster you have ever seen. It is easily as
+  wide as your arm-span and sits waist high! It probably weighs a lot
+  too!" ;
+
+  WIDGET
+  (
+    "a giant pearl", "mon_pearl",
+    600,100, 0,0, Mins(45),
+    $mobile
+  )
+  WDESC = "
+  This is the largest and most beautiful pearl you have ever seen.
+  Its surface is so perfect it seems to almost give off light!" ;
+
+  /** This serve no purpose, other than to hide the pearl **/
+  WIDGET
+  (
+    "oyster shell", "mon_oysterShell",
+    0,0, 0,0, 0,
+    $mobile
+  )
+  WCLOAK ;
+}
+
+
+/***************************************************************************/
+/* The Bat in the bell tower                                               */
+/***************************************************************************/
+
+{
+  MOBILE
+  (
+    "a vampire bat", "mon_bat", MALE,
+    550, 800, Mins (45),
+    mon_bell_03
+  )
+  MATTACK    = 100 ;
+  MMINATTACK =   8 ;
+  MFIXED  = "It flutters out of your clumsy grasp." ;
+  MDNAME  = "A large bat flutters nearby." ;
+  MENTER  = "A large bat flutters in!" ;
+  MEXIT   = "The bat flaps its wings and flutters out." ;
+  MDESC   = "
+  It looks like a vampire bat - The fangs are a dead giveaway!" ;
+
+  MOBILE_MAP
+        ( mon_bell_02, mon_bell_03, mon_bell_04, mon_bell_03 ) ;
+
+  WIDGET
+  (
+    "sharp fangs", "mon_fangs",
+    0,0, 120,40, 0,
+    $mobile
+  )
+  WCLOAK ; MWEAPON ;
+}
+
+
+/***************************************************************************/
+/* The giant lobster                                                       */
+/***************************************************************************/
+
+{
+  MOBILE
+  (
+    "a giant lobster", "mon_lobster", MALE,
+    200, 500, Mins (30),
+    mon_path_06
+  )
+  MDNAME = "A giant lobster stands guard over the cave entrance." ;
+  MFIXED = "I think it has too many claws to do that safely ..." ;
+  MDESC  = "
+  This is a very large lobster. It reminds you of a huge insect with its
+  claws and antenna things twitching and waving at you." ;
+
+  WIDGET
+  (
+    "it's claws", "mon_claws",
+    0,0, 80,40, 0,
+    $mobile
+  )
+  WCLOAK ; MWEAPON ;
+}

@@ -1,0 +1,294 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+#ifndef _PARSE_H_
+#include "parse.h"
+#endif
+
+func @._randomsay
+{
+  if (atoi($1) <= 0)
+    return $2;
+  $r = random(19) ;
+  if ($r > 15)
+    return @._randomsay(atoi($1)-1, str($2,"p")) ;
+  else if ($r > 12)
+    return @._randomsay(atoi($1)-1, str($2,"e")) ;
+  else if ($r > 9)
+    return @._randomsay(atoi($1)-1, str($2,"m")) ;
+  else if ($r > 6)
+    return @._randomsay(atoi($1)-1, str($2,"f")) ;
+  else if ($r > 3)
+    return @._randomsay(atoi($1)-1, str($2,"u")) ;
+  else if ($r > 0)
+    return @._randomsay(atoi($1)-1, str($2,"h")) ;
+  else
+    return @._randomsay(atoi($1)-1, str($2," ")) ;
+}
+
+func @.say
+{
+  $here=#actor.location;
+
+  if (#actor.dumb)
+  {
+    $arg = "" ;
+    $spc = "" ;
+    foreacharg $tmp
+    {
+      $rndword = @._randomsay(strlen($tmp));
+      $arg = str($arg, $spc, $rndword);
+      if(random(20) < 15) 
+        $arg = str($arg,"!");
+      $spc = " ";
+    }
+  }
+  else
+  {
+    bundleArgs ;  
+  }
+
+  foreach $ply in (#actor.location.contents) {
+    if (#actor!=$ply && !$ply.deaf) {
+      @._tellNAME($ply, #actor);
+      echoto($ply, " says \"", $arg, "\"\n");
+    }
+  }
+
+  echo("You say \"", $arg, "\"\n");
+
+  if ($here._listen) $here._listen($arg) ;
+  foreach $thg in ($here.contents)
+    if ($thg._listen) $thg._listen($arg) ;
+    
+  log(strtime(), " ", #actor.name, " SAYs ", $arg, "\n");    
+} chmod(&@.say, "W:rs");
+
+func @.wsay
+{
+  wizardCommand;
+  minArgs(1, "*** wsay what?");
+
+  if (#actor.dumb)
+  {
+    $arg = "" ;
+    $spc = "" ;
+    foreacharg $tmp
+    {
+      $rndword = @._randomsay(strlen($tmp));
+      $arg = str($arg, $spc, $rndword);
+      if(random(20) < 15) 
+        $arg = str($arg,"!");
+      $spc = " ";
+    }
+  }
+  else
+  {
+    bundleArgs ;  
+  }
+
+  echo("You wSay \"", $arg, "\"\n");
+
+  foreach $ply in (#actor.location.contents) 
+  {
+    if (WIZ($ply))
+      if (#actor!=$ply && !$ply.deaf) 
+      {
+        @._tellNAME($ply, #actor);
+        echoto($ply, " wSays \"", $arg, "\"\n");
+      }
+  }
+  log(strtime(), " ", #actor.name, " WSAYs ", $arg, "\n");
+} chmod(&@.wsay, "W:rs");
+
+func @.shout
+{
+  if (#actor.dumb)
+  {
+    echo("The sock lodged in your mouth prevents you from shouting.\n");
+    return;
+  }
+
+  minArgs(1, "*** shout what?");
+
+  bundleArgs ;
+
+  foreach $plr in (@.onlinePlayers) {
+    if ($plr == #actor) 
+      echo ("You telepathically shout ...") ;
+    else if (!$plr.deaf && !$plr.eafmuffs) 
+    {
+      echoto ($plr,"*** A voice in your head ") ;
+      if (@._youCanSeeMe ($plr))
+        echoto ($plr,"(sounding like ",#actor.name,") ");
+      echoto ($plr,"SHOUTs:");
+    }
+    if (!$plr.deaf && !$plr.earmuffs)
+      echoto ($plr,"\n  \" ",$arg," \"\n") ;
+  }
+  log (strtime(), " ", #actor.name," SHOUTs ",$arg,"\n") ;
+} chmod(&@.shout, "W:rs");
+
+func @.wshout
+{
+  wizardCommand ;
+  if (#actor.dumb)
+  {
+    echo("The sock lodged in your mouth prevents you from wshouting.\n");
+    return;
+  }
+
+  minArgs(1, "*** wshout what?");
+
+  bundleArgs ;
+
+  foreach $plr in (@.onlinePlayers) {
+    if ($plr == #actor) 
+      echo ("You telepathically wshout ...") ;
+    else if (!$plr.deaf && !$plr.eafmuffs && WIZ($plr)) 
+    {
+      echoto ($plr,"*** A voice in your head ") ;
+      if (@._youCanSeeMe ($plr))
+        echoto ($plr,"(sounding like ",#actor.name,") ");
+      echoto ($plr,"WSHOUTs:");
+    }
+    if (!$plr.deaf && !$plr.earmuffs && WIZ($plr))
+      echoto ($plr,"\n  \" ",$arg," \"\n") ;
+  }
+  log (strtime(), " ", #actor.name," WSHOUTs ",$arg,"\n") ;
+} chmod(&@.wshout, "W:rs");
+
+func @.tell
+{
+  minArgs(2, "*** tell who what?");
+
+  $plr = @._singleVis(@.onlinePlayers, $1) ;
+  if (!$plr)
+    return;
+
+  $arg = "" ;
+  $fst = 1 ;
+  $spc = "" ;
+  foreacharg $tmparg 
+  { 
+    if ($fst) 
+      $fst = 0 ; 
+    else
+    { 
+      if (#actor.dumb)
+      {
+        $rndword = @._randomsay(strlen($tmparg));
+        $arg = str($arg, $spc, $rndword);
+        if(random(20) < 15) 
+          $arg = str($arg,"!");
+      }
+      else
+      {
+        $arg = str ($arg,$spc,$tmparg) ; 
+      }
+      $spc = " "; 
+    }
+  }
+  if (!$plr.deaf)
+  { 
+    echoto ($plr,"*** A voice in your head ") ;
+    if (@._youCanSeeMe ($plr))
+      echoto ($plr,"(sounding like ",#actor.name,") ") ;
+    echoto ($plr,"says:\n  \" ",$arg," \"\n") ;
+  } 
+
+  echo ("Sending telepathic message to ",$plr.name," ... Ok.\n") ;
+
+  log (strtime(), " ", #actor.name," TELLs ",$plr.name,":",$arg,"\n") ;
+} chmod(&@.tell, "W:rs");
+
+func @.whisper
+{
+  splitParse("to", "*** whisper <what> to <whom>?");
+
+  $who = @._singleVis(#actor.location.contents, $second, @.noOneHere);
+  if(!$who)
+    return;
+
+  if (#actor.dumb)
+    $first = @._randomsay(strlen($first));
+
+  if (!$who.deaf)
+  {
+    @._tellNAME ($who, #actor) ;
+    echoto($who," whispers \"", $first, "\"\n");
+  }
+
+  echo("You whisper \"", $first, "\" to ", $who.name,"\n");
+} chmod(&@.whisper, "W:rs");
+
+func @.emote
+{
+  if (#actor.dumb)
+  {
+    echo("The sock makes emoting anything very difficult.\n");
+    return;
+  }
+
+  minArgs(1, "*** emote what?");
+
+  bundleArgs ;
+
+  @._emote ($arg) ;
+
+  if (regcmp($arg, "^'.*"))
+  {
+    echo (#actor.name,$arg,"\n") ;
+    log (strtime(), " <E> ", #actor.name, $arg, "\n") ;
+  }
+  else
+  { 
+    echo (#actor.name," ",$arg,"\n") ;
+    log (strtime(), " <E> ", #actor.name, " ", $arg, "\n") ;
+  } 
+
+} chmod(&@.emote, "W:rs");
+
+func @.wem
+{
+  wizardCommand;
+
+  if (#actor.dumb)
+  {
+    echo("The sock makes emoting anything very difficult.\n");
+    return;
+  }
+
+  minArgs(1, "*** wem what?");
+  bundleArgs;
+
+  foreach $ply in (#actor.location.contents) {
+    if (WIZ($ply)) {
+      echoto($ply, "WEM: ");
+      @._tellNAME($ply, #actor);
+      echoto($ply, " ", $arg, "\n");
+    }
+  }
+  log(strtime(), " <WEM> ", #actor.name, " ", $arg, "\n");
+}
+
+func @.page
+{
+  minArgs(1, "page <person>");
+
+  bundleArgs;
+
+  $who = @._singleVis(@.onlinePlayers, $arg);
+  if (!$who) return;
+
+  echo("Magically paging ", $who.name, "... done.\n");
+  echoto($who, "\aYou sense that ");
+  @._tellName($who, #actor);
+  echoto($who, " is looking for you in ");
+  if (WIZ($who))
+    echoto($who, #actor.location, ", ");
+  echoto($who, #actor.location.name, ".\n");
+}
+
+

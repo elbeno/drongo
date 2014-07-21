@@ -1,0 +1,63 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include  "drogon.h"
+#include "mobiles.h"
+
+
+/***************************************************************************/
+/* The giant oyster                                                        */
+/***************************************************************************/
+
+mon_oyster.tickleState = 0 ;
+
+func mon_oyster.tickFn
+{
+  if (mon_oyster.tickleState != 0)
+    mon_oyster.tickleState = mon_oyster.tickleState - 1 ;
+}
+
+func mon_oyster._tickleFn
+{
+  echo ("You tickle the giant oyster with ", #caller.name, "!\n") ;
+  @._emote ("tickles the giant oyster with ", #caller.name, ".") ;
+
+  if (mon_oyster.tickleState < 2)	/* 0 or 1 */
+  {
+    @._lekoFor (mon_oyster, "The giant oyster rocks a little in the sand!\n") ;
+    mon_oyster.tickleState = mon_oyster.tickleState + 2 ;
+  }
+  else if (mon_oyster.tickleState < 4)	/* 2 or 3 */
+  {
+    @._lekoFor (mon_oyster, "The giant oyster shudders violently!\n") ;
+    mon_oyster.tickleState = mon_oyster.tickleState + 2 ;
+  }
+  else
+  {
+    @._lekoFor (mon_oyster, "The giant oyster rocks violently in the sand then sneezes!\n") ;
+    mon_oyster.tickleState = 0 ;
+
+    if (mon_pearl.location != mon_oyster)
+      return ;
+
+    echo ("As it sneezes, it ejects a huge pearl which thumps into your stomach\n") ;
+    echo ("and lands (luckily) undamaged in the sand at your feet!\n") ;
+
+    @._leko ("As the oyster sneezes, it ejects a huge pearl which bounces off\n") ;
+    @._lekoName () ;
+    @._leko (" and lands in the sand!\n") ;
+
+    @._move (mon_pearl, #actor.location) ;
+    
+  }
+
+}

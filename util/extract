@@ -1,0 +1,19 @@
+#!/bin/sh
+# Extract #defines from output of server
+# Use to generate rooms.h, etc.
+
+# Usage: extract output.h <dump
+#    or: sub source | extract output.h
+
+echo "
+/*
+ * $1
+ *
+ * Computer generated: DO NOT ALTER
+ *
+ */
+" >$1
+grep \#define >>$1
+echo "
+ /** Computer generated: DO NOT ALTER **/
+" >>$1

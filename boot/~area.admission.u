@@ -1,0 +1,253 @@
+/* mode: -*- c -*- */
+#include <drogon.h>
+#include "/homes/rws13/mud/game/misc/players.h"
+#include "/homes/dtm10/drongo/defines.h"
+#define areaadmitSyntax "*** areaadmit list | all | none | add <obj> \
+| del <obj> | copy <room> <room>"
+
+func @.areaadmit
+{
+  if ($#==2) {
+    if ($1=="add") {
+      @.areaadmitadd($2);
+      return;
+    }
+
+    if ($1=="del") {
+      @.areaadmitdel($2);
+      return;
+    }
+  }
+  
+  if ($#==3) {
+    if ($1=="copy") {
+      @.areaadmitcopy($2,$3);
+      return;
+    }
+  }
+
+  if ($#==1) {
+    if ($1=="all") {
+      @.areaadmitall();
+      return;
+    }
+
+    if ($1=="none") {
+      @.areaadmitnone();
+      return;
+    }
+
+    if ($1=="list") {
+      @.areaadmitlist();
+      return;
+    }
+  }
+
+  echo(areaadmitSyntax,"\n");
+}
+
+func @.areaadmitcopy
+{
+  if (!($from=atoobj($1))) {
+    echo(areaadmitSyntax,"\n");
+    return;
+  }
+
+  if (!($to=atoobj($2))) {
+    echo(areaadmitSyntax,"\n");
+    return;
+  }
+
+  if (!(($from.room) && ($from.area) && ($to.room) && ($to.area))) {
+    echo("The object numbers must specify rooms within areas.\n");
+    return;
+  }
+
+  if ((#actor!=$to.owner) && (#actor.level<29)) {
+    echo("You cannot change the admission lists for ",$to.area.fullname,".\n");
+    return;
+  }
+  
+  echo("Copying from ",$from.area.fullname," to ",$to.area.fullname,"\n");
+
+  foreach $arg in ($from.area.admitList) {
+    if (listsearch($to.area.admitList)) {
+      echo($arg.name," (",$arg,") is already in.\n");
+    } else {
+      $to.area.admitList=listadd($to.area.admitList,$arg);
+      echo($arg.name," (",$arg,") has been added.\n");
+    }
+  }
+} chmod (&@.areaadmit, "W:rs") ;
+
+func @.areaadmitall
+{
+  $area=#actor.location.area;
+
+  if (!($area=#actor.location.area)) {
+    echo("This location is not in an area.\n");
+    return;
+  }
+
+  if ((#actor!=#actor.location.owner) && (#actor.level<29)) {
+    echo("You cannot change the admission lists for ",$area.fullname,".\n");
+    return;
+  }
+
+
+  echo("Adding players for ",$area.fullname,"\n");
+
+  foreach $arg in (Util.players) {
+    if (listsearch($area.admitList)) {
+      echo($arg.name," (",$arg,") is already in.\n");
+    } else {
+      if ($arg.level>0) {
+        $area.admitList=listadd($area.admitList,$arg);
+        echo($arg.name," (",$arg,") has been added.\n");
+      }
+    }
+  }
+} chmod (&@.areaadmitall, "W:rs") ;
+
+func @.areaadmitnone
+{
+  $area=#actor.location.area;
+
+  if (!($area=#actor.location.area)) {
+    echo("This location is not in an area.\n");
+    return;
+  }
+
+  if ((#actor!=#actor.location.owner) && (#actor.level<29)) {
+    echo("You cannot change the admission lists for ",$area.fullname,".\n");
+    return;
+  }
+
+
+  echo("Removing players for ",$area.fullname,"\n");
+
+  foreach $arg in ($area.admitList) 
+    echo($arg.name," (",$arg,") has been dropped.\n");
+
+  $area.admitList=NULL;
+} chmod (&@.areaadmitnone, "W:rs");
+
+
+
+func @.areaadmitadd
+{
+  $area=#actor.location.area;
+
+  if (!($area=#actor.location.area)) {
+    echo("This location is not in an area.\n");
+    return;
+  }
+
+  if ((#actor!=#actor.location.owner) && (#actor.level<29)) {
+    echo("You cannot change the admission lists for ",$area.fullname,".\n");
+    return;
+  }
+  numArgs(1,areaadmitSyntax);
+
+  if (!($obj=atoobj($1))) {
+    echo("That is not a valid object.\n");
+    return;
+  }
+
+  if (!($obj.player)) {
+    echo("That object is not a player.\n");
+    return;
+  }
+
+  if (listsearch($area.admitList,$obj)) {
+    echo($obj.name," (",$obj,") is already on the list for ",$area.fullname,".\n");
+    return;
+  }
+
+  $area.admitList=listadd($area.admitList,$obj);
+  echo($obj.name," (",$obj,") has been added to the list for ",$area.fullname,".\n");
+} chmod (&@.areaadmitadd, "W:rs") ;
+
+func @.areaadmitdel
+{
+  $area=#actor.location.area;
+
+  if (!($area=#actor.location.area)) {
+    echo("This location is not in an area.\n");
+    return;
+  }
+
+  if ((#actor!=#actor.location.owner) && (#actor.level<29)) {
+    echo("You cannot change the admission lists for ",$area.fullname,".\n");
+    return;
+  }
+
+  if (!($obj=atoobj($1))) {
+    echo("That is not a valid object.\n");
+    return;
+  }
+
+  if (!($obj.player)) {
+    echo("That object is not a player.\n");
+    return;
+  }
+
+  if (!(listsearch($area.admitList,$obj))) {
+    echo($obj.name," (",$obj,") is not on the list for ",$area.fullname,".\n");
+    return;
+  }
+
+  $area.admitList=listdrop($area.admitList,$obj);
+  echo($obj.name," (",$obj,") has been dropped from the list for ",$area.fullname,".\n");
+} chmod (&@.areaadmitdel, "W:rs") ;
+
+func @.areaadmitlist
+{
+  if (!($area=#actor.location.area)) {
+    echo("This location is not in an area.\n");
+    return;
+  }
+
+  if ((#actor!=#actor.location.owner) && (#actor.level<29)) {
+    echo("You cannot view the admission lists for ",$area.fullname,".\n");
+    return;
+  }
+  
+  echo("List of players with access to ",$area.fullname,".\n");
+  foreach $ply in ($area.admitList) {
+    $txt=str($ply);
+    echo(@._repeatText(4-strlen($txt)," "),$txt," : ",$ply.name,"\n");
+  }
+} chmod (&@.areaadmitlist, "W:rs") ;
+    
+func @._playerNotOwner
+{
+  if (!($1.area))
+    return;
+
+  if ($actor.level>=29)
+    return;
+
+  if ($1.owner==#actor)
+    return;
+
+  return 1;
+}
+
+func @._playerNotAdmitted
+{
+  if (!($2.area)) 
+    return;
+
+  if ($1.level>=29)
+    return;
+
+  if ($1==$2.owner)
+    return;
+
+  if (!(listsearch($2.area.admitList,$1)))
+    return 1;
+
+  return;
+}
+

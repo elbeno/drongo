@@ -1,0 +1,95 @@
+/***************************************************************\
+* Information file for Logic Island 				*
+* Submitted by Bugblatter djt1000@uk.ac.cam.hermes		*
+\***************************************************************/
+
+/* Revision History
+ 
+ Date   | Modifications
+--------+-------------------------------------------------------
+03Mar94 | This file created
+--------+-------------------------------------------------------
+03Mar94 | Submitted to Irn-Bru
+--------+-------------------------------------------------------
+
+*/
+
+
+To Irn-Bru
+==========
+
+Here is the code I have been writing over the last few months. It
+is the start of an island to replace/be the second island. The code
+currently includes only one puzzle but will hopefully have four
+more added to it (making a total of five). I do have plans for these
+and have made most of the island accordingly. I have not made
+the village because this involves slightly more work, but have left
+room for it and prevented players getting there. 
+
+Currently the code sent consists of the basic island locations and
+a wizard tower. This has a puzzle in it, as described below. This
+all currently works under Drongo (as Boro calls it). It also contains
+a room for myself, and a control room for the puzzle.
+
+There are a few things that i think you need to do:
+  - what should happen when the player choses the wrong solution to the
+    door puzzle. More about this in the source code.
+
+Below is a breif description of the puzzles (including those I intend to
+add)
+
+I hope the code is in the 'Drogon' standard, and that it is OK. The code
+for the puzzle is long, but the function to reset the puzzle is compilcated.
+
+I have turned the island around so that one of the locations is facing
+west. This is location island2_beach_03. I have added rocks to the other
+beach locations so there is a reason why you cannot land on them.
+
+Logic Island
+============
+
+The Room Puzzle
+---------------
+
+To be found in the wizard tower.
+
+In a room (The Puzzle Room) there are three exits, and a stone. Each
+exit has a plaque as does the stone. The inscriptions on the door
+plaques read one of the following:
+  'The ingot is behind door X'
+  'The ingot is not behind door X'
+  'Plaque X lies'
+  'Plaque X tells the truth'
+And the plaque on the stone gives some indication of how many doors are
+telling the truth. Depending on what ingot you are playing for (determined
+by which are available) the inscriptions are of varying difficulty. There
+are four possible treasures of increasing order and weight. The bronze,
+silver, gold and platinum ingots. If you are playing for the platinum ingot
+it is in the cleanres cupboard not any of the 'standard' doors and there
+is no solution to the puzzle posed!
+The idea is a good player will collect two ingots and then come back
+for the other two. The bronze is very easy. The gold can be nasily hard
+and the platinum (as mentioned above needs lateral thinking!
+
+The pebble puzzle
+-----------------
+
+To be found in the cave. This will be a game of NIM.
+
+The potion puzzle
+-----------------
+
+To be found in the forest.
+
+The Dynamic maze
+----------------
+
+Unsure. Possibly on the sand!
+
+The Moving maze
+---------------
+
+To be found in the village
+
+
+Bugblatter -  03 March 1994

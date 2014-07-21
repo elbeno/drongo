@@ -1,0 +1,99 @@
+press puppets
+The following displays are set up:
+(1) Generic Announcer/Follower          (14) Generic Scriptable Puppet
+(2) Generic Puppet                      (15) Generic Follower
+(3) Generic Gendered Object             (16) Generic Horse
+(4) Generic Announcer                   (17) Mzr's Gnrc ctchng+thrwng pppt
+(5) Draxx                               (18) Frand's generic wanderer
+(6) Sick's generic following puppet     (19) Frand's generic follower
+(7) Sck's gnrc pppt wth addtnl ftrs dbs (20) Generic Announcer Puppet
+(8) Sick's generic conversational puppe (21) Generic John Travolta
+(9) Generic Puppet with Features        (22) Generic zoological following puppe
+(10) Puppet with Teleport Messages      (23) Generic Exterior Vehicle
+(11) generic monster                    (24) generic gendered thing
+(12) Generic Loyal Kobold               (25) generic wanderer
+(13) Generic Parsing Puppet             (26) Morphing Puppet
+press containers
+The following displays are set up:
+(1) Generic Combination Safe            (8) Generic Zone
+(2) Generic Vending Machine             (9) Mazer's generic secure container
+(3) generic alarmed container           (10) Khalarghast's Improved Container
+(4) generic container                   (11) generic emptyable container
+(5) Generic Bottomless Container        (12) Generic NOOMail Bag
+(6) generic electrical device           (13) gnrc mssg-ntgrtng/nglsh-lstng cntn
+(7) generic wearable container          (14) Generic Container With Tag/Card
+press generic_exits
+The following displays are set up:
+(1) Really Secure Exit                  (6) Secure Exit
+(2) generic exit                        (7) Defaulting Exit
+(3) Generic Switchable Exit             (8) generic door
+(4) Generic Stairwell Exit              (9) Frand's transparent exit
+(5) generic missile-transmitting exit   (10) Generic Door
+press misc
+The following displays are set up:
+(1) Generic AV Equipment                (19) generic bulletin board
+(2) Generic Multi-Purpose Pet           (20) generic radio
+(3) Generic Drink                       (21) generic computer system
+(4) generic musical instrument          (22) generic builder
+(5) Generic Flower                      (23) Frand's generic game board
+(6) Gnrc Prgrmmbl Mscl instrmnt         (24) generic letter
+(7) Generic Timepiece with Alarm        (25) generic chair
+(8) Generic Furniture                   (26) generic dog
+(9) Frand's generic magnetic thing      (27) generic following dog
+(10) Generic Climbable Object           (28) Generic Bruce
+(11) Generic Combination Lock           (29) generic watch
+(12) Generic Answering Machine          (30) Generic Body of Chlorinated Water
+(13) Generic Grafitti Wall              (31) Generic Pool Toy
+(14) Wntrmt's Gnrc Wrbl objct           (32) Generic Sittable Object
+(15) Generic Radio                      (33) Frnd's nw gnrc mnl/ncyclpd
+(16) Generic Zapper                     (34) generic CD
+(17) generic thing                      (35) generic CD player
+press misc2
+The following displays are set up:
+(1) Generic Transport Panel             (18) Generic Deck of Cards
+(2) Generic Pile                        (19) Generic Integrating Clothing
+(3) Generic Chair                       (20) Generic Mirror Portal
+(4) Generic Calendar                    (21) Generic Portal Node
+(5) Frand's generic breeder             (22) generic telephone
+(6) Generic Strasbourg Clock Echo Devic (23) Generic Mace
+(7) Generic Watch                       (24) generic recording object
+(8) shot of bourbon                     (25) Generic Room Attachment
+(9) Generic Puree                       (26) Generic Fire Alarm
+(10) a marshmallow                      (27) Frand's generic detailed thing
+(11) Generic Diskette                   (28) Generic Telephone
+(12) generic trainable pet              (29) Frand's generic map
+(13) Generic Auditor                    (30) Mazer's generic safe key
+(14) generic electrical connector       (31) Generic Kallisti Gold
+(15) generic masque                     (32) Wintermute's Generic Paintball Gun
+(16) Generic Bonker                     (33) Generic 3D Space
+(17) generic middle-earth jewelry       (34) Generic MUD Pie
+press misc3
+The following displays are set up:
+(1) Generic Wind-Up Toy                 (16) lesser generic magnetic container
+(2) Generic Pillow                      (17) Generic_Box
+(3) generic table                       (18) generic Markov Chainer
+(4) generic crystal                     (19) Generic Halloween Costume
+(5) generic trippable stairway          (20) Generic Consumable Object
+(6) generic stupid waving hat           (21) Generic Room Area
+(7) generic name corrector              (22) Generic Sitting Area
+(8) generic encyclopaedia               (23) Generic Standing Area
+(9) Generic Breakable Object            (24) Generic Survey
+(10) generic space alien                (25) Generic Televison Set
+(11) Generic Wigglable Personal Object  (26) Sick's generic voodoo doll
+(12) generic lecture                    (27) generic footbag
+(13) Generic Drinkable Object II        (28) Generic Carcinogenic Object
+(14) Generic Balloon                    (29) Gnrc amplfbl Mscl instrmnt
+(15) Gnrc thrwbl+ctchbl objct wth vrbl  
+press misc4
+The following displays are set up:
+(1) Generic Lazer Tag Device            (12) generic magnetic container
+(2) Generic Phone                       (13) Generic Analog Watch
+(3) generic magnetic container          (14) Generic Listening Device
+(4) Generic Wearable Object             (15) Generic Soda
+(5) Generic Alarming Watch              (16) Dblsq's gnrc frstrtn dll
+(6) Generic Missile control             (17) Generic Integrated AV Component
+(7) Generic Book                        (18) Generic Editing Camcorder
+(8) Generic StarLyte                    (19) generic lizard
+(9) generic byte counter                (20) generic multi-communication channe
+(10) Gnrc Prgrmmbl Cnsmbl objct         (21) Blackbriar's Generic Clothing Item
+(11) Generic TLA and Phrase Book        

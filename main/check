@@ -1,0 +1,48 @@
+#!/bin/sh
+SERVERDIR=/home/bjd1000/drongo/main/fridge
+SERVERPID=$SERVERDIR/server_pid
+SERVERTOUCH=$SERVERDIR/server_lives
+
+if [ ! -f $SERVERPID ]; then
+	echo "no server process id in $SERVERPID"
+	exit 2
+fi
+
+if [ ! -f $SERVERDIR/serverhost ]; then
+	echo "no serverhost file!"
+	exit 2
+fi
+
+SERVERHOST=`cat $SERVERDIR/serverhost`
+
+if [ $SERVERHOST != `hostname` ]; then
+	echo "Drongo is running on $SERVERHOST - please try from there"
+	exit 2
+fi
+
+# server pid is in the file, created at boot-time
+SPID=`cat $SERVERPID`
+
+# create the touchfile
+touch $SERVERTOUCH
+if [ $? != 0 ]; then
+	echo "cannot create touch file $SERVERTOUCH"
+	exit 2
+fi
+
+# signal the server to remove the touch file
+echo "sending a kill -CONT to pid $SPID"
+kill -CONT $SPID
+if [ $? != 0 ]; then
+	echo "kill failed. server must be dead."
+	exit 1
+fi
+
+if [ -f $SERVERTOUCH ]; then
+	echo "touch file is still present. server must be dead"
+	exit 1
+fi
+
+echo "server seems to be alive and kicking"
+exit 0
+

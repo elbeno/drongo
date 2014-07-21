@@ -1,0 +1,15 @@
+
+
+	This is the source and tools/doc for Ubermud.
+
+roadmap::
+
+Makefile	- top-level makefile. builds everything recursively.
+btlib		- b+tree library.
+doc		- documentation.
+include		- include files for all libraries.
+main		- main interpreter and compiler source.
+obj		- libraries created by the compiler.
+regexlib	- regular expression library.
+samples		- random bits of U-code.
+util		- utilities and misc. stuff.

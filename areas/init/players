@@ -1,0 +1,23 @@
+/*
+ *  Drongo player file
+ *  Drongo version: unknown 
+ *  compiled and running on j-007.emma.cam.ac.uk
+ *  author of this file: Ben Deane
+ *  creation date: 25/5/95
+ */
+
+#include <drogon.h>
+
+{
+  PLAYER("Linca") ;
+  $player.sex = FEMALE ;
+  PDESC = "
+  Wearing comfortable clothing suited to the lifestyle of an adventurer, 
+  she skips freely through the Land of Drogon. 
+  The instant you hear her lyrical voice, you are put at ease. 
+  Truth, beauty, and love envelop you in her presence. 
+  She is a musician, an artist, a philosopher, and a friend. 
+  She reminds you that it is not ones appearance, 
+  but ones personality, which truly make up his/her being." ;
+}
+

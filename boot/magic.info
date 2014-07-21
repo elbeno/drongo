@@ -1,0 +1,131 @@
+/*
+You wave your hands and mutter "Glakarise, paralyse" ...
+*** Your magic backfires!
+Some strange roots grow out of the ground and grab your feet, making further
+movement impossible!
+e
+The roots prevent you from moving.
+
+Linca waves her hands and mutters "Gladakaref, make a deaf" ...
+"hello? am I deaf/dumb etc?
+
+Linca says: "doesn't work"
+
+Linca waves her hands and mutters "Glakarinde, make a blind" ...
+
+Linca's eyelids slam closed!
+
+You wave your hands and mutter "Gladakdeel, do a heal" ...
+
+* You have been healed of any dumb, deaf, paralyse or blind spells!
+
+You wave your hands and mutter "Gladakarum, make a dumb" ...
+*** Your magic backfires!
+Your attempt to dumb yourself fails as the magic from the dumb spell
+cancells out the incomming dumbing magic.
+
+wHelp magic:
+
+Random thoughts about Drogon Magical spells and Mana values
+===========================================================
+
+  Magic for anyone:
+    tell          1
+    page          1
+    shout         5  wshout 5
+
+    fumble:      10
+    dumb:        10
+    deafen:      10
+    paralyse     10
+    blind:       35
+    heal:        15 (20 when dumb)
+
+    summon:      15
+
+    pWhere:      15
+    mWhere:      15
+    oWhere:      20     (heavy duty cpu user)
+
+---------------------------more-------------
+
+  Wizard magic only:
+    teleport:    10
+    pw all:      30
+    disguises:   50
+    undisguise:  75
+
+    boot:       200
+    zap:        300
+
+---------------------------more-------------
+
+Sugested max. mana values and restore times for each level are:
+
+  Level  Mana  Restore time
+  =====  ====  ============
+     0:    1    2 per 15 seconds. (  8 per minute)
+  1- 6:    5
+  7- 8:   10    3 per 15 seconds. ( 12 per minute)
+  9-10:   15
+    11:   20
+ 12-16:   25
+    17:   30    4 per 15 seconds. ( 15 per minute)
+    18:   40
+    19:   50
+    20:  200    5 per 15 seconds. ( 20 per minute)
+    21:  500   15 per 15 seconds. ( 60 per minute)
+    22: 1000   25 per 15 seconds. (100 per minute)
+
+
+help magic:
+
+  Drogon Magic
+  ~~~~~~~~~~~~
+  The land of Drogon is a magical place and there are a few magical
+  spells that the ordinary Drogoneer can use.
+
+  Most Drogon magic works by summoning a demon to do your dirty work.
+  You may also find scrolls which contains magical text which will perform
+  the magic directly by you when it is read. Your ability to perform magic
+  depends on your level within the game. Generally speaking, wanderers
+  will find it impossible to do magic, whereas wizards magic will never
+  fail.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Type "more" for the next page -=-
+more
+
+  The amount of magic that you can do is controlled by your mana. The
+  more mana you have, the more spells you can do. Casting a spell will
+  use up your mana, to the point that you will no-longer be able to do
+  any magic. Casting a spell when you have insufficient mana will reduce
+  your mana by about half of what the spell needs. Fortumately your mana
+  value can't go below zero. Type "score" (or "sc") to see your current
+  mana value and it's maximum possible value.
+
+  Your mana regenerates with time. The higher your level, the faster it
+  regenerates.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Type "more" for the next page -=-
+
+  Shout, tell and page are magical commands and will deplete your mana
+  value accordingly, as is casting an earmuffs spell.
+
+  Magical commands that exist within the land are:
+    deafen, dumb, blind, paralyse, heal, fumble, summon,
+    pWhere, oWhere and mWhere.
+
+  Type "help <magical command>" for more details.
+  (Wizards and witches can type "wHelp magic" for more details)
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- End of file -=-
+
+
+You wave your hands and mutter "Glakadumble cause a fumble" ...
+*** Your magic backfires!
+
+You fumble! You drop a miniature snowstorm.
+
+*/
+
+
+

@@ -1,0 +1,43 @@
+/* -*- c -*- */
+
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @._setArea
+{
+  $tnam=str("default", CodeSub);
+
+  if ($1==$tnam) {
+    #actor._editArea=NULL;
+    return;
+  }
+
+  foreach $ar in (Util.areas) {
+    if ($ar.name==$1)
+      $mch=$ar;
+  }
+
+  if ($mch==NULL) {
+    $mch = objectnew () ;
+    $mch.area = 1 ;
+    $mch.name = $1 ;
+    Util.areas = listadd (Util.areas, $mch) ;
+  }
+
+  #actor._editArea=$mch;
+
+} chmod(&@._setArea, "W:rs");
+
+/* This function returns the actor number to whom the object
+created by this player will be attributed */
+
+func @._getCurOwner
+{
+  if ((#actor._editArea==NULL) || (#actor._editArea.name==str("default",CodeSub))) {
+    return CodeSub;
+  }
+
+  return #actor._editArea.owner;
+} chmod(&@._getCurOwner, "W:rs");
+

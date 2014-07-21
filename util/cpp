@@ -1,0 +1,2 @@
+/lib/cpp -traditional -P -I/home/bjd1000/drongo/main $1 > /home/bjd1000/drongo/main/fridge/8.code
+

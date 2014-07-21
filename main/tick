@@ -1,0 +1,1 @@
+$MUDUTILDIR/tickgen -h `cat $MUDDIR/serverhost` -l Toaster -p `cat $MUDDIR/toasterpass`

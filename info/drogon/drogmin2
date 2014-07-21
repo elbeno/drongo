@@ -1,0 +1,130 @@
+Coding:
+Irn-Bru : "I have nearly completed 2 maunal to send to you all."
+Irn-Bru : "I'll finish them at the w/end and email them to all builders, allong with the u-code ref. manual."
+
+
+Seeing more of what's going on
+Irn-Bru : "OK - WHAT I CAN DO IS TO MAKE MORE COMMANDS ECHO THEIR RESULTS TO THE WIZARDS"
+"how about partial snoop, ie commands but not tell"
+
+Quests:
+I think that there should be a correlation between quests solved and maximum attainable level....about 95% to get to lvl 14"
+Brona says: "quest for each level no way"
+Vote : N,Y,N
+Ged: one thing about the quest that would help is if the player CANNOT have done it before. (like the two in operation now!)"
+
+Gobstopper:
+"move the gobstopper"
+"or only have it work once?"
+or hide it or put a puzzle in."
+Increase sleep time......"
+"eg. I could alter the gobstopper to not work after you have past level 4."
+
+Hp restore:
+Borogove: "Make truffle restore a number of hit points"
+Astaroth: "Pete suggests - Eating the truffle not increase stam, but increases the speedd at which stam is recovered"
+Irn-Bru : "OK - MOBILES CURRENTLY REGENERATE VRY FAST - I'LL SLOW THAT DOWN A BIT."
+Borogove: "More places with water?"
+Irn-Bru : "OK - WE HAVE 3 HEALTH RESTORERS: TRUFFLE, DATES AND WATER IN OASIS."
+Irn-Bru : "YES - AND MELY IF YOU CARRY IT FOR MORE THAN 5 MINS."
+Ged     : "a heal spell ?"
+Daneel  : "nope , but a place you can go and pay to be healed(?)"
+Irn-Bru : "A MEANS THAT I USED IN ANOTHER GAME WAS PRAYING WITH A CROSS IN A CHURCH."
+Daneel  : "how about a place, where you can rest, and pay money to be restored in a
+certain time, ie in a hotel room, the better the room , the faster you heal."
+Borogove: "I think more food is needed, scattered around,..."
+Borogove: "I like the idea of it going moldy if you hold it too long"
+Ged     : "i think damage should be kept after logout too. otherwise..."
+Borogove: "Incremented slowly"
+Borogove: "Faster if you relax (by some definition)"
+Ged     : "we will need a heal spell tho - if arguments and problems occur (not to full either - heal <> 20)"
+Pesky   : "Can players be made to get drunk, which affects the chances of hitting an opponent in a fight,
+	 but gives some healing properties?? "
+Astaroth: "Right, as far as comparison with other MUGs goes, I find that stam
+    on here rises MUCH too fast... Also, considering people can run around"
+    getting back to max stam is very easy"
+
+Daneel  : "a persons total combat effectiveness should be a function of their hp and then ..."
+             their attack value of the weapon and the defense val of the armour they"
+             are wearing...."
+
+Darksword thinks that that might increase ppl trying to solve non-violent puzzles!!! which is good
+
+Ged     : "i thought it might be a good idea"
+   "for perforamnce degradation for a number of resons"
+   "eg drunk, low hp etc. Not just fighting"
+   "but all performance. - stealing / magic etc"
+   "stealing especially."
+
+Auto flee:
+Irn-Bru  : "how about an auto-flee (wimpy mode) when getting very low on points."
+Astaroth : "Basically, you record the amount of times the person has initiated fights ....."
+   and the amount of times they have fled, and the amount of times they have been attacked"
+   and on that basis you calculate how much of a coward they are"
+   and auto flee mode is a setting which is beyond"
+   their control as its an integral part of their charactefr"
+Astaroth : "an extra variable for mobiles concernibg how frightened they get"
+Pesky    : "Can fighting players, mean -1 lvl for looser."
+Daneel   : "we need to get over the point that fighting is a VERY RISKY poroposition"
+Daneel   : "I like the way it is......"
+Irn-Bru  : "which is why I think that losing ALL if you attack and lose is good."
+Vagnerr  : "I think that actualy fignting things should not only reduce your staminar ..."
+     "but also make you more tired"
+
+"Shall we all agree to come up with some quest ideas.... and perhaps try coding some bits to take
+the strain of irn-bru....."
+ 
+Building:
+Darksword: "so that we can get different opinions from ppl on whta they think of the areas"
+Irn-Bru  : "THIS ARCH WILL HELP TO GUILD PEOPLE ABOUT BUILDING AND LOOK AT WHATS CURRENTLY BEING BUILT"
+Borogove :"If we had a board which all builders had access too..."
+Borogove : "we could all pin up what we are currently building"
+Darksword: "we can also make the committeee a pass/fail committee ...they can refuse someones' area if..."
+Darksword: "its not good enough"
+Ged      : "a room mentioned in build help, with build access, and a bulletin."
+Irn-Bru  : "As I have to do a little work to gmove an area from online to offline I'd appreciate some vetting , yes!"
+Irn-Bru  : "so I could create more of them..."
+Borogove : "on-line builders could pin up entrance room numbers:"
+
+Daneel   : "can everyone at some time have a look in the wizards academy, and check their portraits, mail me a desc if
+ you want one made/changed"
+Daneel   : "use drogon mail."
+
+Irn-Bru  : "ok - armour weapons:"
+Irn-Bru  : "I think that they will stay at 0 when in online format."
+
+Astaroth : "Concerning tags attached to rooms, which can be used as a reference to teleport to."
+
+On-line built objects:
+ghost values
+For play testing - fetch an object and leave it next to the ghost treasure
+
+
+Choice of arch:
+Ged because he asked
+
+when someone is deafed or dumbed then emotes shouldn't work
+
+Ged says: "how will we decide upon the committee ?"
+
+Quests:
+Borogove: "Either build a quest section of your own"
+Borogove: "or think of a quest for DDrogon as it stands"
+Borogove: "Atleast quests built into the current map mean the land is used more than once!"
+
+Darksword: "diff from the templ
+
+Darksword: "can we have a vote board ?"
+Darksword: "so that anyone can put up an idea on it...and"
+Borogove : "And after some discussion we can change our votes"
+
+Darksword: "a mail group that we can subscribe to...."
+
+Darksword: "i could regulate the group ....if anyone wants it..."
+Darksword: "not regulate but just do the mail
+Darksword: "just a mail thing ..i collect mail from everyone .."
+Darksword: "and resend to everyone on the list ...info an"
+
+Emoteto
+look <room>
+

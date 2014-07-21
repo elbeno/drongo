@@ -1,0 +1,7 @@
+cd init
+load
+cd ../temple
+load
+cd ../my_area
+load
+cd ..

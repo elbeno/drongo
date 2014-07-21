@@ -1,0 +1,324 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include "drogon.h"
+
+/** The road to the mansion **/
+
+{
+  ROOM ("Red cobbled road", "mansion_road_01") ; RDESC = "
+  This is a wide cobbled road leading from the statue of Irn-Bru in the
+  West to a mansion, far off to the East." ;
+}{
+  ROOM ("Red cobbled road", "mansion_road_02") ; RDESC = "
+  This is a wide cobbled road leading from the statue of Irn-Bru far in
+  the West to a mansion to the East. You notice that the entire mansion
+  grounds seem to be enclosed by a high wall, constructed out of some
+  White marble-like rock. " ;
+}{
+  ROOM ("Red cobbled road", "mansion_road_03") ; RDESC = "
+  This is a wide open cobbled area in front of a fairly large mansion
+  directly to the East of you. Open grassy areas lie to the North and
+  South. Although the doors to the mansion are wide open, you see some
+  sort of shimmering veil covering the door." ;
+  SCENERY ("shimmering veil", "*") ;
+}
+
+/** The mansion grounds **/
+
+{
+  ROOM ("Open grassy area", "mansion_grass_01") ; RDESC = "
+  An open grassy area to the North West of the mansion. A flower garden
+  is to the East and the cobbled area in front of the mansion to the
+  South. You see the White walls to the North and West." ;
+  SCENERY ("High, White walls", "They are tall White walls, made out of what appears to be marble.") ;
+}{
+  ROOM ("Open grassy area", "mansion_grass_02") ; RDESC = "
+  An open grassy area to the South West of the mansion. More grass lies
+  to the East and the cobbles area in from of the mansion to the North.
+  You see the White walls to the West and South." ;
+  SCENERY ("High, White wall", "It's a tall White wall, made out of what appears to be marble.") ;
+}{
+  ROOM ("Open grassy area", "mansion_grass_03") ; RDESC = "
+  You are in the middle of a long East/West lawn to the South of the
+  mansion. A White wall is to the South." ;
+  SCENERY ("High, White wall", "It's a tall White wall, made out of what appears to be marble.") ;
+}{
+  ROOM ("Open grassy area", "mansion_grass_04") ; RDESC = "
+  You are at then East end of a long East/West lawn. The mansion lies to
+  the North West. To the North is a herb garden and to the East there is
+  a most curious folly. A high wall continues to the South." ;
+  SCENERY ("High, White wall", "It's a tall White wall, made out of what appears to be marble.") ;
+}{
+  ROOM ("Folly", "mansion_folly") ; RDESC = "
+  You are standing inside a most curious folly. It can best be described
+  as looking somewhat like Stonehenge with a roof. There are about 2
+  dozen pillars arranged in a rough circle of about 10 meters (33')
+  diameter with a single lump of what looks like granite for the roof.
+  You notice engravings of peacocks on most of the pillars. Through the
+  pillars to the West, you see a long lawn, and a herb garden to the
+  North West." ;
+  SCENERY ("Peacock engravings", "These have been hand carved into the stone pillars.") ;
+  INDOORS ;
+}{
+  ROOM ("Herb garden", "mansion_herbs") ; RDESC = "
+  A fairly small garden to the East of the mansions kitchen. You
+  recognise quite a few herbs such as thyme, mint, rosemary, parley as
+  well as several other herbs that look quite unfamiliar. A topiary is to
+  the North, with the western end of a long lawn to the South." ;
+}{
+  ROOM ("Flower garden", "mansion_flowers") ; RDESC = "
+  This is a pleasant (but fairly shady) flower garden to the North of the
+  mansion. You can see marigolds, roses, white and yellow daisies and
+  several other colourful flowers glowing quite happily. A high wall
+  prevents progress to the North. There is a grassy area to the West and
+  what looks like a very interesting topiary to the East." ;
+  SCENERY ("High, White wall", "It's a tall White wall, made out of what appears to be marble.") ;
+}
+
+/** The topiary **/
+
+{
+  ROOM ("Topiary", "mansion_topiary_01") ; RDESC = "
+  This is the North-Western corner of a large topiary. This section is
+  composed of privet bushes carefully cut into small animal shapes. You
+  can make out squirrels, mice (or rats?) cats and dogs." ;
+}{
+  ROOM ("Topiary", "mansion_topiary_02") ; RDESC = "
+  This is the North-Eastern corner of a large topiary. The bushes in this
+  section seem to be pruned into fairly regular geometric shapes. You
+  make out spherical, cylindrical and conical bushes." ;
+}{
+  ROOM ("Topiary", "mansion_topiary_03") ; RDESC = "
+  You are in the centre of a large topiary. The bushes in this section
+  have been pruned into bird shapes. The most recognisable ones are
+  flamingoes (or are they storks?) and swans." ;
+}{
+  ROOM ("Topiary", "mansion_topiary_04") ; RDESC = "
+  This is the South-Western corner of a large topiary. The bushes in this
+  section have been pruned into what appears to be male and female
+  faces.  You don't recognise any of the faces, however. A flower garden
+  can be seen to the West and a herb garden to the South. The topiary
+  continues to the North and East." ;
+}{
+  ROOM ("Topiary", "mansion_topiary_05") ; RDESC = "
+  This the the South-Eastern corner of a large topiary. The bushes here
+  seem to be rather mis-shapen. I'd guess that the gardener is leaving
+  them to grow some more before pruning them into new shapes." ;
+}
+
+
+/** The lower hallway **/
+
+{
+  ROOM ("Lower hallway", "mansion_loHall_01") ; RDESC = "
+  This is the eastern end of an East/West hallway. The lounge is to the
+  North, and the dining room to the South." ;
+  INDOORS ;
+}{
+  ROOM ("Lower hallway", "mansion_loHall_02") ; RDESC = "
+  You are in the middle of an East/West hallway. The library is to the
+  North with the ballroom to the South." ;
+  INDOORS ;
+}{
+  ROOM ("Lower hallway", "mansion_loHall_03") ; RDESC = "
+  This is the western end of an East/West hallway. The main doors to the
+  mansion are to the West and are wide open. A wide staircase leads up." ;
+  INDOORS ;
+}
+
+/** Ground floor **/
+
+{
+  ROOM ("Kitchen", "mansion_kitchen") RDESC = "
+  A good sized kitchen with a large oak table to one side and lots of
+  brass pots and pans hung on the wall. You see a large open fireplace
+  with ovens on either side. A staircase leads down to the cellar. The
+  herb garden is out the East, pantry to the South and the dining room to
+  the West." ;
+  SCENERY ("oak table",           "A large and sturdy kitchen table.") ;
+  SCENERY ("brass pots and pans", "They are clean and polished.") ;
+  SCENERY ("open fireplace",      "A large and warming fireplace.") ;
+  SCENERY ("ovens",               "Cast iron ovens set into the brick work around the fireplace.") ;
+  INDOORS ;
+}{
+  ROOM ("Cellar", "mansion_cellar_01") ; RDESC = "
+  A good sized wine cellar with racks of what appears to be good vintage
+  wine and champagne. Several casks of ale can be seen along the northern
+  wall. Stairs lead back up to the kitchen and a stone archway leads
+  East." ;
+  SCENERY ("racks",        "Racks full of wine bottles.") ;
+  SCENERY ("Casks of ale", "Several large barrels, filled with some fine ale.") ;
+  INDOORS ;
+}{
+  ROOM ("Food store", "mansion_cellar_02") ; RDESC = "
+  This is a cool storage room to the East of the main cellar for the long
+  term storage of various food items. You see sacks of various fruits and
+  vegetables, as well as bags of flour and oats." ;
+  SCENERY ("bags",  "Large paper bags filled with various flours and oats.") ;
+  SCENERY ("sacks", "Large brown hessian sacks filled with various fruits and vegetables.") ;
+  INDOORS ;
+}{
+  ROOM ("Damp chamber", "mansion_cellar_03") ; RDESC = "
+  This is a tiny damp and dark little chamber, barely large enough for
+  you to stand up in." ;
+  INDOORS ;
+}{ 
+  ROOM ("Pantry", "mansion_pantry") ; RDESC = "
+  A small rooms to the South of the kitchen, lined with shelves
+  containing various foodstuffs. You see some of the herbs from the
+  garden hanging from the ceiling, small bags of flour, eggs, cheeses
+  and so on." ;
+  SCENERY ("shelves", "*") ;
+  SCENERY ("herbs",   "*") ;
+  SCENERY ("bags",    "*") ;
+  SCENERY ("flower",  "*") ;
+  SCENERY ("cheeses", "*") ;
+  SCENERY ("eggs",    "They look like hens eggs.") ;
+  INDOORS ;
+}{
+  ROOM ("Dining room", "mansion_diningRoom") ; RDESC = "
+  You are standing in a medium sized dining room. You see a long dining
+  table with high-backed chairs, set with silver cutlery for 24 people. A
+  swing door to the East leads into the kitchen and doorways to the North
+  and West lead to the Hall and Ballroom. Large windows to the South
+  overlook a long East/West lawn" ;
+  SCENERY ("dining table",   "It's long and polished.") ;
+  SCENERY ("chairs",         "*") ;
+  SCENERY ("silver cutlery", "Highly polished silver knives, forks and spoons.") ;
+  INDOORS ;
+}{
+  ROOM ("Ballroom", "mansion_ballRoom") ; RDESC = "
+  This is a large open ballroom with a highly polished wooden floor. A
+  small raised area is to the West, presumably a stage for a small band
+  to play from. You notice a large crystal chandelier hanging from the
+  ceiling.  Doorways lead East and North to the dining room and hall.
+  Large windows to the South overlook a long East/West lawn." ;
+  SCENERY ("stage",              "It's no more than a raised wooden platform.") ;
+  SCENERY ("Crystal chandelier", "It's a very large and impressive chandelier, gleaming and sparkling in\n  the light.") ;
+  INDOORS ;
+}{
+  ROOM ("Ballroom stage", "mansion_stage") ; RDESC = "
+  This is a small raised wooden platform, probably just big enough to fit
+  5 or 6 people and their instruments. The ballroom is to the East." ;
+  INDOORS ;
+}{
+  ROOM ("Lounge", "mansion_lounge") ; RDESC = "
+  A spacious room, with a nice soft carpet underfoot. An archway leads
+  North to a conservatory, with the doorway to the hall to the South." ;
+  SCENERY ("Carpet", "*") ;
+  INDOORS ;
+}{
+  ROOM ("Conservatory", "mansion_conservatory") ; RDESC = "
+  This is a nice sunny conservatory overlooking the flower garden to the
+  North. The conservatory is filled with exotic tropical plants and
+  butterflys." ;
+  SCENERY ("butterflys",             "Some very colourful butterflys.") ;
+  SCENERY ("exotic tropical plants", "There is a fascinating display of weird and wonderful plants.") ;
+  INDOORS ;
+}{
+  ROOM ("Library", "mansion_library") ; RDESC = "
+  A fairly small library with the East and West walls packed with shelves
+  full of books. Passages lead North and South to a study and the
+  hallway." ;
+  SCENERY ("shelves", "*") ;
+  SCENERY ("books",   "*") ;
+  INDOORS ;
+}{
+  ROOM ("Study", "mansion_study") ;
+  RDESC = "
+  This is a small study with a large mahogany desk and a green leather-bound
+  chair. You notice a rather curious painting on the wall." ;
+  SCENERY ("mahogany desk", "*") ; SDESC = "
+  This is a most impressive desk constructed from highly polished mahogany." ;
+  SCENERY ("chair",         "*") ; SDESC = "
+  A most comfortable chair with a green leather seat." ;
+  SCENERY ("the painting",  "*") ; SDESC = "
+  This is most odd! It's a still-life water colour, but the choice of
+  subject, a giant oyster, resting on a bed of feathers, defies any sort
+  of sane explanation!" ;
+  INDOORS ;
+}
+
+/** The upper hallway **/
+
+{
+  ROOM ("Upper hallway", "mansion_upHall_01") ; RDESC = "
+  This is the eastern end of an East/West hallway. The nursery is to the
+  North, the ladys bedroom to the South and the guest bedroom to the
+  East." ;
+  INDOORS ;
+}{
+  ROOM ("Upper hallway", "mansion_upHall_02") ; RDESC = "
+  You are in the middle of an East/West hallway. The master bedroom is to
+  the South with a childrens bedroom to the North." ;
+  INDOORS ;
+}{
+  ROOM ("Upper hallway", "mansion_upHall_03") ; RDESC = "
+  This is the western end of an East/West hallway. A small bedroom
+  belonging to the nanny is to the north. A wide staircase leads down." ;
+  INDOORS ;
+}
+
+/* Upper floor */
+
+{
+  ROOM ("Master bedroom", "mansion_masterBedroom") ; RDESC = "
+  A large and spacious bedroom. The main features are a large four poster
+  bed, wardrobe and a large chest of drawers. The door to the North leads
+  to the hallway with a connecting door to the bedroom to the East." ;
+  SCENERY ("bed",              "A large and comfortable bed.") ;
+  SCENERY ("wardrobe",         "A large wardrobe, designed to hold jackets, shirts and trousers.") ;
+  SCENERY ("chest of drawers", "A fairly plain wooden chest of drawers.") ;
+  INDOORS ;
+}{
+  ROOM ("Ladies bedroom", "mansion_ladiesBedroom") ; RDESC = "
+  A moderate sized bedroom with a four poster bed adorned with a white
+  satin bedspread. There is a dressing table supporting glass containers
+  holding perfumes, creams and powders. A smaller table in the corner
+  holds a vase full of fresh pink roses. A door to the north leads to the
+  hallway with a connecting door to the bedroom to the West." ;
+  SCENERY ("dressing table",   "*") ;
+  SCENERY ("bed",              "A large and comfortable bed.") ;
+  SCENERY ("satin bedspread",  "It feels lovely and soft and warm.") ;
+  SCENERY ("vase",             "It's full or roses.") ;
+  SCENERY ("fresh pink roses", "They are pink and pretty and sweet smelling.") ;
+  INDOORS ;
+}{
+  ROOM ("Guest bedroom", "mansion_guestRoom") ; RDESC = "
+  A smallish bedroom with a double bed and bedspread. There is a small
+  chest of drawers and a dressing table." ;
+  SCENERY ("double bed",       "*") ;
+  SCENERY ("bedspread",        "*") ;
+  SCENERY ("chest of drawers", "*") ;
+  SCENERY ("dressing table",   "*") ;
+  INDOORS ;
+}{
+  ROOM ("Nursery", "mansion_nursery") ; RDESC = "
+  A room painted in bright colours with various toys scattered about the
+  floor. Doorways lead South and West to the hallway and small bedroom." ;
+  INDOORS ;
+}{
+  ROOM ("Small bedroom", "mansion_kidsBedroom") ; RDESC = "
+  This is a smallish room with a single bed and brightly painted walls.
+  Doorways lead South, East and West to the hallway, nursery and nannys
+  bedroom." ;
+  SCENERY ("single bed", "It's a standard single bed.") ;
+  INDOORS ;
+}{
+  ROOM ("Nannys bedroom", "mansion_nannyBedroom") ; RDESC = "
+  A small room with a single bed and a small dressing table. Doorways
+  lead south and East to the hallway and small bedroom." ;
+  SCENERY ("single bed",           "*") ;
+  SCENERY ("small dressing table", "*") ;
+  INDOORS ;
+}

@@ -1,0 +1,410 @@
+
+	Information for Drogon Builders. Rev 5,  2-May-94
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	Copyright (c) Gordon Henderson,  gordon@meiko.com
+	     Arch Wizard Irn-Bru, Creator of Drogon
+	Alterations Borogove, Archwizard of Drogon
+
+
+Part 1: Creating the universe
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+CREATING ROOMS
+~~~~~~~~~~~~~~
+
+  All rooms for any one area are stored in a file called "rooms". This
+  file is basically a list of rooms names and descriptions in the following
+  format.
+
+  {
+    ROOM ("room name", "Unique_Room_Name") ;
+    RDESC = "
+    The room description." ;
+    FLAGS ;
+  }
+
+  "room name":
+    This is the name of the room, as produced by the LOOK command.
+
+  "Unique_Room_Name"  (URN)
+    This is a unique name which is used by subsequent data and functions
+    to identify the room. It can not contain any spaces. Custom has it
+    that it is prefixed with the name of the area the room is in. Eg.
+    mansion_lowerHall_01.
+
+  to create the room description:
+
+  RDESC = "
+  This is the description
+  It may have any number of lines
+  and the lines must be terminated by a new line and start with 2 spaces.
+  It ends like this ... " ;
+
+  FLAGS:
+    These are various flags that may be set on a room:
+
+    HAVEN ;
+	No attacking allowed with a generic message.
+
+    HAVEN_TEXT = "message" ;
+	No attacking here with the given message printed.
+
+    NO_SUMMON_IN ;
+	No-one (not even a wizard) can summon anyone to this location.
+
+    NO_SUMMON_OUT ;
+	No-one can be summoned from this location ;
+
+    NO_TP_IN ;
+	No-one, not even a wizard can teleport from the location.
+
+    NO_TP_OUT ;
+	No-one, not even a wizard can teleport out from this location.
+
+    RXFETCH ;
+	Wizards can't fetch any object from this location.
+
+  These flags can all be on the same line if wished. Eg:
+    ROOM ("toilet", "foobars_toilet") ; HAVEN ; NO_TP_IN ; NO_SUMMON_OUT ;
+
+  All room descriptions should give you a good idea of all the obvious
+  exits from that room. It should be possible to map an area without
+  using the "exits" command. It is possible to hide an exit from the
+  exits command, see below.
+
+  Try to make the room description "exciting" and not just something like
+  "You are inside a temple". I'd prefer the room description to contain a
+  description of the room exits too, if possible, so that you really
+  shouldn't have to resort to the "exits" command.
+
+  You can create simple mazes with only a few rooms. An example is the
+  path to Zogs cave. This is only 3 locations, but all the unused exits
+  are looped back to each other, creating a very confusing mess of what
+  appears to be more than 3 rooms!
+
+
+ADDING SCENERY TO A ROOM
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  It is possible to add invisible, or scenery objects to a room, to help
+  with the room description. Scenery objects can't actually be seen, but
+  they can be examined or read. Eg. If you wish to add a fireplace and a
+  chair to a room, but just want these as part of the room description, with
+  no real function in the game, you may do something like the following:
+
+  SCENERY ("a fireplace", "An open fireplace with a warm fire in the grate.") ;
+  SCENERY ("a chair",     "An old and tattered chair.") ;
+
+  Scenery objects were intended to add a bit of realism to the room. The
+  description shouldn't really extend over one line. If it really needs
+  to then consider creating an object and setting the WDNAME (see below).
+  If you can make the description "*", then you will get the generic "You
+  see nothing special" message.
+
+  If you really need to, you can extend the description over one line
+  with the following:
+
+  SCENERY ("a fireplace" , "*") ; SDESC = "
+  This is the description of the scenery.
+  It can extend over many lines, each line ending with a carriage
+  return, and the next starting with 2 spaces, ending like ... "; 
+
+  The SCENERY definition must occur within the curly-brackets that
+  surround the ROOM definition. Eg.
+
+  {
+    ROOM ("A test room", "ib_testRoom_01") ; HAVEN ;
+    RDESC = "
+    This is a warm little room with an archway leading north. There is a
+    fireplace on the south wall, and a chair facing the fire." ;
+    SCENERY ("a fireplace",  .....
+  }
+
+
+CREATING THE MAP
+~~~~~~~~~~~~~~~~
+
+  The map information for a given area is stored in a separate file
+  called "map" with the either of the following two macros:
+
+    CONNECT    (URN_1, URN_2, "direction") ;
+    BI_CONNECT (URN_1, URN_2, "dir1-2", "dir2-1") ;
+
+  The directions may be "north", "south", "east", "west", "ne", "nw",
+  "se", "sw", "up" or "down". Other exit directions (Eg. enter, exit,
+  leave, slide) may be created by room or object functions.
+
+  You can hide an exit from the "exits" command with:
+
+    @._hideExit (URN_1, "direction") ;
+
+  Note that you don't always need to make each connection from a room to
+  another an back again use the same mirrored exits. Eg. You may go north
+  from one room into another, but need to go west to get back again.
+  however, if you are going to do this, you MUST make this clear in the
+  room description. Eg. "You see a path which leads north, turning to the
+  east in the distance", and "You see a a path leading west, turning
+  south in the distance" in the other room.
+
+
+
+CREATING OBJECTS
+~~~~~~~~~~~~~~~~
+
+  The object information for an area live in the "widgets" file.
+  (Historical reasons, don't ask why!) You define objects as follows:
+
+  {
+    WIDGET
+    (
+      "name", "unique_object_name",
+      value, weight,  weapon strength, armour strength,  sleepTime,
+      location
+    ) ;
+    WDESC = "
+    The objects description ..." ;
+    Other data and FLAGS ;
+  }
+
+  "name":
+    This is what you would normally see when you look in the room, or look
+    in your inventory. (It can be overridden when the object isn't being
+    carried - see WDNAME below).
+
+  "unique_object_name":  (UON):
+    This is a unique name which is used by subsequent data and functions
+    to identify the object. It can not contain any spaces. Custom has it
+    that it is prefixed with the name of the area the object is in. Eg.
+    "mansion_violin".
+
+  value:
+    This is the objects value in pobblebeads. You revive the pobbles when
+    the object is offered to the Gods.
+
+  weight:
+    This is the weight of the object. There are no real units, but see the
+    'help levels' file for the maximum load that a player can carry, and
+    EX other object to get a general idea of what things weigh.
+
+  weapon power:
+    This is the weapon power of the object. The maximum weapon power
+    allowed is 120. It is unlikely that I will allow anyone to create a
+    weapon with a value above 80.
+
+  armour value:
+    This is the armour value of the object. It can be any value you wish,
+    but the maximum armour value permitted by a player is 50.  (Anything
+    more that a player may be carrying is ignored) Mobiles are not affected
+    with this limit.
+
+  sleepTime:
+    This is how long the object will stay out of the game after it has been
+    offered to the Gods.
+
+    Macros Mins(x) and Hours(x) exist for use in the sleepTime parameter,
+    additionally, if you set the sleepTime to -1, it will be 3 times the
+    value in seconds which is a reasonable default.
+
+  location:
+    This is the URN of the objects home location.
+
+  The object description works in exactly the same way as the room
+  description does. See above for details. (Only remember to use WDESC and
+  not RDESC!)
+
+  FLAGS:
+    There are various flags which may be set on an object:
+
+    WEDIBLE ;
+    WDRINKABLE ;
+	These make the object edible or drinkable with a generic message
+	being output. See object functions below for details about creating
+	more effects with eating and drinking.
+
+    WXFETCH ;
+	This object may not be fetched by a wizard.
+
+    WSTICKY ;
+	This object will stay on your inventory when you quit the game or
+	get killed. (Used mostly for a mobiles weapons and armour).
+
+    WINVISIBLE ;
+	The object is invisible when dropped. May be used instead of SCENERY,
+ 	or for other effects like the ring in the ice palace.
+
+    WSPECIAL ;
+	This object has a special restore routine - some DM code is required
+	to get it back into the game. Eg. the gobstopper after it has been
+	turned into the silver eye needs to be reset.
+
+  Other Data:
+    The following other data can be attached to an object:
+
+    WFIXED = "Fixed message" ;
+	The object can not be picked up, and if anyone tries, they get the
+	supplied message. (Everyone else in the room sees the generic "foobar
+	fiddles with <object>" message.
+
+    WTEXT = "This is readable text on an object" ;
+	This makes an object readable.
+
+    WDNAME = "Widget DOWN name" ;
+
+	The WDNAME of an object, if set, is output when the object is on the
+	ground. You may use this to create some scenery with some function in
+	the game, or just to make something look more realistic. Eg. If you
+	have an object called "a red neon sign", you can set it's WDNAME to
+	"A huge red neon sign floats nearby".
+
+
+Object notes:
+
+  If an object doesn't have a WDNAME, the look command (when looking in
+  the room) adds "There is " before the object name, and " here." after
+  is. When you create an object, you need to add "a", "an", or "some"
+  to the start of the name. Eg. "a red neon sign", "some grains of corn",
+  "an apple", and so on.
+
+
+CREATING MOBILES
+~~~~~~~~~~~~~~~~
+
+  You create a mobile is a very similar way to creating objects. The data
+  for the mobile definitions for an area is held in a file called
+  "mobiles" and they are defined as follows.
+
+  {
+    MOBILE
+    (
+      "Name", "unique_mobile_name",gender,
+      hp, value, sleepTime,
+      location
+    ) ;
+    MDESC = "
+    The mobiles description" ;
+    Other data and FLAGS ;
+
+    /** Define here any WIDGETS the mobile may have, set the location of
+    		the widgets the the UMN of the mobile	**/
+  }
+
+  "name":
+    This is the name of the mobile.
+
+  "unique_mobile_name":  (UMN):
+    This is a unique name which is used by subsequent data and functions
+    to identify the mobile. It can not contain any spaces. Custom has it
+    that it is prefixed with the name of the area the object is in. Eg.
+    "mansion_suitOfArmour".
+
+  sex:
+    This is 1 for male and 0 for female.
+
+  level:
+    This is the equivalent player level of the mobile. See "help levels"
+    for details. It controls the number of hit points the mobile has and
+    it's value. (You get 10% or 15% on killing it - See "help attack" for
+    these details)
+
+  sleepTime:
+    This is how long the mobile will stay out of the game after it has
+    been killed.
+
+  location:
+    This is the initial location of the mobile.
+
+  Other data and FLAGS:
+    The following data and flags can be set for a mobile.
+
+    MDNAME = "Mobile down name" ;
+	See WDNAME for more details of this.
+
+    MFIXED = "fixed text" ;
+	At the present time, EVERY mobile MUST be MFIXED. See WFIXED for more
+	details.
+
+    MTEXT = "mobile text" ;
+	If it needs to be readable ...
+
+    MSTICKY ;
+	Not used at present.
+
+    MATTACK = n ;
+	This is the %age probability of the mobile attacking someone on sight.
+	(0 to 100). By default this is zero.
+
+    MXATTACK = "No attack message\n" ;
+	This prevents the mobile from ever being killed, and outputs the
+	message given. Eg. "The oyster is impervious to your attacks".
+
+    MENTER = "Entering emote.\n" ;
+    MEXIT  = "Leaving emote.\n" ;
+	The emote messages are output when the mobile moves, (if it has a
+	map!) prefixed by the mobiles name. The default messages are simply
+	"<mobile name> has arrived" and "<mobile name> has left".
+
+    MOBILE_MAP = listnew (URN1, URN2, URN3, ... ) ;
+        This is a simple u-code statement which creates a list of URNs for the
+        mobile to move through. The mobiles move every 5 seconds. to slow a
+        mobile down, include the same location several times in succession, or
+        create a mobile tick function. (See part 2 for details of these
+        functions)
+
+  A mobile only checks to see if there is someone to attack every 5
+  seconds, when it is just about to leave a room, or just after it has
+  entered the next room. If you wish for a true attack on sight, you
+  need to code a room function for every room that the mobile passes
+  through.
+
+
+SOME CONVENTIONS
+~~~~~~~~~~~~~~~~
+
+  Directions:
+    Names should always be in lower case, unless you are starting a
+    sentence with them. (Eg. north).
+
+    No punctuation should be present between mid-directions (Eg. northwest)
+
+    A slash should be used for alternate directions. (Eg. north/south or
+    east/west).
+
+  Please be consistent with your use of the apostrophe (') in room and
+  object descriptions. I follow 2 simple rules, and I hope that you do
+  too, in the interests on consistency.
+
+  1. If you add an "s" to indicate possession then DON'T use an apostrophe.
+
+  2. If you join two words together and drop a letter or 2 the DO use
+     an apostrophe, and place it where the missing letters would be.
+
+  Eg.	Gordons mug. 		Mug belonging to Gordon
+	Gordon's not here!	Gordon IS not here.
+	The Dragons den.
+	Heathers sceptre.
+
+  Program style:
+    A long time ago, I adopted a style of program layout and I have stuck
+    with it ever since. Basically, this involves using 2 spaces as the
+    basic indentation level, and always vertically aligning block begin and
+    end markers (Eg. { and } in C and u-code, begin and end in Pascal)
+    in blocks of code. I always use an abundance of spaces too.
+
+    If you expect me to debug your code, I suggest that you adopt this, or
+    a very similar style for your Drogon u-code.
+
+    I can automatically format the text in {R,W,M,S}DESC instructions to fit
+    into 80 columns, starting with 2 spaces.
+
+
+ +--+  +--+  +--+
+ |- +--+  +--+ -|
+ +---+ - - -+---+
+     | - - -|
+     |- - - |
+     | - - -+-------------------------------------------------------------+
+     |- - Arch Wizard Irn-Bru - Creator of Drogon - gordon@meiko.com - - -|
+     +--------------------------------------------------------------------+
+     | - - - - - - Ip address: 192.131.108.55,  port 6123 - - - - - - - - |
+     +--------------------------------------------------------------------+

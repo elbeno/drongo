@@ -1,0 +1,59 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include  "drogon.h"
+#include "widgets.h"
+#include   "rooms.h"
+
+
+func @.dm_mansion
+{
+  archWizCommand ;
+
+
+/** Lock the mansion gates? **/
+
+  if (mansion_gates.closed)
+    if (!mansion_gates.locked)
+      if (time () > mansion_gates.closeTime)
+      {
+        mansion_gates.locked = 1 ;
+        @._lekoFor (mansion_gates, "The Dungeon Master appears, locks the mansion gates with a skeleton key
+then vanishes!\n") ;
+        @._lekoFor (mansion_gates2, "You hear the rattle of a key in the lock as someone outside locks the gate.\n") ;
+      }
+
+
+/** Close the mansion gates? **/
+
+  if (!mansion_gates.closed)
+    if (time () > mansion_gates.closeTime)
+    {
+      mansion_gates.closed = 1 ;
+      @._lekoFor (mansion_gates, "The Dungeon Master appears, closes the gates then vanishes!\n") ;
+      @._lekoFor (mansion_gates2, "Someone outside the mansion grounds closes the gates.\n") ;
+    }
+
+
+/** Move the barrel of ale? **/
+
+  if (mansion_ale.moved)
+    if (time () > mansion_ale.moveTime)
+    {
+      mansion_ale.moved = 0 ;
+      @._lekoFor (mansion_ale, "The Dungeon Master appears, moves the barrel which conceals the passageway to
+the North then vanishes!\n") ;
+      @._hideExit (mansion_cellar_01, "north") ;
+    }
+
+
+}

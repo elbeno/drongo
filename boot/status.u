@@ -1,0 +1,223 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @.sc
+{
+  @.score();
+} chmod(&@.sc, "W:rs");
+
+func @.score
+{
+  echo("  Level ", #actor.level, ": ", @._levelName(#actor.level, #actor.sex),
+       ". ", #actor.money, " pobblebeads. ");
+  if (#actor.taskPending)
+    echo("(TaskPending) \n");
+  else
+    echo("(No Task Pending)\n");
+  echo("  ", #actor.hp, "/", @._maxHp(#actor.level), " hit points, ", 
+       #actor.mana, "/", @._maxMana(#actor.level), " mana.\n");
+} chmod(&@.score, "W:rs");
+
+func @.who
+{
+  if ($#==2) {
+    echo (@.voiceInHead,"You are ", #actor.name, ".", @.eVoice);
+    return;
+  }
+
+  if(!islist(@.onlinePlayers)) {
+    echo("Nobody logged on! What are you doing here?\n") ;
+    return(1) ;
+  }
+
+  $count = -1 ;
+  echo("
+   Player               Idle     On for  Level
+----------------------------------------------\n");
+
+  $tm = time();
+  foreach $user in (@.onlinePlayers) {
+    if ($user.name != NULL)
+    {
+      if (@._iCanSeeYou($user))
+      {
+        $count = $count + 1 ;
+        if ($user.invis) echo ($user.invis,":");
+        else echo("   ");
+        echo($user.name);
+        @._sp(20-strlen($user.name), ".");
+        echo(" ", @._hmmss($tm-$user.idleTime), " ");
+        echo(" ", @._hmmss($tm-$user.loginTime), " ");
+	if ($user.level<10) echo (" ");
+	echo ($user.level, ": ", @._levelName($user.level,$user.sex),"\n") ;
+      }
+    }
+  }
+  if ($count==0)
+    echo("You are on your own.\n");
+  else if ($count==1)
+    echo("There is one other player visible to you.\n");
+  else
+    echo("There are ", $count, " other players visible to you.\n");
+  echo("\n");
+
+  return($count) ;
+}
+
+func @.qw
+{
+  if(!islist(@.onlinePlayers)) {
+    echo("Nobody logged on! What are you doing here?\n") ;
+    return(1) ;
+  }
+
+  if ($1 == "-loc")
+  {
+    if(!ARCH(#actor))
+    {
+      echo(@.Huh);
+      return;
+    }
+    @.pw("all");
+  }
+  else if ($1 == "-ip")
+  {
+    if(!ARCH(#actor))
+    {
+      echo(@.Huh);
+      return;
+    }
+    echo("\n");
+    foreach $user in (@.onlinePlayers) {
+      if ($user.name != NULL)
+      {
+        if (@._iCanSeeYou($user))
+        {
+          if ($user.invis)
+            $n = str(" *",$user.name);
+          else
+            $n = str("  ",$user.name);
+          $n = @._pad($n,22,".");
+          $n = str($n, " ", $user.ipnum);
+          echo($n, "\n");
+        }
+      }
+    }
+    echo("\n");
+  }
+  else
+  {
+    $namecount = 0;
+    $count = -1;
+    echo("\n");
+    foreach $user in (@.onlinePlayers) {
+      if ($user.name != NULL)
+      {
+        if (@._iCanSeeYou($user))
+        {
+          $count = $count + 1;
+          if ($namecount == 3)
+          {
+            echo($output,"\n");
+            $output = "";
+            $namecount = 0;
+          }
+          if ($user.invis)
+            $n = str("*",$user.name);
+          else
+            $n = str(" ",$user.name);
+          $n = @._pad($n,22," ");
+          $output = str($output,"    ",$n);
+          $namecount = $namecount + 1;
+        }
+      }
+    }
+    echo($output,"\n");
+    if ($count==0)
+      echo("You are on your own.\n");
+    else if ($count==1)
+      echo("There is one other player visible to you.\n");
+    else
+      echo("There are ", $count, " other players visible to you.\n");
+    echo("\n");
+  }
+}
+
+func @._pad          /* returns $1 padded to length $2 with character $3 */
+{
+  if ($2 == strlen($1))
+    return $1;
+  return @._pad(str($1,$3), $2, $3) ;
+}
+
+
+/* HELP:
+currently help is somewhat minimalist
+if called with no parameters, print the help/help
+file. if called with a parameter, try to print a
+file by that name. */
+
+func @.help
+{
+  if($# == 0) {
+    if(@._pageFile(#actor, "help","help") == NULL)
+      echoto(#actor, "help seems to be unavailable...\n") ;
+    return ;
+  }
+  
+  foreacharg $hlp
+    if(@._pageFile(#actor, "help",$hlp) == NULL)
+      echoto(#actor, "no help for \"", $hlp, "\"\n") ;
+} chmod (&@.help, "W:rs") ;
+
+func @.wHelp
+{
+  wizardCommand;
+  if($# == 0) {
+    if(@._pageFile(#actor, "wHelp","help") == NULL)
+      echoto(#actor, "help seems to be unavailable...\n") ;
+    return ;
+  }
+  
+  foreacharg $hlp
+    if(@._pageFile(#actor, "wHelp",$hlp) == NULL)
+      echoto(#actor, "no help for \"", $hlp, "\"\n") ;
+}
+
+func @.awHelp
+{
+  if($# == 0) {
+    if(@._pageFile(#actor, "awHelp","help") == NULL)
+      echoto(#actor, "help seems to be unavailable...\n") ;
+    return ;
+  }
+  
+  foreacharg $hlp
+    if(@._pageFile(#actor, "awHelp",$hlp) == NULL)
+      echoto(#actor, "no help for \"", $hlp, "\"\n") ;
+}
+
+func @._pageFile
+{
+  $1.pDir = $2;
+  $1.pFil = $3;
+  $1.pNum = 0;
+  $file = str($2,"/",$3,".0");
+  return (catfile ($1, $file));
+} chmod (&@._pageFile, "W:rs");
+
+func @.more
+{
+  if (#actor.pNum == NULL)
+  {
+    echo("No more!\n");
+    return;
+  }
+  #actor.pNum = #actor.pNum + 1;
+  $file = str(#actor.pDir, "/",#actor.pFil, ".", #actor.pNum) ;
+  if (!catfile (#actor, $file))
+    #actor.pNum = NULL;
+} chmod (&@.more, "W:rs");
+
+

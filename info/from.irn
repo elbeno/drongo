@@ -1,0 +1,20 @@
+Subject: Re: _pre, _post fns
+Message: _xxxExitFn (dest,curr) ; _xxxEnterFn (last,curr);
+
+Subject: Re: More help needed
+Message: preExitFn, leave emote, postExitFn, move, preEnterFn, enterEmote, postE
+nterFn, preLookFn, look, postLookFn
+
+Subject: Re: Query/suggestion?
+Message: correct. no provsion, but easy to add a room._tellFn, but it would have
+ to mimic tell fairly well. (actually, I could make tell do all the hard work - 
+eg. mana, and just call the Fn with the text instead of echoto'in it)
+
+Subject: Re: More questions
+Message: Yes, you can make a mobile attack a player, but you need to do the canA
+ttack check first. Email this to me and I'll look into it.
+
+Message: Yes you can change hp (no fn) but it won't kill you. What I DO NOT want
+ is another hugely ugly lump of code like Bugblatters. I will have to maintain a
+ll this code when you guys leave uny and it's its not simple & easy, I wont incl
+ude it into drogon.

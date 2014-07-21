@@ -1,0 +1,294 @@
+/***************************************************************\
+* widgetFns description file for Logic Island 			*
+* Submitted by Bugblatter djt1000@uk.ac.cam.hermes		*
+\***************************************************************/
+
+/* Revision History
+ 
+ Date   | Modifications
+--------+-------------------------------------------------------
+31Jan94 | This file created
+01Feb94 | Plaque function bodies added
+04Feb94 | Completely rewritten
+07Feb94 | Accidentally deleted. Typed back in!
+08Feb94 | Other function skeletons added
+09Feb94 | This file split into widgetFns and roomFns
+10Feb94 | Read functions changed to reflect incriptions!
+12Feb94 | Indicator describe functions added
+19Feb94 | Ingot reset functions added 
+21Feb94 |  and moved to dmFns!
+        | Corrected some spellings
+        | New bit to indicator (needs completing) - completed
+03Mar94 | Altered the last player display bit
+04Mar94 | Paper functions added!
+        | Drop functions for ingots! If a player drops an ingot
+        | it gets reset. More than one player needed!
+05Mar94 | _specialGetFn for pebble implemented
+--------+-------------------------------------------------------
+04Mar94 | Submitted to Irn-Bru
+--------+-------------------------------------------------------
+
+
+*/
+
+#include <drogon.h>
+#include "rooms.h"
+#include "widgets.h"
+#include "mobiles.h"
+/* #include "../players.h" */
+
+/*****************\
+* The Room Puzzle *
+\*****************/
+
+/* Globals */
+
+island2_wizTower_indicator.LastActor = NULL ;
+
+/* Definitions */
+
+#define NULL_INGOT		0
+#define BRONZE_INGOT		1
+#define SILVER_INGOT		2
+#define GOLD_INGOT		3
+#define PLATINUM_INGOT		4
+
+#define PUZZLE_READY		0
+#define PUZZLE_INUSE		1
+#define PUZZLE_UNREADY		2
+#define PUZZLE_RESETTING	3
+
+#define TRUTH			1
+#define LIE			0
+
+/* Initial values */
+
+island2_wizTower_02.Inscription = "Only the faint remnants of an inscription remain!\n" ;
+
+/* Plaque read functions */
+
+func island2_wizTower_bPlaque._readFn
+{
+  if (island2_wizTower_02.PuzzleStat == PUZZLE_READY)
+    echo ("The inscription on the bronze plaque reads:\n",
+          island2_wizTower_03.Inscription, "\n") ;
+  else
+    island2_wizTower_needle._plaqueUnreadable() ;
+}
+
+func island2_wizTower_sPlaque._readFn
+{
+  if (island2_wizTower_02.PuzzleStat == PUZZLE_READY)
+    echo ("The inscription on the silver plaque reads:\n",
+          island2_wizTower_04.Inscription, "\n") ;
+  else
+    island2_wizTower_needle._plaqueUnreadable() ;
+}  
+
+func island2_wizTower_gPlaque._readFn
+{
+  if (island2_wizTower_02.PuzzleStat == PUZZLE_READY)
+    echo ("The inscription on the gold plaque reads:\n",
+          island2_wizTower_05.Inscription, "\n") ;
+  else
+    island2_wizTower_needle._plaqueUnreadable() ;
+}
+
+func island2_wizTower_needle._readFn
+{
+  if (island2_wizTower_02.PuzzleStat == PUZZLE_READY)
+  {
+    echo ("The inscription of the stone needle reads:\n",
+          island2_wizTower_02.Inscription, "\n") ;
+    if (island2_wizTower_02.WhichIngot == NULL_INGOT)
+      return ;
+    else if (island2_wizTower_02.WhichIngot == BRONZE_INGOT)
+      echo ("The inscription is written in bronze.\n") ;
+    else if (island2_wizTower_02.WhichIngot == SILVER_INGOT)
+      echo ("The inscription is written in silver.\n") ;
+    else if (island2_wizTower_02.WhichIngot == GOLD_INGOT)
+      echo ("The inscription is written in gold.\n") ;
+    else if (island2_wizTower_02.WhichIngot == PLATINUM_INGOT)
+      echo ("The inscription is written in platinum.\n") ;
+  }
+  else
+    island2_wizTower_needle._plaqueUnreadable() ;
+}
+
+func island2_wizTower_needle._plaqueUnreadable
+{
+  if (island2_wizTower_02.PuzzleStat == PUZZLE_INUSE)
+    echo ("The inscription on the plaque is scrambling too fast to read!\n");
+  else if (island2_wizTower_02.PuzzleStat == PUZZLE_UNREADY)
+    echo ("Only the faint remnants of an inscription remain!\n");
+}
+
+/* Indicator Describe function */
+func island2_wizTower_indicator._readFn
+{
+  island2_wizTower_indicator._describeFn() ;
+}
+
+func island2_wizTower_indicator._describeFn
+{  
+  echo ("\n          A sign above says:\n\n");
+  echo ("    ** The Door Puzzle Indicator **\n");
+  echo ("There are a three lights, next to the labels:\n") ;
+
+  if (island2_wizTower_02.PuzzleStat != PUZZLE_UNREADY)
+  {
+    if (island2_wizTower_02.WhichIngot      == BRONZE_INGOT)     $ingot = "B" ;
+    else if (island2_wizTower_02.WhichIngot == SILVER_INGOT)     $ingot = "S" ;
+    else if (island2_wizTower_02.WhichIngot == GOLD_INGOT)       $ingot = "G" ;
+    else if (island2_wizTower_02.WhichIngot == PLATINUM_INGOT)   $ingot = "P" ;
+  }
+  else
+    $ingot = "X" ;
+
+  if (island2_wizTower_02.PuzzleStat == PUZZLE_READY)
+    echo (" ", $ingot, " Ready (Ingot in ", 
+    island2_wizTower_02.WhereIngot.name, ")\n") ;
+  else if (island2_wizTower_02.PuzzleStat == PUZZLE_INUSE)
+    echo (" o Ready (Ingot in ", 
+    island2_wizTower_02.WhereIngot.name, ")\n") ;
+  else
+    echo (" o Ready\n") ;
+
+  if (island2_wizTower_02.PuzzleStat == PUZZLE_INUSE)
+    echo (" ",$ingot, " In-use (", island2_wizTower_indicator.LastActor.name, 
+          " in ", island2_wizTower_indicator.LastActor.location.name, ")\n") ;
+  else
+    echo (" o In-use\n") ;
+
+  if (island2_wizTower_02.PuzzleStat == PUZZLE_UNREADY)
+    echo (" ", $ingot, " Unready\n") ;
+  else
+    echo (" o Unready\n") ;
+  
+  if (island2_wizTower_indicator.LastActor == NULL)
+    echo ("\n Last Player: No-one has played since last re-boot!\n") ;
+  else
+    echo ("\n Last Player: ", island2_wizTower_indicator.LastActor.name, "\n") ;
+}
+
+/* Paper functions */
+func island2_wizTower_paper._readFn
+{
+  if (!M_WIZ(#actor))
+    echo(island2_wizTower_paper.text) ;
+  else
+    echo("
+             The Room Puzzle on Logic Island\n
+
+    You may call several functions in Bugblatters study
+    to reset the puzzle if something goes wrong with it!
+    The best is reset, as this resets it completely.
+    Three others: ready, inuse and unready set the puzzle
+    status, but do not do anything else. These should be
+    used only if you have a good reason.\n
+
+    An indicator is provided to give information about
+    the puzzle status, but: this information shout not
+    handed out. If a player can read the indicator, they
+    may come here and read it!\n
+
+    Hope you enjoy it!\n
+
+     ** Bugblatter March 1994\n\n") ;
+} 
+
+func island2_wizTower_paper._specialDropFn
+{
+  if (#actor.location == island2_wizTower_07) /* In study */
+    island2_wizTower_paper.dName =
+      "There is a piece of paper on the desk." ;
+  else
+    island2_wizTower_paper.dName =
+      "There is a piece of paper lying on the ground." ;
+}
+
+/* Ingot drop functions */
+func island2_wizTower_09._retrieveIngot
+{
+  /* $1 = ingot string, $2 = ingot object */
+  if (#actor.location != island2_wizTower_09)
+  {
+    echo ("
+You drop a ", $1, " ingot.
+A vision of an apprentice God appears before you and snatches the 
+", $1, " ingot. He scowls at you saying: Well! If thats all you are
+going to do with it! The God then vanishes in a puff of blue smoke.\n\n") ;
+    @._leko ("
+", #actor.name, " drops a ", $1, " ingot.
+A vision of an apprentice God appears before ", #actor.name, "
+and snatches the ", $1, " ingot. He scowls at\n", #actor.name, "
+saying: Well! If thats all you are going to do with it! The God
+then vanishes in a puff of blue smoke.\n\n") ;
+    @._move ($2, island2_wizTower_09) ;
+    @._reko (island2_wizTower_09, "
+There is a puff of blue smoke, which clears revealing an image of an
+apprentice God who looks slightly annoyed. He stays long enough to drop 
+a ", $1, " ingot, before vanishing in a puff of blue smoke!\n\n") ;
+  }
+}
+
+func island2_wizTower_bIngot._specialDropFn
+{
+  island2_wizTower_09._retrieveIngot("bronze", island2_wizTower_bIngot) ;
+  return 1 ; /* Do not execute drop code */ 
+}
+
+func island2_wizTower_sIngot._specialDropFn
+{
+  island2_wizTower_09._retrieveIngot("silver", island2_wizTower_sIngot) ;
+  return 1 ; /* Do not execute drop code */ 
+}
+
+func island2_wizTower_gIngot._specialDropFn
+{
+  island2_wizTower_09._retrieveIngot("gold", island2_wizTower_gIngot) ;
+  return 1 ; /* Do not execute drop code */ 
+}
+
+func island2_wizTower_pIngot._specialDropFn
+{
+  island2_wizTower_09._retrieveIngot("platinum", island2_wizTower_pIngot) ;
+  return 1 ; /* Do not execute drop code */ 
+}
+
+/*****************\
+* The game of NIM *
+\*****************/
+
+func island2_beach_pebble._specialGetFn
+{
+  if (island2_beach_wizard.location == island2_beach_cave
+     == #actor.location)
+  {
+    echo ("
+As you go to get the pebble, the wizard waves his hand and wiggles his
+fingers. You are fascinated by this and completely forget about the pebble") ;
+    return 1; /* Don't execute get code */
+  }
+}
+
+func island2_beach_pebble._specialDropFn
+{
+  if (#actor.location == island2_beach_cave == island2_beach_wizard.location)
+    island2_beach_pebble.dName = 
+      "There is a shiny pebble in front of the man." ;
+  else
+    island2_beach_pebble.dName = "There is a shiny pebble here." ;
+  return 0; /* execute drop code */
+}
+
+
+
+
+
+
+
+
+
+
+

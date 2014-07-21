@@ -1,0 +1,34 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) Gordon Henderson                                       */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+/*
+ * The definition of Prescotts pet kitten.
+ *
+ */
+
+#include "drogon.h"
+#include  "owner.h"
+
+{
+  MOBILE
+  (
+    "a small black kitten", "prescott_kit", MALE,
+     0, 0, 0,
+     PRESCOTT
+  )
+  MDESC    = "
+  Mortis is a small cute little black kitten, however don't be fooled by
+  appearance, this adorable feline could tear you to shreds." ;
+  MDNAME   = "There is a small black kitten here meowing for Prescott." ;
+  MXATTACK = "You can't attack personal pets." ;
+  $mobile.weight = 2000 ;
+}

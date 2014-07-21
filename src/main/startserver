@@ -1,0 +1,4 @@
+#!/bin/sh
+MUDDIR=/atreus/mjr/hacks/mud/main
+echo running: um -d $MUDDIR/fridge -f $MUDDIR/boot.u
+exec um -d $MUDDIR/fridge -f $MUDDIR/boot.u -l $MUDDIR/um.log

@@ -1,0 +1,17 @@
+
+  Drogon commands
+  ~~~~~~~~~~~~~~~
+    Movement ........ exits, follow, go, home, quit.
+    Communication ... emote, page, say, shout, tell, whisper, earmuffs.
+    General actions . close, open, drop, get, take, offer, drink, eat, shake,
+                      give, steal, lock, unlock, pull, push, move, turn, use.
+    Seeing .......... examine, inventory, look, read, search, who,
+                      brief, verbose.
+    Fighting ........ attack, murder, flee, wield, wimp.
+    Misc ............ score,  bug, idea, typo,  cpw, cid,  email, desc,
+                      motd, nametag,  news, prompt,  earmuffs,  xflags.
+
+  Type "help <command>" for further details on a particular command,
+  and "help magic" for details of all the magical commands.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Type "more" for the next page -=-

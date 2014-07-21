@@ -1,0 +1,36 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) Gordon Henderson                                       */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+/*
+ * The definition of Lincas pet puppy.
+ *
+ */
+
+#include <drogon.h>
+#include  "owner.h"
+
+{
+  MOBILE
+  (
+    "a little black puppy", "linca_puppy", FEMALE,
+     0, 0, 0,
+     LINCA
+  )
+  MDESC    = "
+  This is a small puppy, with a coat of dark brown fur mingled with
+  black. She waits patiently for her owner, Linca, to come and play with
+  her. There is a small tag attached to her collar, with her name on it.";
+  MDNAME   = "A little black puppy sits here, wagging its tail." ;
+  MTEXT    = "The silver tag on her collar says SPARKY." ;
+  MXATTACK = "You can't attack personal pets." ;
+  $mobile.weight = 2000 ;
+}

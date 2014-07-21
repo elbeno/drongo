@@ -1,0 +1,418 @@
+
+	Information for Drogon Builders. Rev 4, 14-Nov-92
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	Copyright (c) Gordon Henderson,  gordon@meiko.com
+	     Arch Wizard Irn-Bru, Creator of Drogon
+
+
+Part 2: The Universe, it's functions and data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+OVERVIEW
+~~~~~~~~
+
+Firstly, an overview of what happens when you type a line of text at
+the UberMUD input monitor. The line you type gets split up into
+individual words, and an argument list is formed in much the same way as
+the Unix argv/argc mechanism. The first work that you typed if the name
+of the function that will be called. The monitor looks for that
+function in the following order:
+
+  The current room, for any room functions,
+  Your current inUSE object.
+  Your player object.
+  The system table of global commands, again.
+
+It is possible to have a global system command over-ride any inUse, player,
+or room command, but there are no examples of these at present in Drogon.
+
+In addition to these functions called by the monitor, the Drogon
+universe rules also call various functions. Eg. when moving from room
+to room, there is a set of functions which can be called on leaving and
+entering and getting or dropping objects or functions on objects which
+are called as a side-effect of a system command. (Eg. pull and push).
+
+Each function has to perform it's own parsing of the arguments
+supplied. A functions is called with a count of arguments and each
+individual word of the input line passed as a separate argument. $# is
+the number of arguments, and $1, $2, $3, ... are the arguments
+themselves.
+
+All variables start with a dollar ($) symbol and object numbers with a
+hash (#) symbol. @ refers to object #0, this is the system object and
+is stored in RAM. All other objects are stored on disk.
+
+The universe is composed of objects. A player is an object, a widget is
+an object, a room is an object. They are all the same as far as the
+database is concerned. You move a player from room to room by removing
+his object from a list contained in one room, and adding it to a list
+in the second room.
+
+Objects contain elements. An element can be an integer, a string, a
+reference to another object number, or a list of object numbers. Element
+names are separated from the object numbers by a dot. Eg. #20.name would
+contain the name of object #20. The object number of the current player
+that the system is executing a command for is defined as #actor.
+
+All objects have an element that says what kind of object it is. these
+elements are .room, .player, .widget, .scenery, .exit and .mobile. Most
+objects have a .name element and a .description element.
+
+Player objects contain .nameTag, .money, .hp, .taskPending, .invisible
+and .load elements, and various other elements used as flags to indicate
+the state of the various magical side effects. (Eg. .dumb), or the
+completion state of a particular task.
+
+Player, mobile and room objects contain a .contents element. This is a
+list of the contents of that object. Eg. the players in a room, or the
+objects in a players inventory.
+
+Rooms have a .exits element. This is a list of exit objects, each one
+having a .name, .destination and .hidden elements. The name is a string
+containing the name of the exit and the destination is the object
+number of the destination for that exit. The .hidden element (either 0
+or 1) determines the exits appearance fro the "exits" command. (It
+won't block movement, you need a room function for that.
+
+Players, widget and mobile objects have a .location element. This is
+set to the object number of the objects location. For players, it is
+the room number, for widgets, it is the room number, or player number.
+
+Note that the server is a single tasking server. When a player executes
+a command, the server will execute that command until that command
+completes. It will then proceed to the next player who has a command
+waiting. If you create a command that loops forever (almost impossible
+to do) or one that outputs megabytes of text, then the server will
+seemingly grind to a halt for the other players.
+
+Remember those uNames in part 1? When the files are submitted to the
+server for inclusion into the database, the uNames are output with
+their object numbers into a file which you can include into your code
+files and use the uName to refer to the object. Every file that is
+submitted to the server is passed through the C pre-processor.
+Submitting the rooms file produces rooms.h, the widgets file produces
+widgets.h and the mobiles file produces mobiles.h.
+
+
+COMMON DATA
+~~~~~~~~~~~
+
+There are various lists which contain score for each level, magic
+percentage for each level and so on, but you shouldn't need to ever
+refer to them. Constants you may wish to refer to are as follows: (This
+is a direct extract from the file where they are defined):
+
+  @.Huh             = "Sorry, I don't understand.\n" ;
+  @.voiceInHead     = "A voice in your head whispers:\n  \"" ;
+  @.eVoice          = ".\"\n" ;
+  @.notSureWho      = "I'm not sure who you mean. Please be more specific" ;
+  @.notSureWhat     = "I'm not sure what you mean. Please be more specific" ;
+  @.noOneHere       = "There is no-one with that name here" ;
+  @.noOneHereInLand = "There is no-one in the land with that name" ;
+  @.onlyDoToPeople  = "You can only perform this spell on people" ;
+  @.noGo            = "You can't go that way.\n" ;
+
+Eg. you can use these like this:
+
+  if (user-defined-move-command fails)
+    { echo (@.noGo) ; return ; }
+
+
+BUILTIN SUBROUTINES AND MACROS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This section describes some of the built-in functions and macros that
+are available for use by Drogon programmers. Note that things that
+start with @ are system functions or data, and are held in RAM within
+the server, everything else is held on disk in the main database.
+
+  numArgs (n, "message") ;	/* macro */
+  minArgs (n, "message") ;	/* macro */
+
+  numArgs checks for an exact number of arguments, minArgs check for at
+  least the specified number. On a failure, the message is output and the
+  macro executes a return instruction, preventing further execution of
+  the function.
+
+
+  bundleArgs ;			/* macro */
+  bundleArgsNoSpace ;		/* macro */
+
+  These 2 macros bundle all your functions arguments into 1 string called
+  $arg. The 1st one places exactly one space between each argument, the
+  second one inserts no spaces.
+
+
+  $howMany = @._ambName (list, $arg) ;	/* function	*/
+  $what    = @._ambMatch		/* the result	*/
+
+  This sequence searches the list for an object whos name best matches
+  the argument. It returns the number of matches. If 0, there were no
+  matches, if 1, there was an exact match and $what is valid.
+
+  Use of these functions and macros can be fairly complicated, but can
+  save a lot of code. Here is an example from the attack command. In this
+  example, the player has typed "attack foo bar", the function "attack"
+  is called with 2 arguments, "foo" and "bar. It checks for the minimum
+  number of arguments, bundles them together then tries to find the
+  object named.  We bundle the arguments up to look for people whos names
+  may have spaces in them, or for object names that may contain a space.
+
+  func @.attack
+  {
+  
+    minArgs (1, "*** attack <who>?") ;
+    bundleArgs ;
+    $howMany = @._ambName (#actor.location.contents, $arg) ;
+    $victim  = @._ambMatch ;
+  
+    if ($howMany == 0)
+      { echo (@.noOneHere, ".\n") ;          return ; }
+  
+    if ($howMany > 1)
+      { echo (@.notSureWho, ".\n") ;         return ; }
+  
+    if (!@._iCanSeeYou ($victim))
+      { echo (@.noOneHere, ".\n") ;          return ; }
+  
+    if (!@._plyCanAttack ($victim))
+      return ;
+  
+    @._attack ($victim) ;
+  
+  }
+
+  Note: See below for details of the @._iCanSeeYou () function.
+
+  The attack command function will actually match any object in the
+  #actor.location.contents list. (that is objects as well as players!)
+  The function @._plyCanAttack () works out if this object is a player,
+  and if it can be attacked.
+
+  @._iCanSeeYou ($who) ;	/* function */
+  @._youCanSeeMe ($who) ;	/* function */
+
+  These two functions work out if you can really see someone, or if they
+  can see you. You may not have to use these functions, but they may be
+  useful if coding things for wizards.
+
+  Outputting Text
+  ~~~~~~~~~~~~~~~
+
+  echo (...) ;		/* server builtin function */
+  echoto ($who, ...) ;	/* server builtin function */
+
+  These are the basic text output functions. echo() goes to the current
+  #actor, echoto () goes to the named player. Your outputted string
+  should eventually be terminated with a newline character. (\n).
+
+  @._emote (...) ;	/* function */
+
+  This outputs the text given to the screens of every other player in
+  the current room, prefixed with your name. A slightly better version
+  is:
+
+  @._visEmote (...) ;	/* function */
+
+  This takes your visibility into account. (ie if you are invisible,
+  instead of just printing your name, it will output "Someone" and then,
+  if the person can see you, it will add your name in parenthesis. Eg.
+  Someone (Irn-Bru) ...)
+
+  Note that a newline is supplied automatically with the emote functions.
+
+  @._leko (...) ;
+  @._geko (...) ;
+
+  These 2 functions output the text supplied either locally (in your
+  current location) or globally (to everyone). Nothing is output on
+  your own screen!
+
+  @._reko (roomnum, ...) ;
+
+  This outputs text to everyone in a given room, including the current
+  player. You can use #actor.location as the roomnum if you are
+  outputting text from (say) a widget function to everyone in the
+  current #actors room.
+
+  Here is an example from the monastery. It's the pulling the rope function
+  for the bell in the bell tower. The rope object has an _pullFn attached
+  which gets called when you type "pull rope". (See below for details of
+  object functions).
+
+  func mon_bellRope._pullFn
+  {
+    echo ("You pull the rope with a mighty heave!\n") ;
+    @._visEmote ("pulls the rope with a mighty heave!") ;
+  
+    if (mon_crown.location == specialStore)
+      @._reko (mon_bell_05, "The bell makes a loud clunking noise then
+		nothing more.\n") ;
+    else
+    {
+      echo ("The bell makes an almighty BOINGGGGG sound!\n") ;
+      @._geko ("You hear the BOINGGGGG of a large bell in the distance!\n") ;
+    }
+ 
+  }
+
+  mon_bellRope is the uName of the rope, and in the file that contains
+  this function, at the top, it has a #include "widgets.h" line to
+  include the uNames which were extracted from the submission of the
+  widgets file. mon_bell_05 is the uName of the top of the bell tower.
+
+
+
+ROOM FUNCTIONS
+~~~~~~~~~~~~~~
+
+Rooms can have functions attached to them. These functions can only be
+accessed when the player is in that room. Current examples are the
+slide command at the top of the pyramid and the game functions in Zogs
+cave.
+
+Room functions for an area are held in a file called "roomFns" and are
+defined as follows:
+
+  func URN.foobar
+  {
+    /** The u-code for function foobar in room URN **/
+  }
+
+
+As well as having functions in a room which are typed by the player,
+there are a set of functions that can be called from the movement code.
+These are:
+
+  URN._preExitFn ($dest) ;
+  URN._postExitFn ($dest) ;
+
+These are called with the room Id of the destination room. It returns 0
+if the move is allowed and 1 if prohibited. (Eg. blocking the move into
+the toilets in the pub, or blocking the move through doors when they
+are closed). Note that if your code performs the move then you need to
+return 1 to stop the rest of the GO code from being executed.
+
+  URN._preEnterFn ($from) ;
+  URN._postEnterFn ($from) ;
+  URN._preLookFn ($from) ;
+  URN._postLookFn ($from) ;
+
+These are called with the room Id of the original room.
+
+_postEnter is used in the castle to make people die when they try to go
+the wrong way down the slippery slope [shit chute] - They become
+crocodile fodder. preLook can be used to give extra messages as you
+move into a room. Eg. when going into Zogs cave, similar for
+_postLook.
+
+_postLook can be used to kill someone after they have entered the room,
+and seen the description and contents. Eg. falling off a bridge.
+
+Rooms may also have an _describeFn instead of an RDESC. See the information
+on _describeFn below.
+
+
+WIDGET FUNCTIONS
+~~~~~~~~~~~~~~~~
+
+Widgets can have 2 types of function attached to them. The first type
+are like the room functions, but can only be accessed when you USE the
+object. Examples of this type are the cattle prod, and the jelly-baby
+machine.
+
+The second type are functions that are called as a result of some
+action happening elsewhere in the universe. Some of the global commands
+will call a function of a widget, if the function has been defined for
+that widget.
+
+  Command   	      Widget Function called
+  =======   	      ======================
+    open, close:	_openFn, _closeFn,
+    lock, unlock:	_lockFn, _unlockFn,
+    pull, push:		_pullFn, _pushFn,
+    turn:		_turnFn,
+    shake:		_shakeFn,
+    eat, drink:		_eatFn, _drinkFn,
+    examine:		_describeFn,
+    read:		_readFn
+    get, drop:		_getFn, _dropFn
+
+Eat and drink are a little special: You can make a widget edible by
+just using the WEDIBLE or WDRINKABLE flag in the widget definition. You
+can then eat or drink the object, but no side effect occur. If you
+attach a _eatFn or a _drinkFn to the object (instead on WEDIBLE, or
+WDRINKABLE), that function will be called and then anything can happen
+(Eg. the Magic Mushroom!)
+
+Examine and read are similar to the eat and drink functions. If the object
+has some text, or a description, then they are printed out, if it has
+an _readFn, or an _describeFn these are called instead. Examples include
+the castle drawbridge - You can see it it's up or down, and some of
+the gates and doors - You can see if they are open or closed. Rooms
+may have an _describeFn too.
+
+Get and drop are similar again. These functions don't have to be
+present, they are only called if they are. If they return 1 then the
+rest of the get or drop code is executed, if they return 0 then the get
+and drop code executes normally. Examples using these functions are the
+mouldy bread the the corn.
+
+Doors are currently a tricky thing to implement. you will need 2
+objects, (one on either side). You can link the open and close
+functions together, however. When you open one door, you want to output
+messages for people in that room, and also for people in the room on
+the other side! (You don't have to, but I'll consider this sloppy work
+if you don't!) You also need some room functions to block the move
+if the door is closed!
+
+It you want to implement a openable door (or a lockable one), examine
+the mansion code as this has a good example. (The golden Gates).
+
+It is possible to create widgets with USEable functions that call
+functions on other objects. An examine is the quill in the mansion.
+You may USE it and then tickle something. If the object being tickled
+has an _tickleFn then it is called, if it's a player you see a humourous
+message, otherwise you get a "You can't tickle that" message.
+
+
+MOBILE FUNCTIONS
+~~~~~~~~~~~~~~~~
+
+Every 5 seconds, the system attempts to move a mobile. Before the move,
+a mobile._tickFn is called. Depending on the result of this function,
+the mobile will move, or not. After the move (if it happens) the
+mobile._tickFn will be called again. (or not, depending on the result
+of the first _tickFn).
+
+These mobile ticks can be used to make the mobile output some speech, or
+follow a random path, or a computed path. (If the mobile doesn't have a map,
+the function still gets called every 5 seconds).
+
+Note that mobiles with an MATTACK of greater than zero will check a
+room for a potential victim on each tick (this happens automatically).
+It is still possible to "run" past a hostile mobile. To counteract this
+you would need to provide room functions to catch players moving
+through. (The only one at present is the mummy at the top of the
+pyramid).
+
+Mobiles can have _describeFns (and _readFns if needed!) These work in
+the same way as those for WIDGETs.
+
+Creating traps and puzzles requires some thought and knowledge, not
+only of U code, but of how my universe rules and data structures work
+too. Probably best to think of how the puzzle/trap works in full and
+discuss it with me.
+
+
+ +--+  +--+  +--+
+ |- +--+  +--+ -|
+ +---+ - - -+---+
+     | - - -|
+     |- - - |
+     | - - -+-------------------------------------------------------------+
+     |- - Arch Wizard Irn-Bru - Creator of Drogon - gordon@meiko.com - - -|
+     +--------------------------------------------------------------------+
+     | - - - - - - Ip address: 192.131.108.55,  port 6123 - - - - - - - - |
+     +--------------------------------------------------------------------+

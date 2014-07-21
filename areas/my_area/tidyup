@@ -1,0 +1,3 @@
+rm *.msg
+rm *.BAK
+rm *~

@@ -1,0 +1,54 @@
+Server BOOTED: Mon Jun 19 21:58:14 1995
+New connect @131.111.133.6
+connect: Toaster id#8@8
+close connect @8
+New connect @131.111.133.6
+connect: Toaster id#8@8
+close connect @8
+New connect @131.111.133.6
+connect: Toaster id#8@8
+close connect @8
+New connect @131.111.133.6
+connect: Toaster id#8@8
+New connect @127.0.0.1
+connect: winker id#1@9
+close connect @9
+close connect @8
+Server shutdown request: Tue Jun 20 01:59:02 1995
+--down--
+Server BOOTED: Tue Jun 20 22:26:58 1995
+New connect @127.0.0.1
+connect: winker id#1@8
+New connect @127.0.0.1
+connect: guest1 id#10@9
+close connect @8
+close connect @9
+Server shutdown request: Tue Jun 20 22:37:35 1995
+--down--
+Server BOOTED: Wed Jul  5 21:41:45 1995
+New connect @127.0.0.1
+connect: winker id#1@8
+New connect @127.0.0.1
+connect: linca id#16@9
+Wed Jul  5 21:44:08 1995 Linca SAYs hello
+close connect @9
+New connect @127.0.0.1
+close connect @8
+connect: winker id#1@9
+New connect @127.0.0.1
+connect: Toaster id#8@8
+close connect @8
+New connect @127.0.0.1
+connect: linca id#16@8
+Wed Jul  5 21:45:25 1995 <E> Linca smiles happily.
+close connect @9
+close connect @8
+Server shutdown request: Wed Jul  5 21:49:18 1995
+--down--
+Server BOOTED: Sat Sep  2 18:25:28 1995
+New connect @127.0.0.1
+connect: winker id#1@8
+Sat Sep  2 18:30:07 1995 Winker SAYs Sparky, sit
+close connect @8
+Server shutdown request: Sat Sep  2 18:30:26 1995
+--down--

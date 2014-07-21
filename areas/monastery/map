@@ -1,0 +1,62 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include "drogon.h"
+#include  "rooms.h"
+
+#include "rooms/sea/rooms.h"
+
+
+BI_CONNECT (sea_13,      mon_path_01, "se",    "nw"    ) ;
+BI_CONNECT (mon_path_01, mon_path_02, "south", "north" ) ;
+BI_CONNECT (mon_path_02, mon_path_03, "south", "north" ) ;
+BI_CONNECT (mon_path_03, mon_path_04, "south", "north" ) ;
+BI_CONNECT (mon_path_04, mon_path_05, "south", "north" ) ;
+BI_CONNECT (mon_path_05, mon_path_06, "nw",    "se"    ) ;
+BI_CONNECT (mon_path_06, mon_cave,    "nw",    "se"    ) ;
+
+BI_CONNECT (sea_13,      mon_path_01, "up",    "down"  ) ;
+BI_CONNECT (mon_path_01, mon_path_02, "up",    "down"  ) ;
+   CONNECT (mon_path_02, mon_path_03, "up"             ) ;
+   CONNECT (mon_path_04, mon_path_03, "up"             ) ;
+BI_CONNECT (mon_path_04, mon_path_05, "down", "up"     ) ;
+
+BI_CONNECT (mon_path_03,     mon_archway,     "west",  "east"  ) ;
+
+BI_CONNECT (mon_archway,     mon_corridor,    "north", "south" ) ;
+BI_CONNECT (mon_corridor,    mon_hall,        "west",  "east"  ) ;
+BI_CONNECT (mon_hall,        mon_kitchen,     "west",  "east"  ) ;
+BI_CONNECT (mon_kitchen,     mon_anteChamber, "west",  "east"  ) ;
+BI_CONNECT (mon_anteChamber, mon_chapel,      "south", "north" ) ;
+
+BI_CONNECT (mon_archway,     mon_bell_01,     "south", "north" ) ;
+BI_CONNECT (mon_bell_01,     mon_corridor_01, "west",  "east"  ) ;
+BI_CONNECT (mon_corridor_01, mon_corridor_02, "west",  "east"  ) ;
+BI_CONNECT (mon_corridor_02, mon_corridor_03, "west",  "east"  ) ;
+BI_CONNECT (mon_corridor_03, mon_chapel,      "north", "south" ) ;
+
+BI_CONNECT (mon_archway,      mon_courtyard_01, "west", "east" ) ;
+BI_CONNECT (mon_courtyard_01, mon_courtyard_02, "west", "east" ) ;
+BI_CONNECT (mon_courtyard_02, mon_chapel,       "west", "east" ) ;
+
+BI_CONNECT (mon_hall,    mon_courtyard_01, "south", "north" ) ;
+BI_CONNECT (mon_kitchen, mon_courtyard_02, "south", "north" ) ;
+
+BI_CONNECT (mon_corridor_01, mon_dorm_01,    "south", "north" ) ;
+BI_CONNECT (mon_corridor_02, mon_dorm_02,    "south", "north" ) ;
+BI_CONNECT (mon_corridor_03, mon_library_01, "south", "north" ) ;
+BI_CONNECT (mon_library_01,  mon_library_02, "south", "north" ) ;
+
+BI_CONNECT (mon_bell_01, mon_bell_02, "up", "down" ) ;
+BI_CONNECT (mon_bell_02, mon_bell_03, "up", "down" ) ;
+BI_CONNECT (mon_bell_03, mon_bell_04, "up", "down" ) ;
+BI_CONNECT (mon_bell_04, mon_bell_05, "up", "down" ) ;

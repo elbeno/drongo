@@ -1,0 +1,203 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @._quit
+{
+  @._visEmote("fades into nothingness...");
+  @._boot(#actor) ;
+} chmod(&@._quit, "W:rs");
+
+func @._quitHangup
+{
+  @._visEmote("turns into a statue!");
+}
+
+func @.quit
+{
+  @._quit () ;
+} chmod(&@.quit, "W:rs");
+
+func @._welcome
+{
+  if (#actor==Util) {
+    echo("Logging from ",strtime(),"\n") ;
+    return ;
+  }
+  if (#actor==CodeSub)
+    return ;
+
+  $sal = Util.sal;
+  $a = atoi (#actor);
+
+  if ($sal==1)
+    if ($a > 9 && $a < 16) {
+      echo(
+  "Sorry - this place is currently only open to Registered Players.\n");
+      @._boot(#actor);
+      return;
+    }
+
+  if ($sal==2)
+    if (!WIZ(#actor)) {
+      echo(
+  "Sorry - this place is currently only open to Wizards and Witches.\n");
+      @._boot(#actor);
+      return;
+    }
+
+  if ($sal==3)
+    if (!ARCH(#actor)) {
+      echo("Sorry - this place is currently only open to Arch-Wizards\
+ and Arch-Witches.\n");
+      @._boot(#actor);
+      return;
+    }
+
+  if ($sal==4)
+    if (!CREATOR(#actor) && #actor != #1)
+    {
+      echo("Sorry - this place is currently only open to Creators.\n");
+      @._boot(#actor);
+      return;
+    }
+
+  if (@.textDump)
+  {
+    echo("
+
+ =--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=
+ =--=                        *** >> POOF << ***                          =--=
+ =--=    THERE IS A BINDING FLASH OF LIGHT AND A LOT OF ORANGE SMOKE     =--=
+ =--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=--=
+
+");
+
+  }
+  else
+  {
+    catfile (#actor, "motd/welcome");
+    @.motd ();
+  }
+
+  echo ("Welcome, ",#actor.name," to the land of Drongo.\n") ;
+  if (#actor.loginTime) 
+  {
+    echo ("  (Your last visit was on ", strtime (#actor.loginTime));
+    if (#actor.ipnum) 
+    {
+      echo(" from ", #actor.ipnum, ")\n");
+    }
+    else
+    {
+      echo(")\n");
+    }
+  }
+
+  #actor.loginTime = time();
+  #actor.idleTime = #actor.loginTime;
+  #actor.ipnum = getip(#actor);
+
+  if ($a > 9 && $a < 16)
+  {
+    #actor.level=0;
+    #actor.invis=0;
+    #actor.money=0;
+    #actor.hp=0;
+    #actor.mana=1;
+    #actor.nameTag=NULL;
+    #actor.mbx=NULL;
+    #actor.name=str ("Guest",$a-9); 
+    #actor.home=#2;
+/*    echo("\nHelp is now available - just type 'help' to get some!\n");
+    echo("To make a real character, type 'newchar', and read the info.\n");
+*/
+    echo("What the heck are you doing here, and how did you find this place?\n");
+  }
+
+  foreach $plr in (@.onlinePlayers)
+    if ($plr.monLog)
+      if (@._youCanSeeMe($plr))
+	  echoto ($plr, "\a*** ",#actor.name," has connected!\n") ;
+  
+  if(#actor.name != NULL)
+    @.onlinePlayers = listadd(@.onlinePlayers,#actor);
+
+  $olp = listcount(@.onlinePlayers);
+
+  if (@.connects == NULL)
+  {
+    @.connects=1;
+    @.maxConnects=1;
+  }
+  else
+  {
+    @.connects=@.connects+1;
+    if ($olp>@.maxConnects)
+      @.maxConnects=$olp;
+  }
+
+  if (Util.connects==NULL)
+  {
+    Util.connects=1;
+    Util.maxConnects=1;
+  }
+  else
+  {
+    Util.connects=Util.connects+1;
+    if ($olp>Util.maxConnects)
+      Util.maxConnects=$olp;
+  }
+
+  /* reset any blind, deaf, dumb, paralyse spells */
+  #actor.blind = NULL;
+  #actor.paralysed = NULL ;
+  #actor.dumb = NULL ;
+  #actor.deaf = NULL ;
+
+  /* put in something here to deal with in jail */
+
+  @._moveply(#actor.home) ;
+  @._visEmote ("appears.\n") ;
+
+  if (#actor.mbx.new)
+    echo("\nYou have mail. - type \"po\" from the void to get to the Post Office.\n");
+  if (#actor._news)
+    echo("\nThere is new news. Please type 'news' to read it.\n");
+
+} chmod(&@._welcome, "W:rs");
+
+
+func @.motd
+{
+  catfile (#actor, "motd/messages");
+  if (#actor.builder) catfile (#actor, "motd/builders");
+  if (WIZ(#actor)) catfile (#actor, "motd/wizards");
+}
+
+func @._boot
+{
+  $plr = atoobj ($1) ;
+
+  if ($plr != CodeSub)
+    foreach $p in (@.onlinePlayers)
+      if ($p.monLog) 
+        if (@._plrCanSeePlr($p, #actor))
+          if ($p!=$plr)
+	    echoto ($p, "\a*** ",$plr.name," has disconnected.\n") ;
+
+  @.onlinePlayers = listdrop (@.onlinePlayers, $plr) ;
+
+  if ($plr != CodeSub) {
+    echoto($plr, "
+--- Your surroundings fade to a nothingness --- Your hear a distant voice:
+      \"Farewell traveller, come back soon\"
+   The voice fades into the nothingness which is slowly replaced by ...\n\n");
+  }
+  @._resetInvent($plr);
+  @.__move($plr, #0);
+  disconnect($plr) ;
+} /* chmod(&@._boot, "W:rs"); - don't really want anyone able to boot anyone */
+
+
+

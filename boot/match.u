@@ -1,0 +1,121 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+/***************************************************************************/
+/***            ---------    MATCHING FUNCTIONS    ----------            ***/
+/***************************************************************************/
+
+func @._ambName
+{
+  $what = NULL ;
+  $howmany = 0 ;
+  $oldname="";
+  foreach $thg in ($1) {
+    $hit = match($2,$thg,"name") ; /*regexp($thg.name,$2) ;*/
+    if ($hit && ($oldname!=$thg.name)) { /* Count n items with the same name as 1 */
+      $what = $thg ;
+      $howmany = $howmany + 1 ;
+      $oldname=$thg.name;
+    }
+    
+  }
+  
+  @._ambMatch = $what ;
+  return $howmany ;
+}
+
+func @._singleName
+{
+  if ($# < 3) $none = str ("There is no ",$2," here.") ;
+  else $none = $3 ;
+  $howmany = @._ambName ($1, $2) ;
+  if ($howmany == 0)
+  {
+    echo ($none,"\n") ;
+    return ;
+  }
+  
+  if ($howmany > 1)
+  {
+    echo (@.notSureWhat,"\n") ;
+    return ;
+  }
+  
+  return @._ambMatch ;
+} chmod(&@._singleName, "W:rs");
+
+func @._ambVis
+{
+  $what = NULL ;
+  $howmany = 0 ;
+  $oldname="";
+
+  foreach $thg in ($1)
+  {
+    if (@._iCanSeeYou($thg) || $thg.widget)
+    {
+      $hit = match($2,$thg,"name") ; /*regexp ($thg.name,$2) ;*/
+      if ($hit && ($oldname!=$thg.name))
+      {
+        $what = $thg ;
+        $howmany = $howmany + 1 ;
+        $oldname=$thg.name;
+      }
+      
+    }
+    
+  }
+  
+  @._ambMatch = $what ;
+  return $howmany ;
+} chmod(&@._ambVis, "W:rs");
+
+func @._singleVis
+{
+  if ($# < 3) $none = @.noOneInLand ;
+  else $none = $3 ;
+  $howmany = @._ambVis ($1,$2) ;
+  if ($howmany == 0)
+  {
+    echo ($none,"\n") ;
+    return NULL ;
+  }
+  
+  if ($howmany > 1)
+  {
+    echo (@.notSureWho,"\n") ;
+    return NULL ;
+  }
+  
+  return (@._ambMatch) ;
+} chmod(&@._singleVis, "W:rs");
+
+func @._matchAnything
+{
+  $obj = atoobj($1);
+  if (!$obj)
+  {
+    $num = @._ambName(Util.mobiles, $1);
+    $obj = @._ambMatch;
+    $num = $num + @._ambName (Util.players, $1);
+    if (@._ambMatch)
+      $obj = @._ambMatch;
+    $num = $num + @._ambName (Util.widgets, $1);
+    if (@._ambMatch)
+      $obj = @._ambMatch;
+
+    if ($num == 0) {
+      echo("There is nothing with that name.\n");
+      return NULL;
+    }
+
+    if ($num > 1) {
+      echo("There are many things with that name.\n");
+      return NULL;
+    }
+  }
+  return $obj;
+} chmod(&@._matchAnything);
+
+

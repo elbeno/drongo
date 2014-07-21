@@ -1,0 +1,3 @@
+$MUDUTILDIR/sub rooms | $MUDUTILDIR/extract rooms.h
+$MUDUTILDIR/sub widgets | $MUDUTILDIR/extract widgets.h
+$MUDUTILDIR/sub roomFns

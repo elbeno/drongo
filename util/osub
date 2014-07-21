@@ -1,0 +1,1 @@
+/home/bjd1000/drongo/util/usubmit -l Toaster -p mustk -h 'cat <$MUDSERVERHOST' -f $1

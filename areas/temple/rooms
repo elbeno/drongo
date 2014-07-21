@@ -1,0 +1,16 @@
+#include <drogon.h>
+
+{
+  ROOM ("Temple", "ps_temple") ;
+  RDESC = "
+  This is a very small single roomed temple where worshippers may offer
+  their treasures to the Gods in return for gifts and favours (but mostly
+  money). The way out is to the south." ;
+  HAVEN ;
+  NO_SUMMON_OUT ;
+  INDOORS ;
+}
+
+
+
+

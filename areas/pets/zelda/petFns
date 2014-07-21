@@ -1,0 +1,87 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+/*
+ * Listening functions for Zelda's Pet Mouse.
+ *
+ */
+
+#include "drogon.h"
+#include  "owner.h"
+#include    "pet.h"
+
+
+func zelda_mouse._listen
+{
+   if  (regcmp ($1, "^Squeaky, crawl.*"))
+      { #self._crawl ($1) ;     return ; }
+
+   if (regcmp ($1, "^Squeaky, nibble.*"))
+     { #self._nibble ($1) ;    return ; }
+   
+
+   if (regcmp ($1, "^Squeaky,"))
+     @._reko (#self.location, "Squeaky scurries around your feet looking for cheese.\n") ; }
+
+func zelda_mouse._duh
+{
+  @._reko (#self.location, "Squeaky sniffs around for something to nibble.\n") ;
+}
+
+func zelda_mouse._crawl
+{ 
+  $s = regexp ($1, " [a-zA-Z]*$") ; $s = regexp ($s, "[^ ].*") ;
+  
+  if ( $s == "me") 
+    $s = #actor.name ;
+ 
+  if (( $p = @._findOLP_Lz ($s)) == NULL)
+    return #self._duh () ;
+
+  if ( ARCH ($p) || ($p == ZELDA) )
+  {
+    @._reko (#self.location,"Squeaky looks at her friend ", $p.name, ", shakes her little head and
+decides to crawl to ", #actor.name, " instead!\n") ;
+  $p = #actor ;
+  }
+  @._reko (#self.location, "Squeaky squeaks earpiercingly and crawls up ",$p.name, ", making ", @._himHer ($p),
+" squirm.\n") ;
+}
+
+func zelda_mouse._nibble
+{
+  if ( !(ARCH (#actor) || (#actor == ZELDA)) )
+    return #self._duh () ;
+
+  $s = regexp ($1, " [a-zA-Z]*$") ; $s = regexp ($s, "[^ ].*") ;
+
+  if ($s == "me")
+    $s = #actor.name ;
+
+  if (($p = @._findOLP_Lz ($s)) == NULL)
+    return #self._duh () ;
+
+  if ( ARCH ($p) || ($p == ZELDA) )
+  {
+    @._reko (#self.location,"Squeaky looks at her friend ", $p.name, ", shakes her head and decides to
+nibble on ", #actor.name, " instead!\n") ;
+   $p = #actor ;
+  }
+
+  becomePlayer ($p) ;
+  echo ("Squeaky scurries up you and nibbles on your neck with vampire-like
+teeth.\n") ;
+ 
+  @._geko ("\n<!> ", #actor.name, " has been nibbled to death by Zeldas mouse!\n") ;
+  @._resurrect (0) ;
+  becomeMyself ;
+}

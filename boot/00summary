@@ -1,0 +1,286 @@
+Summary:
+
+Key:
+D - Fully Drogon compatible (AFAIK)
+d - Same function exists in Drogon, probably doing the same thing
+X - Not compatible
+W - Is setuid W:rs
+
+
+
+umInit0:	System variables
+
+match:
+func @._ambName			/* D					*/
+func @._singleName		/* X	Get a best match for name	*/
+func @._ambVis			/* D					*/
+func @._singleVis		/* X	Get best match for vis plr	*/
+
+strings:
+func @._levelName		/* D	Return a name for a given level	*/
+func @._himHer			/* D	Return obj prn for gender	*/
+func @._hisHer			/* D	Return possessive for gender	*/
+func @._heShe			/* D	Return sub prn for gender	*/
+
+drongo:
+func @._hmmss                   /* X    Return time as H:MM:SS		*/      
+func @._calcTotArmour		/* XW	Calculate a player's armour	*/
+func @._compLocs		/* X	Comparison for groupsorting pw  */
+func @._resetInvent		/* XW	Reset player's items		*/
+func @._resetObject		/* XW	Replace an object		*/
+func @._offerObject		/* XW	Zap an object			*/
+func @._sub			/* X	Sorting routine			*/
+func @._groupSort		/* X	Flexible list sorting routine	*/
+func @._minScore		/* XW	Shrug?				*/
+func @._maxMana			/* dW					*/
+func @._manaRestore		/* XW					*/
+func @._maxHp			/* dW					*/
+func @._maxLoad			/* dW					*/
+func @._use			/* XW	Make player use object		*/
+func @._useMana			/* XW	Test for enough mana		*/
+func @._takeMoney		/* DW	Take money from player		*/
+
+tick:
+func @._doDmFns			/* XW	Handle system reset stuff	*/
+func @._reobj			/* XW	Test objects $1-$2 for reset	*/
+func @.gen_tick			/* XW	The system tick			*/
+func @._fifteencheck
+...
+
+create:
+func @._newRoom			/* XW	Make new room			*/
+func @._newMobile		/* XW	Make new mobile			*/
+func @._newWidget		/* XW	Make new widget			*/
+func @._addScenery		/* XW	Add scenery to room		*/
+func @._newPlayer		/* X	Make new player			*/
+func @.__initPlayer		/* X	Set up player's initial vars	*/
+func @._link			/* XW	Add a link between rooms	*/
+func @._hideExit		/* DW					*/
+func @._showExit		/* DW					*/
+
+
+print:
+func @._youCanSeeMe		/* D					*/
+func @._iCanSeeYou		/* D					*/
+func @._plrCanSeePlr		/* X					*/
+func @._plrCanSeeLvl		/* X					*/
+func @._lekoName		/* D					*/
+func @._lekoNAME		/* D					*/
+func @._tellName		/* X					*/
+func @._tellNAME		/* X					*/
+func @._emote			/* D					*/
+func @._visEmote		/* D					*/
+func @._visLeko			/* D					*/
+func @._leko			/* D					*/
+func @._lekoFor			/* D	Echo message to object's loc	*/
+func @._geko			/* D					*/
+func @._reko			/* D					*/
+func @._echoToArchesHere	/* X	Echo to arches at location	*/
+func @._twoPlayerEmote
+func @._emote2p
+func @._itemStats		/* X	Return string for EX header	*/
+func @._sysms			/* X	D=_wall? Send system msg	*/
+func @._sp			/* d	Print n copies of $		*/
+func @._pNum			/* D	Print $1 to width $2		*/
+
+
+movement:
+
+func @._moveply			/* XW	Move #actor and look		*/
+func @.__move			/* X	Change an object's location	*/
+func @._move			/* dW	Move, updating player stats	*/
+func @._dirName			/* D	Get direction name		*/
+func @._go			/* d	Move #actor in direction	*/
+func @._doFollowers		/* XW	Move all of players follwers 	*/
+func @.n
+func @.ne
+func @.e
+func @.se
+func @.s
+func @.sw
+func @.w
+func @.nw
+func @.u
+func @.d
+func @.go			/* D	Help for silly people using go	*/
+func @.home
+func @.exits
+func @.follow
+func @.sf
+
+
+
+players:
+func @.give
+func @.steal
+func @.examine
+func @.ex
+func @.i
+func @.inv
+func @.use
+func @.take
+func @.get
+func @.drop
+func @.l
+func @.look
+func @._quickLook
+
+
+fighting:
+func @.wield
+func @.attack
+
+magic:
+func @.summon
+func @.mWhere
+
+
+wizard:
+func @.invis
+func @.vis
+func @.sil
+func @.enterTxt
+func @.exitTxt
+func @.monlog
+func @.boot
+func @.zap
+func @.seeme
+func @.noseeme
+func @.wmi
+func @.tp
+func @.join
+func @.jf
+func @.pc
+func @.mc
+func @.oc
+func @.ow
+func @.mw
+func @.pw
+func @.omatch
+func @.pmatch
+func @.mmatch
+func @._matchlist
+func @.sal
+
+examine:
+func @.EX
+func @._EXroom
+func @._EXmobile
+func @._EXplayer
+func @._EXwidget
+
+
+arch:
+func @.lp
+func @.oe
+func @.seel
+func @.see
+func @.whatis
+func @.sys
+func @.Leko
+func @.Geko
+func @.frob
+func @.cName
+func @.plode
+func @.Do
+func @.force
+
+/***                       Player commands                               ***/
+
+status:
+func @.sc
+func @.score
+func @.who
+func @.qw
+func @.help
+func @.wHelp
+func @.awHelp
+
+
+communication:
+func @.page
+func @.nametag
+func @.cdesc
+func @.say
+func @.wsay
+func @.shout
+func @.tell
+func @.whisper
+func @.emote
+func @.wem
+
+object interaction:
+func @.open
+func @.close
+func @.lock
+func @.unlock
+func @.push
+func @.pull
+func @.search
+func @.read
+func @.turn
+func @.move
+func @.ride
+func @.shake
+func @.eat
+func @.drink
+func @.enter
+
+
+olb:
+func @.rdesc
+func @.myrooms
+func @.link
+func @.dig
+func @.odesc
+func @.odestroy
+func @.object
+func @.removeLink
+func @.Rdestroy
+
+area.handling:
+func @._setArea			/* XW	Set area for actors submission	*/
+func @._getCurOwner		/* XW	Get an owner for actors sub	*/
+
+area.admission:
+func @.areaadmit
+func @.areaadmitcopy
+func @.areaadmitall
+func @.areaadmitnone
+func @.areaadmitadd
+func @.areaadmitdel
+func @.areaadmitlist
+func @._playerNotOwner
+func @._playerNotAdmitted
+
+area.comments:
+?
+
+access:
+func @._cannotChange
+func @._cannotAccess
+
+connect:
+func @._quit
+func @.quit
+func @._welcome
+func @.motd
+func @._boot
+
+
+
+
+func @._objectDestroy
+func @.clock
+func @._highlight
+func @._resurrectQty
+func @._resurrect
+func @.brief
+func @.verbose
+func @.sal ;
+func @.xflags ;
+func @.xattack on/off ;
+func @._pageFile
+func @.move
+
+

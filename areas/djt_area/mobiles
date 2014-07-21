@@ -1,0 +1,38 @@
+/***************************************************************\
+* mobiles description file for Logic Island 			*
+* Submitted by Bugblatter djt1000@uk.ac.cam.hermes		*
+\***************************************************************/
+
+/* Revision History
+ 
+ Date   | Modifications
+--------+-------------------------------------------------------
+05Mar94 | This file created
+--------+-------------------------------------------------------
+04Mar94 | Submitted to Irn-Bru
+--------+-------------------------------------------------------
+*/
+
+#include <drogon.h>
+#include "rooms.h"
+#include "widgets.h"
+
+/* The game of NIM
+ ******************/
+
+{
+  MOBILE
+  (
+    "a long bearded wizard", "island2_beach_wizard", MALE,
+    20,0,0,
+    island2_beach_cave
+  ) ;
+  MFIXED = "You can't really see a place to grab a hold!" ;
+  MXATTACK = "
+  As you begin to attack, the wizard waves his hand and wiggles his
+  fingers. You suddlenly feel all relaxed and calm again!" ;
+  MDNAME = "A man is playing with something in the sand." ;
+  MDESC = "
+  The man appears to be a wizard and has a very long beard. He is
+  constantly rearranging piles of pebbles in the sand." ;
+} 

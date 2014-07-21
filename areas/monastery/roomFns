@@ -1,0 +1,103 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include  "drogon.h"
+#include   "rooms.h"
+#include "mobiles.h"
+
+/***************************************************************************/
+/* Kneeling or standing in the chapel                                      */
+/***************************************************************************/
+
+func mon_chapel.kneel
+{
+  if (#actor.kneeling != NULL)
+    { echo ("You are already kneeling!\n") ; return ; }
+
+  #actor.kneeling = 1 ;
+
+  echo ("You kneel down in front of the table.\n") ;
+  @._visEmote ("kneels in front of the table.") ;
+}
+
+func mon_chapel.stand
+{
+  if (#actor.kneeling == NULL)
+    { echo ("You are already standing!\n") ; return ; }
+
+  #actor.kneeling = NULL ;
+
+  echo ("You stand up.\n") ;
+  @._visEmote ("stands up.") ;
+}
+
+
+/***************************************************************************/
+/* Trying to leave the chapel? Make sure we stand up first!                */
+/***************************************************************************/
+
+func mon_chapel._preExitFn
+{
+  if (#actor.kneeling != NULL)
+    { echo ("You are still kneeling. It would be better if you stood up first.\n") ; return 1 ; }
+  else
+     return 0 ;
+}
+
+
+/***************************************************************************/
+/* mon_chapel._describeFn: Different if we are kneeling                    */
+/***************************************************************************/
+
+func mon_chapel._describeFn
+{
+  echo ("
+  This is the monasterys chapel. It seems to be in remarkably good condition,
+  despite the appearance of the rest of the monastery. It has a bare stone
+  floor and brick walls. Along the walls are a few statues, no doubt of
+  some minor deities. There is a large stained-glass window to the West,
+  and under it a fairly plain table. Archways lead off the the North, South
+  and East.") ;
+
+  if (#actor.kneeling != NULL)
+    echo (" You notice a small round stone raised slightly from the main
+  flagstones.") ;
+
+}
+
+
+/***************************************************************************/
+/* Trying to get past the lobster?                                         */
+/***************************************************************************/
+
+func mon_path_06._preExitFn
+{
+  /** Going to the cave? **/
+  if ($1 != mon_cave)
+    return 0 ;
+
+  /** Is the lobster here? **/
+  if (mon_lobster.location != mon_path_06)
+    return 0 ;
+
+  echo ("The giant lobster won't let you past.\n") ; return 1 ;
+}
+ 
+
+/***************************************************************************/
+/* Foolishness in the cave?                                                */
+/***************************************************************************/
+
+func mon_cave.plugh
+{
+  echo ("A hollow voice says: \"Fool\" ...\n") ;
+}

@@ -1,0 +1,235 @@
+Someone (Irn-Bru) says: "Want to be an arch?"
+You say: "Yeah ok"
+Someone (Irn-Bru) waves his hands and mutters "Ratta-dob do me a frob" ...
+
+Someone (Irn-Bru) says: "ok, Invis (0,1,2)"
+Someone (Irn-Bru) says: "0 - no effect, 1 lightning, 2 hole in the ground"
+
+You feel the earth under your feet rumble and shake a little. A hole
+appears in the ground and out of the hole rises Irn-Bru!
+Irn-Bru waves his hands and mutters "Zapadiz, make invis" ...
+
+You see a bolt of lightning and hear a mighty thunderclap! When your eyes
+and ears recover you notice Irn-Bru has vanished from sight!
+Someone (Irn-Bru) says: "actually, the numbers only work with invis/vis - no Vi
+s, Invis goes directly Invis with no effects."
+
+Someone (Irn-Bru) says: "sbf/cbf set/clear builder flag. I don't want any more 
+builders at present."
+Someone (Irn-Bru) says: "you can tp into all rooms. (even 525, my office, and h
+eathers.)"
+  "arch wiz shout - aws".
+You telepathically arch-wiz-shout ...
+  "Wheee!"
+  " EX player will give their email address, if set. "
+  " you get to hear whispers too. don't mention this to anyone. "
+Someone (Irn-Bru) says: "ban - ban a player - there is even help on it - awHelp
+ ban"
+
+  ban <player> <number of days>
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  This command bans a player from the game from 1 to 5 days. The player
+  does not need to be online to ban him or her. Your ban action is logged
+  and you must have good reason before banning a player. (You can-not
+  cancel a ban).
+
+  It is a good idea to leave me a NOTE when you ban someone.
+
+  Note: If the players-name has spaces in it, you must enclose the name
+        in double quotes.  Eg.  ban "foo bar" 4.
+
+  Banning a player who is currently connected doesn't throw them out of
+  the game. You may with to follow a BAN with a BOOT.
+
+Someone (Irn-Bru) says: "in the mortality lounge:"
+Someone (Irn-Bru) says: "am/dm - add member, delete member."
+
+Someone (Irn-Bru) says: "I think that you can work most of the xflags too."
+
+xflags
+Drogon universe control flags:
+      sal: Access level is 0: All access.
+   xshout: Shouting is ENABLED.
+   xemote: Emote prefix is DISABLED.
+  xattack: General attacking is ENABLED.
+      xpk: Player killing is ENABLED.
+     xmpk: Mobile-player killing is ENABLED.
+     xmaw: Mobiles attacking wizards is DISABLED.
+     xwam: Wizards attacking mobiles is DISABLED.
+   xbuild: Online building is ENABLED.
+
+Someone (Irn-Bru) says: "theres not many more commands."
+Someone (Irn-Bru) says: "cName "old" "new" ..."
+Someone (Irn-Bru) says: "Get/Drop - get/drop objects - avoid special functions 
+and actions."
+Someone (Irn-Bru) says: "Fetch - capital F - Fetch almost anything."
+Someone (Irn-Bru) says: "lp - list players - type "lp" on it-s own for details.
+"
+*** lp < s0 | s> n | l0 | nc | pk | wiz | -dwiz n | ban | -d n | +d n | -sbr >
+ 
+Someone (Irn-Bru) says: "eg. lp pl"
+Someone (Irn-Bru) says: "lp pk"
+Someone (Irn-Bru) says: "s0 - score 0, s> n - score > n, etc."
+
+Someone (Irn-Bru) says: "slip - slip an object TO a player silently."
+Someone (Irn-Bru) says: "ipmatch"
+Someone (Irn-Bru) says: "eg. ipmatch 128.232.*"
+Someone (Irn-Bru) says: "thats the umass crowd."
+Someone (Irn-Bru) says: "eg. whatis 119"
+Someone (Irn-Bru) says: "oe - objectelements"
+Someone (Irn-Bru) says: "and now something even handier: see"
+*** see <#object> <element> [ <element> ... ]
+Someone (Irn-Bru) says: "eg. see 119 name"
+Someone (Irn-Bru) says: "see 119 location name"
+Someone (Irn-Bru) says: "and see 119 location contents"
+#119.location.contents = list of 3 elements.
+Someone (Irn-Bru) says: "you can dumo almost the whole of the database with the
+se ones."
+nod
+Someone (Irn-Bru) says: "read dmail, etc. (almost)"
+Someone (Irn-Bru) says: "seel - see list"
+<i>>seel 525 contents
+Objects in #525.contents: #555 #1 #119
+<i>>whatis 555
+#555: Widget: a white marble desk.
+Someone (Irn-Bru) says: "seel 6 playerList would not be a good thing to do"
+Someone (Irn-Bru) says: "seel 6 roomList even worse."
+Someone (Irn-Bru) says: "oe 6"
+<i>>oe 6
+elements in #6: ._saveCard ._saveLottery ._saveMemberList ._saveSBL ._save_
+bboards .cet0 .cet1 .cet2 .cet3 .cet4 .cet5 .cet6 .cet7 .epoch .hMore .li00 .li0
+1 .li02 .li03 .li04 .li05 .li06 .li07 .li08 .li09 .li10 .li11 .li12 .li13 .li14 
+.li15 .li16 .li17 .li18 .li19 .lo05 .lo06 .lo07 .lo09 .lo10 .lo12 .lo15 .lo16 .l
+o17 .lo19 .lp00 .lp01 .lp02 .lp03 .lp04 .lp05 .lp06 .lp07 .lp08 .lp09 .lp10 .lp1
+1 .lp12 .lp13 .lp14 .lp15 .lp16 .lp17 .lp18 .lp19 .mobileList .name .pkList .pla
+yerList .roomList .sal .salName0 .salName1 .salName2 .salName3 .salName4 .siteBa
+nList .swamp_forestMsg1 .swamp_swampMsg1 .tip .uRoomList .uWidgetList .util .wid
+getList
+Someone (Irn-Bru) says: "use @ for #0"
+Someone (Irn-Bru) says: "seel @ onlinePlayers"
+seel @ onlinePlayers
+Objects in #0.onlinePlayers: #250 #167 #288 #154 #260 #188 #108 #478 #119 #124 
+#1
+
+Someone (Irn-Bru) says: "seele - see a list element"
+seele @ onlinePlayers 1
+#0.onlinePlayers [1] = #250.
+
+Someone (Irn-Bru) says: "mobiles"
+Mobiles Name                  $   HP    %  wep  arm time
+~~~~~~~~~~~~                  ~   ~~    ~  ~~~  ~~~ ~~~~
+The Fort Nog Town Guard    2000  650    0  120   20 1500 map
+Ted the bar manager           0    0    0    -    0    0
+Freddie The Manager           0    0    0    -    0    0
+The Tyrog Su Town Guard    2000  650    0  120   20 1200 map
+Postman Pat                   0    0    0    -    0    0
+Alvar the magician            0    0    0    -    0    0
+Zog                         200  250    0   40   10 1200
+the Guru                    150   40    0    5    0 1200 map ticking
+a warty toad                150  150    0   10    0 1200 map ticking
+a large turtle                0    0    0    -    0    0 ticking
+a nasty crocodile          2000  500   80  120   40  300
+a large old rat             200   30   50    5   10  300 map
+a large and hungry rat      500  150  100   80   10 1800 map
+a grue                     4000 1000  100  120   50 7200
+Jock the salesman             0    0    0    -    0    0
+a giant oyster                0    0    0    -    0    0 ticking
+a vampire bat               800  550  100  120   40 2700 map
+a giant lobster             500  200    0   80   40 1800
+a suit of armour           1200  400   50   80   80 3000 map
+a peacock bush             1500  450  100  100   20 1800 map
+a camel                     150  100    0   40    0 1200 map
+a mummy                     250  250    0   10   50 1200
+Ammit                      2000  650    0  120   80 2700 map
+The palace guard            350  250    0  100   50 1800 map
+The hell hound              800  350  100  120   30 1800 map
+The Ice Monster            1000  350  100  120   80 3000 map
+a black cat                   0    0    0    -    0    0 ticking
+the dragon                 5000 1000    0  250   50  600
+a nasty little fish         400  250  100   40    0 1800 map
+an ancient cave dweller     550  300    5   80   50 1800 map
+a tree person                 0    0    0    -    0    0 map
+the tree elder                0    0    0    -    0    0
+the evil troll             2500  450   75  120   40 2700
+a huge dinosaur            3000  650  100  100   50 2700 map
+a pterodactyl              2000  450   40   70   30 1800 map
+a large dinosaur            500  450    0    1   55  600 map
+a swamp monster            2500  450   90  120   50 2700 map
+a ghost                    2000  450   50   70   50 2700
+Umber Hulk                 1400  550   30   70   40 1800
+a shuggoth                 2200  650  100  100   40 3000
+a ghoul                       0  450  100   70   45 1800
+a swarm of rats            1500  350  100   90   45 1800 map
+The palace manager            0    0    0    -    0    0 ticking
+Sonia the sex goddess         0 5000    0 2000   -1    0 ticking
+
+Someone (Irn-Bru) says: "weapons"
+Weapon Name                      Power  Home
+~~~~~~~~~~~                      ~~~~~  ~~~~
+a finger of death                   -1    #1  P:Irn-Bru
+a small rock                         5  #619  R:Dusty road
+a long sword                       100  #725  R:Guards hut
+a pitchfork                         50  #762  R:Stables
+a ball and chain                    80 #1088  R:Waldos weapons
+a pitchfork                         50 #1973  R:Stables
+a jewel encrusted letter opener     30 #2908  R:Study
+a claymore                         100 #2884  R:Damp chamber
+an ice sword                        70 #3174  R:The Ice Palace armoury
+her sceptre                         -1  #102  P:Heather
+a dinosaurs claw                   100 #3614  R:The north bank of a wide river
+a broken hilt                       25 #4760  R:Rat's lair
+an old oak staff                    -1  #146  P:Shadowmere
+
+armour
+Armour Name                      Armour  Home
+~~~~~~~~~~~                      ~~~~~~  ~~~~
+a golden robe                       -1    #1  P:Irn-Bru
+a dirty macintosh                   -1   #21  P:Andym
+a chain mail bodice                 20  #726  R:Guards hut
+a dusty cloak                        5 #1075  R:Dense shrubbery
+a round shield                      15 #2884  R:Damp chamber
+some magic armour                   20 #3174  R:The Ice Palace armoury
+a colourful robe                    -1  #102  P:Heather
+a magic talisman                    50 #3640  R:the tree elder
+a black cloak                       -1  #146  P:Shadowmere
+   
+Someone (Irn-Bru) says: "I hope that you are writing all this down ..."
+
+Someone (Irn-Bru) says: "makeVis - makeInvis - guess! (you can make a mortal in
+vis with this)"
+
+Someone (Irn-Bru) says: "no efects."
+
+Someone (Irn-Bru) says: "frob"
+
+Someone (Irn-Bru) says: "frob "player" level"
+
+Someone (Irn-Bru) says: "change level, set money, and clear task pending flag."
+
+Someone (Irn-Bru) says: "Geko/GekoIn/GekoOut/Leko"
+
+Someone (Irn-Bru) says: "Wall - Write All - the System message"
+
+SYSTEM MESSAGE @ Tue Oct 19 15:28:13 1993:
+   Testing ...
+
+Someone (Irn-Bru) says: "siteBan [list]"
+
+Someone (Irn-Bru) says: "siteBan nn.nn.nn.nn"
+Someone (Irn-Bru) says: "ban a site."
+You say: "No wildcards, I take it."
+You say: "as in siteBan *.*.*.*"
+
+Someone (Irn-Bru) says: "siteUnBan <site>"
+Someone (Irn-Bru) says: "well - that would work - actually not - it's regular e
+xprression match."
+
+Someone (Irn-Bru) says: "sbr - site ban register - let a player in from a banne
+d site"
+Someone (Irn-Bru) says: "sbb - site ban ban - re-bann a player from a site."
+Someone (Irn-Bru) says: "if you ban a site then all players are banned until yo
+u un-ban the,"
+
+Someone (Irn-Bru) says: "you can use "create" to create a player."
+Someone (Irn-Bru) says: "for someone."
+

@@ -1,0 +1,18 @@
+#include <drogon.h>
+#include "rooms.h"
+
+{
+  WIDGET ("a golden offering tray", "ps_goldenOfferingTray",
+  0, 0, 0, 0, 0, ps_temple) ;
+  WDESC = "
+  The tray is oval shaped and made out of what appears to be Gold. Upon
+  closer inspection, however you can make out that the edges and bottom
+  are Gold, but the top surface seems to be composed of a somewhat
+  familiar swirling void!" ;
+  WDNAME = "A golden offering tray floats close to you expectantly." ;
+  WFIXED = "I don't think the Gods would be too happy if you removed their offering
+tray." ;
+}
+
+
+

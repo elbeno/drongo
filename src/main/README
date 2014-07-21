@@ -1,0 +1,158 @@
+	System dependencies:
+	--------------------
+
+	the code than handles random() and the time stuff in
+	bltin.c assumes that integers and longs can be swapped.
+	the solution is to add another data type - longs - but
+	that is a pain because math operations would need to be
+	overloaded. left as an excercise to the reader.
+
+	ctime returns 26 chars in a string. (according to the
+	man page) The assumption is made in the code (bltin.c)
+	that it will be less than 32 chars.
+
+	I've taken great pains to make sure the union of Opers
+	is used wherever possible to prevent portability problems
+	but such things are uncertain at best. Wherever possible
+	syntactic techniques are used to avoid typing problems,
+	rather than just casts. (I *KNOW* a long can be cast as
+	a char * and vice-versa, but this sucker may be slow 
+	enough to demand being run on a CRAY :)
+
+	The b+tree library used to store the static symbol table
+	is fairly portable, but may break. If it does, good luck
+	to you.
+
+	There are no 'non-trivial' lint(1) complaints. 'trivial'
+	is defined as: stupid shit like function types being
+	declared differently because DEC and Sun can't decide if
+	bcopy is an int or a void, or signal is a (*void)() or
+	whatever. Pointer alignment warnings abound, of course.
+
+	A word on memory management:
+	----------------------------
+
+	memory management is done through 3 completely separate
+	mechanisms, depending on where the allocation is called
+	from. all memory used in compilation (parse.y) is hacked
+	around in static buffers. all memory used in temporaries
+	during the interpeter run is malloc()ed with a function
+	that keeps track of allocations and can free them all in
+	a single call (tmpalloc() and friends). all memory used
+	in the cache and freeze/thaw code (which can also wind
+	up on the stack) is malloc()ed and is freed when the 
+	object leaves the cache or is modified. at any point
+	in time all 3 of these types of memory objects can be
+	found in the stack! be very careful, ye who hack, to
+	ensure that you do not EVER make direct calls to free()
+	unless you are very very sure you know where that 
+	memory came from!
+
+	there are points in the caching code (in store.c and in
+	sym.c) where things are falsely placed onto the temporary
+	allocation list, to be freed later. be wary of this, as
+	it leaves memory around only until the next call to
+	tmpfree().
+
+	A word on the network interface:
+	--------------------------------
+
+	the network interface is designed to allow easy replacement
+	as new network paradigms (a good buzz word) are developed
+	and ballyhooed. simply re-write functionally identical
+	code to plug into tcpstuff.c and away you go. there is a
+	bit of commenting about HOW the interface works at the
+	head of tcpio.c.  if you write bindings of this to other
+	systems, let me know. it should be changed to feed the
+	data to dispatch() a line-at-a-time!
+
+
+	A word on adding new builtin functions:
+	---------------------------------------
+
+	First, make sure it's necessary. Second, be REALLY
+	careful if you have an existing universe database,
+	since the builtin function numbers are compiled in
+	to the objects, and if you change them, you have
+	utterly smoked your db! that being said, how to do
+	it:
+	1) make an entry in the keyword lookup table in parse.y
+		the last value is the ordinal number of the
+		builtin.
+	2) make an entry in blttab.c matching the ordinal
+		number you specified in parse.y
+	3) write the builtin itself. look at the ones in
+		bltin.c. read the comments in bltin.c that
+		explain what happens if you assign to the
+		result memory address before you are ready
+		to return from the builtin!
+	4) make sure that your biltin is "sensible" and does
+		not try to call any functions that would
+		generate another interpreter run! the interpreter
+		is re-entrant only with the most extreme care!
+	5) make an entry in the token table of the standalone
+		syntax checker to match the new keyword, or
+		you will confuse it terribly.
+
+	A word on hacking the monitor:
+	------------------------------
+
+	There are parts of code in monitor.c that HAVE to make
+	some assumptions about the universe rules - such as 
+	where to check for functions and whatnot. These are
+	all in player_in(), and are marked with a big comment:
+	/* HARDCODE */ near them. Before you randomly add
+	2 tonnes of searching to the monitor, remember that
+	the monitor will get called a LOT, and the more
+	searches it does, the more CPU and I/O bandwidth
+	you need! 
+
+	A word on disgusting hacks in here to be aware of:
+	--------------------------------------------------
+
+	There aren't TOO many such, I think, but the biggest, and by
+	far the worst is the uid/perms tags stored in a function.
+	This is a royal butt-pain, but is the most efficient way
+	to implement setuid functions. What it means is that any
+	place where you modify the perms/owner of an object you
+	HAVE TO make sure if it's a function that you patch the mode
+	bits back up again.
+
+	There are awful potential problems with things that are
+	being run or used in the current executing environment
+	being modified while they are running (IE:assigning to
+	a function WHILE it is being run, or a list while it is
+	being iterated across). This is usually handled by
+	either copying the object (as in a list iterator) or
+	by putting it on the free chain for later freeing.
+
+	A word on actually running the server:
+	--------------------------------------
+
+	If you can't figure it out by reading the startserver and
+	haltserver shell scripts, and looking at main.c, you should
+	just give up - you don't know enough C. The only subtle
+	things you need to do is figure out the format for the
+	password file (in disp.c) and how to initialize your
+	universe the first time (feed it init.u AFTER you've
+	booted it with boot.u).
+
+	A word on the password file:
+	----------------------------
+
+	The format is:
+	user-connect name : password : user object number : flags
+
+	for example:
+	UberWiz:X:2:W
+
+	The flags field presently can contain nothing (for none), or
+	a '1' (for programmer permission granted), or a 'W' (for
+	Wizard permission granted). Note that the user-connect-name
+	can have nothing WHATSOEVER to do with the player's game
+	name. Also, note that you can have more than one password
+	entry with different sets of flags for the same object #.
+	(so you can have a login for the Wiz that is not wiz-priv'd)
+	You get to figure the rest out.
+
+mjr.

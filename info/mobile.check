@@ -1,0 +1,61 @@
+/***************************************************************************/
+/* mc:                                                                     */
+/*      Check up on a mobile.                                              */
+/***************************************************************************/
+#include "drogon.h"
+func #2.mc
+{
+  wizardCommand ;
+  minArgs (1, "*** mc who?") ;
+  bundleArgs ;
+
+  $n = @._ambName (@.mobileList, $arg) ;
+  $m = @._ambMatch ;
+
+  if ($n == 0)
+    { echo (@.voiceInHead, @.noOneHereInLand, @.eVoice) ; return ; }
+
+  if ($n > 1)
+    { echo (@.voiceInHead, @.notSureWho,      @.eVoice) ; return ; }
+
+  echo ("\n", $m.name, ", ", @._sex ($m), ", ", $m, ".") ;
+
+  if ($m.uName != NULL)
+    echo ("<", $m.uName, "> ") ;
+
+  echo ("owner: ") ;
+  if ($m.owner == NULL)
+    echo ("System.") ;
+  else
+    echo ($m.owner.name, ".") ;
+
+  echo ("\n  ", $m.dName, $m.description, "\n") ;
+
+  if ($m.text != NULL)
+    echo ("Text:\n------\n", $m.text, "\n------\n") ;
+
+  if ($m.fixedMsg    != NULL) echo ("MFIXED: ",   $m.fixedMsg,    "\n") ;
+  if ($m.noAttackTxt != NULL) echo ("MXATTACK: ", $m.noAttackTxt, "\n") ;
+  if ($m.enterEmote  != NULL) echo ("MENTER: ",   $m.enterEmote,  "\n") ;
+  if ($m.exitEmote   != NULL) echo ("MEXIT:  ",   $m.exitEmote,   "\n") ;
+
+  $w = $m.weapon.power ;
+  $a = 0 ;
+  foreach $o in ($m.contents)
+    $a = $a + $o.armour ;
+
+  echo ("Value:",      $m.money, "/", $m.money * 125 / 100,
+ ", hp: ",      $m.hp, "/", $m._hp,
+ ", t:",        $m.sleepTime,
+ ", wep:",      $w,
+        ", arm:",      $a,
+ ", atk.prob:", $m.attackProb, "%\n") ;
+
+  echo ("Home: ", $m.home, ", ", $m.home.name) ;
+
+  if ($m.map == NULL)
+    echo (", No map.\n") ;
+  else
+    echo (", map contains ", listcount ($m.map), " locations.\n") ;
+
+}

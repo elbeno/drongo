@@ -1,0 +1,35 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) Gordon Henderson                                       */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+/*
+ * The definition of Novas horse.
+ *
+ */
+
+#include "drogon.h"
+#include  "owner.h"
+
+{
+  MOBILE
+  (
+    "a large white horse", "nova_horse", MALE,
+     0, 0, 0,
+     NOVA
+  )
+  MDESC    = "
+  Mymol is the most beautiful and magestic horse you've ever met. He's
+  blindingly white with soft brown eyes. His mane and tail flow out behind
+  him as he runs." ;
+  MDNAME   = "A large white stallion grazes here." ;
+  MXATTACK = "You can't attack personal pets." ;
+  $mobile.weight = 2000 ;
+}

@@ -1,0 +1,527 @@
+/* magic commands for ordinary players */
+
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+#ifndef _PARSE_H_
+#include "parse.h"
+#endif
+
+func @.summon
+{
+  if (#actor.dumb)
+  {
+    echo("The sock prevents you from casting the spell.\n");
+    return;
+  }
+
+  minArgs(1, "*** summon whom?");
+
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Alikason, bring person\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Alikason, bring person\" ...");
+
+  @._echoToArchesHere("  (summoning '", $arg, "'");
+
+  if (@._useMana(15)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis (@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - can't match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  echoto ($who, "You feel a tugging sensation.") ;
+  if (WIZ($who)) 
+  {
+    if (@._youCanSeeMe($who))
+      echoto($who, " (", #actor.name, ")");
+  }
+  echoto ($who, "\n");
+
+  if (#actor==$who) {
+    echo(@.voiceInHead, "You're already here.", @.eVoice);
+    return;
+  }
+
+  $l = $who.location ;
+  if ($l.noSummonOut >= #actor.level || ($1.player && $1.level >= #actor.level))
+  {
+    echo ("A remote magical field prevents the summon.\n") ;
+    return ;
+  }
+
+  if (#actor.location.noSummonIn >= #actor.level)
+  {
+    echo ("A localised magic field prevents the summon.\n") ;
+    return ;
+  }
+  
+  if ((@._playerNotAdmitted($who,#actor.location)) &&
+	 (@._playerNotOwner(#actor.location))) {
+    echo("A localised magic field prevents the summon.\n");
+    return;
+  }
+
+  if (@._youCanSeeMe($who))
+    echoto ($who, "You have been summoned by ", #actor.name, " to ", #actor.location.name, ".\n") ;
+  else
+    echoto ($who, "You have been summoned to ", #actor.location.name, "\n") ;
+
+  $locto=#actor.location;
+  $summoner=#actor;
+
+  becomePlayer($who);
+  @._visEmote("disappears in a puff of white smoke.");
+  @._echoToArchesHere("  (summoned by ", $summoner.name, ")\n");
+  @._moveply($locto) ;
+  @._visEmote("appears in a puff of white smoke!");
+  becomeMyself;
+} chmod (&@.summon,"W:rs") ;
+
+
+func @.mWhere
+{
+  if (#actor.dumb)
+  {
+    echo("The sock prevents you from casting the spell.\n");
+    return;
+  }
+
+  minArgs(1, "*** mWhere whom?");
+
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Rapadile, where mobile\"...\n");
+  @._visEmote("waves ", @._hisHer(#actor),
+		" hands and mutters \"Rapadile, where mobile\"...");
+  @._echoToArchesHere("  (looking for '", $arg, "'") ;
+
+  if (@._useMana(15)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $what = @._singleName(Util.mobiles, $arg, "I find no mobile with that name.");
+
+  if (!($what)) {
+    @._echoToArchesHere(" - no match)\n");
+    return;
+  }
+
+  @._echoToArchesHere(" - ", $what, ", '", $what.name, "' [", $what.location,
+	", ", $what.location.name, "])\n");
+
+  $l = $what.location;
+
+  echo (@.voiceInHead);
+
+  if ($what.hp<0)
+  {
+    if (WIZ(#actor))
+      echo ("Dead (", $l.name, ", ", $l, ")");
+    else
+      echo ("Dead");
+  } else {
+    if (WIZ(#actor))
+      echo ($l.name, ", ", $l);
+    else
+      echo ($l.name);
+  }  
+  echo(".", @.eVoice);
+
+} chmod(&@.mWhere, "W:rs");
+
+func @.pWhere
+{
+  if (#actor.dumb)
+  {
+    echo("The sock prevents you from casting the spell.\n");
+    return;
+  }
+
+  minArgs(1, "*** pWhere whom?");
+
+  bundleArgs;
+
+  if ($arg=="all" && WIZ(#actor))
+  {
+    @._echoToArchesHere(#actor.name, " casts a 'pw all' spell.\n");
+    if (@._useMana(30)) {
+      @._echoToArchesHere("  (but doesn't have the mana)\n");
+      return;
+    }
+    foreach $who in (@.onlinePlayers)
+      if (@._iCanSeeYou($who))
+	$plist=listadd($plist, $who);
+    $plist=@._groupSort($plist, @._compLocs);
+    $count = -1;
+    echo("\n");
+    foreach $who in ($plist) {
+      if ($who.invis)
+          echo(" *");
+        else
+          echo("  ");
+      echo($who.name);
+      @._sp(20-strlen($who.name), ".");
+      @._sp(6-strlen(str($who.location)), " ");
+      echo($who.location, ": ", $who.location.name, "\n");
+      $count = $count + 1;
+    }
+    if ($count == 0)
+      echo("You are on your own.\n");
+    else if ($count == 1)
+      echo("You can see 1 other player.\n");
+    else
+      echo("You can see ", $count, " other players.\n");
+    echo("\n");
+    return;
+  }
+
+  echo("You wave your hands and mutter \"Rapason, where person\"...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Rapason, where person\"...");
+  @._echoToArchesHere("  (on '", $arg, "'") ;
+
+  if (@._useMana(15)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis(@.onlinePlayers, $arg);
+
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return;
+  } else
+    @._echoToArchesHere(" - ", $who, ", '", $who.name, "' [", $who.location, ", ", $who.location.name, "])\n");
+
+  $l = $who.location;
+
+  echo(@.voiceInHead, $l.name, ", ", $l, @.eVoice);
+} chmod(&@.pWhere, "W:rs");
+
+func @.paralyse
+{
+  if (#actor.dumb)
+  {
+    echo("The sock prevents you from casting the spell.\n");
+    return;
+  }
+
+  minArgs(1, "*** paralyse whom?");
+
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Glakarise, paralyse\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Glakarise, paralyse\" ...");
+
+  @._echoToArchesHere("  (paralysing '", $arg, "'");
+
+  if (@._useMana(10)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis (@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if (WIZ($who) && $who.level >= #actor.level) 
+  {
+    echo ("*** Your magic backfires!\n") ;
+    $who = #actor ;
+  }
+
+  echoto ($who, "Some strange roots grow out of the ground and grab your feet, ",
+          "making further\nmovement impossible!\n") ;
+
+  becomePlayer($who) ;
+  @._leko ("Some strange roots grow out of the ground and grab ", $who.name, "\'s", 
+           " feet,\nparalysing ", @._himHer($who), "!\n") ;  
+  becomeMyself ;
+
+  $who.paralysed = 1 ;
+  $who.healParalysedTime = time() + 180;  /* 3 minutes */  
+
+} chmod (&@.paralyse, "W:rs");
+
+func @.deaf
+{
+  @.deafen($1) ;
+} chmod (&@.deaf, "W:rs");
+
+func @.deafen
+{
+  if (#actor.dumb)
+  {
+    echo("The sock prevents you from casting the spell.\n");
+    return;
+  }
+
+  minArgs(1, "*** deafen whom?");
+
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Gladakaref, make a deaf\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Gladakaref, make a deaf\" ...");
+
+  @._echoToArchesHere("  (deafening '", $arg, "'");
+
+  if (@._useMana(10)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis (@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if (WIZ($who) && $who.level >= #actor.level) 
+  {
+    echo ("*** Your magic backfires!\n") ;
+    $who = #actor ;
+  }
+
+  echoto ($who, "Your ears are magically sealed up, making hearing impossible!\n") ;
+
+  becomePlayer($who) ;
+  @._leko ($who.name, "\'s ears are magically sealed up!\n") ;
+  becomeMyself ;
+
+  $who.deaf = 1 ;
+  $who.healDeafTime = time() + 180;  /* 3 minutes */
+  
+} chmod (&@.deafen, "W:rs");
+
+func @.dumb
+{
+  if (#actor.dumb)
+  {
+    echo("The sock prevents you from casting the spell.\n");
+    return;
+  }
+
+  minArgs(1, "*** dumb whom?");
+
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Gladakarum, make a dumb\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Gladakarum, make a dumb\" ...");
+
+  @._echoToArchesHere("  (dumbing '", $arg, "'");
+
+  if (@._useMana(10)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis (@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if (WIZ($who) && $who.level >= #actor.level) 
+  {
+    echo ("*** Your magic backfires!\n") ;
+    echo ("Your attempt to dumb yourself fails as the magic from the dumb spell\n",
+          "cancels out the incoming dumbing magic.\n") ;
+    return ;
+  }
+
+  echoto ($who, "A large sock suddenly appears and flies towards you, lodging itself",
+          "\nfirmly in your mouth!\n") ;
+
+  becomePlayer($who) ;
+  @._leko ("A large sock suddenly appears and flies towards ", $who.name, ",",
+           "lodging\nitself firmly in ", @._hisHer($who), " mouth!\n") ;  
+  becomeMyself;
+
+  $who.dumb = 1 ;
+  $who.healDumbTime = time() + 180;  /* 3 minutes */
+  
+} chmod (&@.dumb, "W:rs") ;
+
+func @.blind
+{
+  if (#actor.dumb)
+  {
+    echo("The sock prevents you from casting the spell.\n");
+    return;
+  }
+
+  minArgs(1, "*** blind whom?");
+
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Glakarinde, make a blind\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Glakarinde, make a blind\" ...");
+
+  @._echoToArchesHere("  (blinding '", $arg, "'");
+
+  if (@._useMana(35)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis (@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if (WIZ($who) && $who.level >= #actor.level) 
+  {
+    echo ("*** Your magic backfires!\n") ;
+    $who = #actor ;
+  }
+
+  echoto ($who, "Your eyelids slam shut!\n") ;
+
+  becomePlayer($who) ;
+  @._leko ($who.name, "\'s eyelids slam shut!\n") ;  
+  becomeMyself ;
+
+  $who.blind = 1 ;
+  $who.healBlindTime = time() + 180;  /* 3 minutes */
+  
+} chmod (&@.blind, "W:rs") ;
+
+func @.fumble
+{
+  if (#actor.dumb)
+  {
+    echo("The sock prevents you from casting the spell.\n");
+    return;
+  }
+
+  minArgs(1, "*** fumble whom?");
+
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Glakadumble, cause a fumble\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Glakadumble, cause a fumble\" ...");
+
+  @._echoToArchesHere("  (fumbling '", $arg, "'");
+
+  if (@._useMana(10)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis (@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if (WIZ($who) && $who.level >= #actor.level) 
+  {
+    echo ("*** Your magic backfires!\n") ;
+    $who = #actor ;
+  }
+
+  /* drop 1) an in use object
+          2) a wielded object
+          3) fifty-fifty if both 1 and 2 apply
+          4) a random object otherwise */
+
+  if (($n = listcount($who.contents)) == NULL)
+    return ;
+
+  $randitem = random($n) + 1 ;
+  $dropobj = listelem($who.contents,$randitem) ;
+
+  if (($who.weapon != bareHandsItem) && ($who.inUse))
+  {
+    $dropobj = $who.weapon ;
+    if (random(2))
+      $dropobj = $who.inUse ;
+  }
+  else if ($who.inUse)
+  {
+    $dropobj = $who.inUse ;
+  }
+  else if ($who.weapon != bareHandsItem)
+  {
+    $dropobj = $who.weapon ;
+  }
+
+  becomePlayer($who) ;
+  @.drop($dropobj) ;
+  becomeMyself ;
+
+} chmod (&@.fumble, "W:rs") ;
+
+func @.heal
+{
+  minArgs(1, "*** heal whom?");
+
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Gladakdeel, do a heal\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Gladakdeel, do a heal\" ...");
+
+  @._echoToArchesHere("  (healing '", $arg, "'");
+
+  if (#actor.dumb)
+  {
+    if (@._useMana(20)) 
+    {
+      @._echoToArchesHere(" - not enough mana)\n");
+      return;
+    }
+  }
+  else
+  {
+    if (@._useMana(15)) 
+    {
+      @._echoToArchesHere(" - not enough mana)\n");
+      return;
+    }
+  }
+
+  $who = @._singleVis (@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  echoto ($who, "You have been healed of any dumb, deaf, paralyse or blind spells!\n") ;
+
+  $who.paralysed = NULL ;
+  $who.blind = NULL ;
+  $who.deaf = NULL ;
+  $who.dumb = NULL ;
+  $who.healParalysedTime = NULL ;
+  $who.healBlindTime = NULL ;
+  $who.healDeafTime = NULL ;
+  $who.healDumbTime = NULL ;
+  
+} chmod (&@.heal, "W:rs") ;
+
+
+

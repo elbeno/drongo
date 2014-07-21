@@ -1,0 +1,81 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @._levelName		/* D	Return a name for a given level	*/
+{
+  if ($1 == 0) return "Wanderer" ;
+  if ($1 == 1) return "Explorer" ;
+  if ($1 == 2) return "Experienced explorer" ;
+  if ($1 == 3) return "Novice Adventurer" ;
+  if ($1 == 4) return "Adventurer" ;
+  if ($1 == 5) return "Seasoned Adventurer" ;
+  if ($1 == 6) return "Lemming" ;
+  if ($1 == 7) return "Dabbler in magic" ;
+  if ($1 == 8) return "Parlour magician" ;
+  if ($1 == 9) return "Adventuring mage" ;
+  if ($1 == 10) return "Alchemist" ;
+  if ($1 == 11) return "Junior Elementalist" ;
+  if (($1 > 11) && ($1 < 17)) {
+    if ($2 == MALE)
+      $mst="Master";
+    else if ($2 == FEMALE)
+      $mst="Mistress";
+    else $mst="Mastir";
+
+    if ($1 == 12) return str($mst, " of Air") ;
+    if ($1 == 13) return str($mst, " of Water") ;
+    if ($1 == 14) return str($mst, " of Fire") ;
+    if ($1 == 15) return str($mst, " of Earth") ;
+    if ($1 == 16) return str($mst, " of Elements") ;
+  }
+  
+  if (($1 > 16) && ($1 < 20)) {
+    if ($2 == MALE)
+      $enc = "Enchanter";
+    else if ($2 == FEMALE)
+      $enc = "Enchantress";
+    else $enc = "Enchantir";
+    if ($1 == 17) return str("Apprentice ", $enc) ;
+    if ($1 == 18) return $enc ;
+    if ($1 == 19) return str("Senior ", $enc) ;
+  }
+  
+
+  if ($2 == MALE)
+    $wiz = "Wizard";
+  else if ($2 == FEMALE)
+    $wiz = "Witch";
+  else $wiz = "Wizitch";
+
+  if ($1 == 20) return str("Young ", $wiz) ;
+  if ($1 == 21) return str("Mature ", $wiz) ;
+  if ($1 <= 24) return str("Super-", $wiz) ;
+  if ($1 == 25) return str("Arch-", $wiz) ;
+  if ($1 == 26) return str("Mega-", $wiz) ;
+  if ($1 <= 28) return "Taker of Souls" ;
+
+  return "Creator" ;
+}
+
+func @._himHer			/* D	Return obj prn for gender	*/
+{
+  if ($1.sex==NEUTER) return "hir";
+  if ($1.sex==FEMALE) return "her";
+  if ($1.sex==MALE) return "him";
+} chmod(&@._himHer, "W:rs");
+
+func @._hisHer			/* D	Return possessive for gender	*/
+{
+  if ($1.sex==NEUTER) return "hir";
+  if ($1.sex==FEMALE) return "her";
+  if ($1.sex==MALE) return "his";
+} chmod(&@._hisHer, "W:rs");
+
+func @._heShe			/* D	Return sub prn for gender	*/
+{
+  if ($1.sex==NEUTER) return "sie";
+  if ($1.sex==FEMALE) return "she";
+  if ($1.sex==MALE) return "he";
+} chmod(&@._heShe, "W:rs");
+

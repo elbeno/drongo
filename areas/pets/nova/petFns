@@ -1,0 +1,111 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+/*
+ * Listening functions for Novas horse
+ *
+ */
+
+#include "drogon.h"
+#include  "owner.h"
+#include    "pet.h"
+
+func nova_horse._listen
+{
+
+  if (regcmp ($1, "^Mymol, kiss.*"))
+    { #self._kiss ($1) ;	return ; }
+
+  if (regcmp ($1, "^Mymol, attack.*"))
+    { #self._attack ($1) ;	return ; }
+
+/* Default action */
+
+  if (regcmp ($1, "^Mymol,"))
+    @._reko (#self.location, "Mymol stops grazing and perks his ears at you.\n") ;
+
+}
+
+func nova_horse._duh
+{
+  @._reko (#self.location, "Mymol stares about blankly.\n") ;
+}
+
+
+/*
+ * Kiss a player.
+ *
+ */
+
+func nova_horse._kiss
+{
+
+/* Isolate victims name */
+
+  $s = regexp ($1, " [a-zA-Z]*$") ; $s = regexp ($s, "[^ ].*") ;
+
+  if ($s == "me")
+    $s = #actor.name ;
+
+  if (($p = @._findOLP_Lz ($s)) == NULL)
+    return #self._duh () ;
+
+  becomePlayer ($p) ;
+  @._leko (
+"Mymol walks over to ", $p.name, " and wiggles his lips on ",
+    @._hisHer ($p), " neck!\n") ;
+
+  echo (
+"Mymol walks over to you and wiggles his lips on your neck!\n") ;
+
+}
+
+
+/*
+ * Attack another player.
+ *
+ */
+
+func nova_horse._attack
+{
+
+  if ( !(ARCH (#actor) || (#actor == NOVA)) )
+    return #self._duh () ;
+
+/* Isolate victims name */
+
+  $s = regexp ($1, " [a-zA-Z]*$") ; $s = regexp ($s, "[^ ].*") ;
+
+  if ($s == "me")
+    $s = #actor.name ;
+
+  if (($p = @._findOLP_Lz ($s)) == NULL)
+    return #self._duh () ;
+
+  if ( ARCH ($p) || ($p == NOVA) )
+  {
+    @._reko (#self.location, 
+"Mymol looks at his friend ", $p.name, ", shakes his head and decides
+to attack ", #actor.name, " instead!\n") ;
+    $p = #actor ;
+  }
+
+  becomePlayer ($p) ;
+  @._leko (
+"Mymol spins round and kicks ", $p.name, "s head with his hind hooves!\n") ;
+  echo (
+"Mymol spins around and bashes your head in with his hind hooves!\n") ;
+
+  @._geko ("\n<!> ", $p.name, " has had ", @._hisHer ($p), " head kicked in by Nova Woolfs horse!\n") ;
+  @._resurrect (0) ;
+  becomeMyself ;
+}

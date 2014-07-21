@@ -1,0 +1,203 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+/*	*	*	*	*	*	*	*	*	*/
+/*	OBJECT CREATION FUNCTIONS					*/
+/*	*	*	*	*	*	*	*	*	*/
+
+
+func @._newRoom
+{
+  $room=#0 ;
+  foreach $oldroom in (Util.rooms) if ($2==$oldroom.urn)
+  /*  if ($oldroom=match($2, Util.rooms, "urn"))	*/
+  {
+    $room = $oldroom ;
+    Util.rooms = listdrop(Util.rooms, $oldroom) ;
+    $oldroom.area.rooms=listdrop($oldroom.area.rooms, $oldroom) ;
+
+    foreach $scen in ($oldroom.scenery)
+      objectdestroy($scen) ;
+    foreach $exit in ($oldroom.exits)
+      objectdestroy($exit) ;
+    #actor._editArea.rooms=listdrop(#actor._editArea.rooms, $oldroom) ;
+
+    objectdestroy ($room) ;
+    echo("Replacing room <", $2, ">\n") ;
+  /*    objectdestroy($oldroom); */
+  }
+
+  if ($room==#0) $room = objectnew () ;
+
+  $room.name = $1 ;
+  $room.urn = $2 ;
+  $room.room = 1 ;
+  $room.owner = @._getCurOwner () ;
+  $room.area = #actor._editArea ;
+
+  Util.rooms = listadd (Util.rooms, $room) ;
+
+  if (#actor._editArea != NULL)
+  {
+    #actor._editArea.rooms = listadd (#actor._editArea.rooms, $room) ;
+  }
+  
+  return $room ;
+} chmod (&@._newRoom, "W:rs");
+
+func @._newMobile
+{
+  $mobile = #0 ;
+  foreach $oldmob in (Util.mobiles) if ($2==$oldmob.umn)
+/*  if ($oldmob=match($2, Util.mobiles, "umn")) */
+  {
+    echo("Replacing old mobile <", $2, ">\n") ;
+    if ($mobile != #0) objectdestroy ($mobile) ;
+    $mobile = $oldmob ;
+    Util.mobiles=listdrop(Util.mobiles, $oldmob) ;
+  /*  objectdestroy($oldmob); */
+  }
+  if ($mobile == #0) $mobile = objectnew () ;
+
+  $mobile.name = $1 ;
+  $mobile.umn = $2 ;
+  $mobile.sex = $3 ;
+  $mobile.hp = $4 ;
+  $mobile.maxhp = $4 ;
+  $mobile.value = $5 ;
+  $mobile.sleep = $6 ;
+  $mobile.home = $7 ;
+  $mobile.mobile = 1 ;
+  @._move($mobile, $7);
+  @._calcTotArmour($mobile);
+  
+  $mobile.owner=@._getCurOwner();
+
+  Util.mobiles = listadd(Util.mobiles, $mobile) ;
+
+  return $mobile ;
+} chmod(&@._newMobile, "W:rs");
+
+func @._newWidget
+{
+  $widg = #0 ;
+  foreach $oldwidg in (Util.widgets) if ($2==$oldwidg.uon)
+/*  if ($oldwidg=match($2, Util.widgets, "uon")) */
+  {
+    echo("Replacing widget <", $2, ">\n") ;
+    @._move ($widg, NULL) ;
+    if ($widg != #0) objectdestroy ($widg) ;
+    $widg = $oldwidg ;
+    Util.widgets=listdrop(Util.widgets, $oldwidg) ;
+    $oldwidg.owner.widgets=listdrop($oldwidg.owner.widgets, $oldwidg) ;
+  /*    objectdestroy($oldwidg); */
+  }
+  if ($widg == #0) $widg = objectnew () ;
+
+  $widg.name = $1 ;
+  $widg.uon = $2 ;
+  $widg.value = $3 ;
+  $widg.weight = $4 ;
+  $widg.power = $5 ;
+  $widg.armour = $6 ;
+  $widg.sleep = $7 ;
+  $widg.home = $8 ;
+  $widg.widget = 1 ;
+  $widg.owner = @._getCurOwner() ;
+  @._move($widg, $8);
+  $widg.owner.widgets = listadd($widg.owner.widgets, $widg) ;
+
+  Util.widgets = listadd(Util.widgets, $widg);
+  return $widg ;
+} chmod(&@._newWidget, "W:rs");
+
+func @._addScenery
+{
+  $scen = objectnew () ;
+  $scen.name = $2 ;
+  $scen.description = str ("\n  ", $3) ;
+  $scen.scenery = 1 ;
+  $scen.invis = 1 ;
+  $1.scenery = listadd ($1.scenery, $scen) ;
+  return $scen ;
+} chmod(&@._addScenery, "W:rs");
+
+func @._newPlayer
+{
+  $plr = objectnew () ;
+  return(@.__initPlayer($plr, $1));
+} chmod(&@._newPlayer, "W:rs");
+
+func @.__initPlayer
+{
+  if (geteuid() != #0) return ;
+  $plr=$1;
+  $plr.name = $2 ;
+  $plr.home = #2 ;
+  $plr.level = 0 ; $plr.money = 0 ;
+  $plr.player = 1 ; $plr.invis = 0 ;
+  $plr.sex = 1 ;
+  $plr.load = 0; $plr.mana = 0;
+  $plr.hp = 0; $plr.tickets = 0;
+  $plr.hpRestoreBoost = 0;
+  $plr.verbose = 1; $plr.createTime=time();
+  $plr.taskPending = 0;
+  $plr.weapon = bareHandsItem ;
+  Util.players = listadd (Util.players, $plr) ;
+
+  /* player should chown itself, but we'd have to make sure they don't own
+     anything defined on them, which could be tricky.			   */
+  /* chown ($plr, $plr); */
+  return $plr ;
+}  chmod(&@.__initPlayer, "W:rs");
+
+
+func @._link			/* XW	Add a link between rooms	*/
+{
+  $exit = objectnew () ;
+  $exit.location = atoobj ($1) ;
+  $exit.destination = atoobj ($2) ;
+  $exit.name = $3 ;
+  $exit.link = 1 ;
+  if ($oldex=match($3, $exit.location.exits, "name")) {
+    $exit.location.exits = listdrop($exit.location.exits, $oldex);
+    objectdestroy($oldex);
+  }
+  
+  $exit.location.exits = listadd ($exit.location.exits, $exit) ;
+  return $exit ;
+} chmod (&@._link,"W:rs") ;
+
+func @._hideExit
+{
+  if ($1.room != 1) {
+    echo ("HideExit:Not a room!\n") ;
+    return ;
+  }
+  
+  $exit = match ($2,$1.exits,"name") ;
+  if ($exit == NULL) {
+    echo ("HideExit:Link not found!\n") ;
+    return ;
+  }
+  
+  $exit.hidden = 1 ;
+} chmod(&@._hideExit, "W:rs");
+
+func @._showExit
+{
+  if ($1.room != 1) {
+    echo ("HideExit:Not a room!\n") ;
+    return ;
+  }
+  
+  $exit = match ($2,$1.exits,"name") ;
+  if ($exit == NULL) {
+    echo ("HideExit:Link not found!\n") ;
+    return ;
+  }
+  
+  $exit.hidden = NULL ;
+} chmod(&@._hideExit, "W:rs");
+

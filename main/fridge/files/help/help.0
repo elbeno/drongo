@@ -1,0 +1,23 @@
+
+  Drongo on-line help system
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~
+  Help is available on almost every Drongo command. Type
+        help <command>
+  to get more details on a particular command.
+
+  General help on the subjects below is also provided.
+
+    rules ........... Rules and Regulations. All player MUST read these.
+
+    intro ........... An introduction to the game. 
+    commands ........ A List of most of the Drongo commands.
+    names ........... How names are formed and matched.
+    magic ........... About magical commands.
+    levels .......... The points (money) required to reach each level.
+    gender .......... Brief note on character gender.
+    dm .............. The Drongo Dungeon Master.
+    wizard .......... Help for wizards.
+    build ........... Drogon room building and object creation.
+
+  Type help <subject> for more details.
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- End of file -=-

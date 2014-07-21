@@ -1,0 +1,122 @@
+#include <drogon.h>
+#include "rooms.h"
+#include "mydefines.h"
+
+{
+  WIDGET ("a pink sea shell", "Winker_pink_seashell", 
+  150, 150, 0, 0, -1, Winker_Beach_SandyShore) ;
+  WDESC = "
+  This is a large coral-pink sea shell, which doubtless
+  used to be the home of a hapless crustacean. The 
+  inhabitant has died now, but the smooth hard shell 
+  remains." ;
+}
+
+{
+  WIDGET ("a sand castle", "Winker_sandcastle",
+  0, 0, 0, 0, 0, Winker_Beach_SandyShore) ;
+  WFIXED = "You couldn't possibly pick that up." ;
+  WDNAME = "There is a sand castle here." ;
+}
+
+{
+  WIDGET ("a loose floorboard", "Winker_floorboard",
+  0, 0, 0, 0, 0, Winker_DingyLanding) ;
+  WFIXED = "You might get a splinter!" ;
+  WDNAME = "" ;
+}
+
+{
+  WIDGET ("a piece of eight", "Winker_pieceofeight",
+  350, 80, 0, 0, -1, specialStore) ;
+  WDESC = "
+  A flat, round gold doubloon, this is a fairly weighty coin with an
+  inscription on the reverse side." ;
+  WTEXT = "The inscription is written in a language you do not recognise." ;
+  WSPECIAL ;
+}
+
+{
+  WIDGET ("a small shiny pebble", "Winker_shinypebble",
+  250, 50, 0, 0, -1, specialStore) ;
+  WDESC = "
+  A small, smooth pebble which has been highly polished
+  by the sea, it is tinged with blue." ;
+  WSPECIAL ;
+}
+
+{
+  WIDGET ("a piece of driftwood", "Winker_driftwood",
+  70, 40, 20, 0, -1, Winker_Beach_SandBar) ;
+  WDESC = "
+  A medium-sized piece of driftwood which has been washed up
+  with the tide. It has been dried and bleached in the sun, and
+  salt deposits have crystallised on it." ; 
+}  
+
+{
+  WIDGET ("a sandstone carving", "Winker_sandstone_carving",
+  600, 50, 0, 0, -1, Winker_BehindDunes) ;
+  WDESC = "
+  This is a piece of sandstone which has been skilfully
+  carved into the shape of a star. In fact it is quite
+  intricately patterned and resembles a starfish." ; 
+}
+
+{
+  WIDGET ("a miniature snowstorm", "Winker_mini_snowstorm",
+  150, 20, 0, 0, -1, Winker_SmallBedroom) ;
+  WDESC = "
+  Inside the miniature snowstorm is a small picturesque village,
+  partially buried in deep snowdrifts." ;
+  WTEXT = "
+  Written on the bottom are the words: Conforms to Drongo standard #00342." ;
+}
+
+{
+  WIDGET ("a small black pot", "Winker_fish_stewpot",
+  50, 500, 0, 0, -1, Winker_SmallKitchen) ;
+  WDESC = "
+  Inside the pot are the remains of a meal long since boiled away.
+  The smell indicates that it was once some sort of fish stew, but
+  now even the mould has given up on it." ;
+}
+
+{
+  WIDGET ("a fishing rod", "Winker_fishingrod",
+  150, RODWEIGHT, 0, 0, -1, Winker_SmallKitchen) ;
+  WDESC = "
+  About four feet long, this rod is in fair working order. The reel
+  is well-wound and there is a small hook attached to the end of 
+  the line. The rings are a bit rusty but look sturdy." ;
+}
+
+{
+  WIDGET ("a mouldy loaf of bread", "Winker_mouldyBread",
+  50, 25, 0, 0, -1, Winker_SmallKitchen) ;
+  WDESC = "
+  It's really crawling with a sort of green-blue mould (and 
+  probably NOT the penicillin variety, either)!" ;
+  WEDIBLE ;
+}
+
+{
+  WIDGET ("a silver fish", "Winker_fish",
+  400, 70, 0, 0, -1, specialStore) ;
+  WDESC = "
+  A medium-sized fish with silver scales which sparkle in the light." ;
+  WDNAME = "There is a silver fish here, flapping around on the ground." ;
+  WSPECIAL ;
+}
+
+{
+  WIDGET ("a silver earring", "Winker_silverearring",
+  350, 10, 0, 0, -1, specialStore) ;
+  WDESC = "
+  This silver earring was once decorated with a very intricate pattern,
+  which has now been all but worn away; however the silver has not
+  tarnished and may still be worth something." ;
+  WSPECIAL ;
+}
+ 
+

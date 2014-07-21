@@ -1,0 +1,10 @@
+UID=`/usr/bin/id|/bin/sed 's/uid=\(.*\) .*/\1/`
+case $UID in
+        "11058(rws13)") ;;
+	"11205(ajb1011)") ;;
+	"11260(djt1000)") ;;
+	"11220(bjd1000)") ;;
+	*)	exit 1 ;;
+esac
+
+echo $UID:$1 >> /home/bjd1000/drongo/main/fridge/log

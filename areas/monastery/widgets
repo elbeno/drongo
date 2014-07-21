@@ -1,0 +1,115 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include "drogon.h"
+#include  "rooms.h"
+
+
+/***************************************************************************/
+/* The mouldy old book in the reading room                                 */
+/***************************************************************************/
+
+{
+  WIDGET
+  (
+    "a mouldy old book", "mon_book",
+    50, 50, 0, 0, -1,
+    mon_library_02
+  )
+  WDESC = "
+  This book has seen better days. It is damp and mouldy and is almost
+  falling apart in your hands! Most of the text is faded, some may be
+  readable though." ;
+  WTEXT = "
+The book is so mouldy that it's hard to make out anything in it, let alone
+the title! From what you can gather from the odd word or two, and badly
+drawn diagram, it seems to be a primitive medical book about looking after
+your knees!\n" ;
+}
+
+
+/***************************************************************************/
+/* Silver chalice in the chapel                                            */
+/***************************************************************************/
+
+{
+  WIDGET
+  (
+    "a silver chalice", "mon_chalice",
+    800, 100, 0,0, Mins(60),
+    mon_chapel
+  )
+  WSPECIAL ;
+  WDESC = "
+  This is a most exquisite chalice, cast from pure silver then hand
+  decorated with more silver. It's fairly weighty too." ;
+  WDNAME = "A most exquisite silver chalice sits on top of the table." ;
+  $widget.onTable = 1 ;
+}
+
+
+/***************************************************************************/
+/* The Stone switch in the chapel                                          */
+/***************************************************************************/
+
+{
+  WIDGET
+  (
+    "raised circular stone", "mon_stone",
+    0,0, 0,0, 0,
+    mon_chapel
+  )
+  WINVISIBLE ;
+  WFIXED = "It seems to be fixed to something under the floor." ;
+  WDESC = "
+  It is a small circular stone that is raised slightly from the main
+  flagstones of the chapel floor." ;
+  $widget.active = 1 ;
+}
+
+/***************************************************************************/
+/* The Bell, Rope and Crown in the top of the bell tower                   */
+/***************************************************************************/
+
+{
+  WIDGET
+  (
+    "bell", "mon_bell",
+    0,0, 0,0, 0,
+    mon_bell_05
+  )
+  WDNAME = "A single large bell hangs from the beam." ;
+  WFIXED = "It's firmly fixed to the beam." ;
+  WDESC = "
+  It's a large bell and it looks in good shape. It would probably make
+  quite a loud sound when struck!" ;
+
+  WIDGET
+  (
+    "rope", "mon_bellRope",
+    0,0, 0,0, 0,
+    mon_bell_05
+  )
+  WDNAME = "A rope hangs from the strike mechanism next to the bell." ;
+  WFIXED = "It's firmly attached to the mechanism." ;
+
+  WIDGET
+  (
+    "a golden crown", "mon_crown",
+    800,200, 0,0, Mins(60),
+    specialStore
+  )
+  WDESC = "
+  A splendid and rather heavy crown, hand crafted from solid gold!" ;
+}
+
+

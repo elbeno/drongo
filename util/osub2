@@ -1,0 +1,30 @@
+MUDDIR=/home/bjd1000/drongo/main
+if [ -f $MUDDIR/fridge/8.code ]; then
+  rm $MUDDIR/fridge/8.code
+  echo Removing old file 1>&2
+fi
+
+echo Preprocessing 1>&2
+
+/lib/cpp -P -I$MUDDIR $1 > $MUDDIR/fridge/8.code 
+
+if [ -f $MUDDIR/fridge/8.code ]; then
+  echo Compiling 1>&2
+  /home/bjd1000/drongo/util/usubmit -l Toaster -p `echo <$MUDDIR/fridge/toasterpass` -h `cat <$MUDDIR/serverhost` -c >$MUDDIR/fridge/vtemp
+  grep "syntax" $MUDDIR/fridge/vtemp 1>&2
+  if [ $? = 0 ]; then
+    echo Source line of error: 1>&2
+    sed -n "`sed -n 's/.*syntax.* //p' $MUDDIR/fridge/vtemp `p" $MUDDIR/fridge/8.code 1>&2
+  fi
+  sed '/$syntax/d;1,3d;$d' $MUDDIR/fridge/vtemp
+
+else
+  echo Preprocess failed 1>&2
+fi
+
+if [ -f $MUDDIR/fridge/vtemp ]; then
+  rm $MUDDIR/fridge/vtemp
+fi
+
+echo Completed 1>&2
+

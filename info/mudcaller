@@ -1,0 +1,51 @@
+Article: 526 of rec.games.mud.announce
+Path: pavo.csi.cam.ac.uk!doc.ic.ac.uk!uknet!pipex!howland.reston.ans.net!spool.mu.edu!news.clark.edu!netnews.nwnet.net!news.u.washington.edu!bounce-back
+From: psh1@cornell.edu (Peter Haight)
+Newsgroups: rec.games.mud.announce
+Subject: MUDCaller v2.3 Released
+Followup-To: poster
+Date: Tue, 19 Oct 1993 14:29:29
+Organization: Cornell University
+Lines: 34
+Approved: rgm-announce-request@glia.biostr.washington.edu
+Message-ID: <2a3nit$edd@news.u.washington.edu>
+NNTP-Posting-Host: glia.biostr.washington.edu
+Keywords: mudcaller telnet client mud packet crynwr
+Originator: scott@glia
+
+This is version 2.3 of MUDCaller released 10/19/93. MUDCaller is a 
+Telnet client for MSDOS designed specifically for MUDS. MUDCaller works over 
+the Crynwr packet drivers on an ethernet network or SLIP. This features of
+this client are:
+
+GUI Environment
+Multiple Windowed Sessions
+Large scrollback buffers
+Macros
+Responses
+Logging
+Barebones telnet support.
+
+If you use Trumpet, FTP, Telnet, PopMail, or Nupop from a PC you can probably 
+use this program.
+
+This fixes the last of the major problems (I hope) in all the previous 
+versions of mudcaller. Including the problem with the maximum input string 
+being 255 characters. The maximum input string is now infinite.
+MudCaller will now connect to regular Telnet places like telnet. It doesn't
+support any terminals (eg vt100) yet so it does not work all that well. 
+
+Mudcaller v2.3 is available via ftp at:
+wuarchive.wustl.edu
+/pub/msdos_uploads/network
+mudcal23.zip
+
+Also, please feel free to email me and I'll send you a UUEncoded copy of 
+Mudcaller v2.3
+-- 
+rec.games.mud.announce submissions: rgm-announce@glia.biostr.washington.edu
+other stuff related to that group:  rgm-announce-request@glia...
+mudlist-related mail:		    mudlist@glia.biostr.washington.edu
+other mail of a personal nature:    scott@glia...
+
+

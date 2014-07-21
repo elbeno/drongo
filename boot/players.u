@@ -1,0 +1,647 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+#ifndef _PARSE_H_
+#include "parse.h"
+#endif
+
+/* PLAYER COMMANDS */
+
+/* 
+ *****************************************************************************
+ * GENERAL ENVIRONMENTAL INTERACTION COMMANDS
+ *****************************************************************************
+ */
+
+func @.give
+{
+  if($# == 2) {
+    $plr = $1 ;
+    $obj = $2 ;
+  } else {
+    splitParse("to", "*** give <what> to <whom>? (or 'give obj plr')") ;
+    $obj = $first ;
+    $plr = $second ;
+  }
+
+  $loc = #actor.location ;
+  $who = @._singleVis ($loc.contents, $plr,@.noOneHere) ;
+  if (!$who) return ;
+  if (!$who.player) {
+    echo ("You can only give items to a player.\n") ;
+    return ;
+  }
+
+  $item = @._singleName (#actor.contents, $obj,
+		"You aren't holding that.") ;
+  if (!$item) return ;
+
+  if ($item == #actor.inUse)  @.use () ;
+  @._move ($item, $who) ;
+  echo("You hand ",$item.name," to ",$who.name,".\n") ;
+  @._tellNAME ($who, #actor) ;
+  echoto($who," hands you ",$item.name,".\n") ;
+
+  foreach $pl in (#actor.location.contents) {
+    becomePlayer($pl) ;
+    $cansee=(@._iCanSeeYou(#actor) || @._iCanSeeYou($who)) ;
+    becomeMyself ;
+
+    if ($cansee && ($pl!=#actor && $pl!=$who)) {
+      @._tellNAME($pl, #actor) ;
+      echoto($pl, " gives something to ") ;
+      @._tellNAME($pl, $who) ;
+      echoto($pl, ".\n") ;
+    }
+  }
+
+  log(strtime(), " ", #actor.name, " GIVEs ", $item.name, " to ",
+	 $who.name, "\n") ;
+} chmod(&@.give,"W:rs") ;
+
+func @.use
+{
+  if ($#==0) {
+    if(#actor.inUse == NULL) {
+      echo("*** use what?\n") ;
+      return ;
+    }
+    echo ("You stop using ",#actor.inUse.name,".\n") ;
+    @._use (NULL) ;
+    return ;
+  }
+
+  bundleArgs ;
+
+  $us = @._singleName(#actor.contents, $arg) ;
+  if (!$us)
+    return ;
+
+  @._use ($us) ;
+
+  echo("You make ", $us.name, " ready for use.\n") ;
+} chmod(&@.use,"W:rs") ;
+
+
+func @.take
+{
+  minArgs(1, "*** take what?");
+
+  bundleArgs ;
+  $what = @._singleName (#actor.location.contents, $arg) ;
+  if (!$what) return ;
+
+  if ($what._specialGetFn)
+    if ($what._specialGetFn())
+      return ;
+
+  if ($what.player) {
+    if (!ARCH(#actor) || #actor.level <= $what.level) {
+      @._visEmote("fiddles with ", $what.name, ".");
+      echo("You can't pick up other players.\n");
+      return;
+    }
+  }
+
+  if ($what.fixed) {
+    echo($what.fixed, "\n");
+    if (!ARCH(#actor) && ($what.owner!=#actor)) {
+      @._visEmote("fiddles with ", $what.name, ".");
+      echo("You can't pick that up.\n");
+      return;
+    }
+  }
+
+  if (($what.weight+#actor.load)>@._maxLoad(#actor.level)) {
+    echo("That is too heavy for you to pick up.\n");
+    @._visEmote("fiddles with ", $what.name, ".");
+    return;
+  }
+
+  @._move($what, #actor) ;
+
+  @._emote("picks up ",$what.name,".") ;
+
+  echo("You pick up ", $what.name, ".\n") ;
+} chmod (&@.take,"W:rs") ;
+
+
+func @.get
+{
+  minArgs(1, "*** get what?");
+
+  bundleArgs;
+  @.take($arg);
+}
+
+
+func @.drop
+{
+  minArgs(1, "*** drop what?");
+
+  bundleArgs;
+
+  if (isobj($1))
+  {
+    $dump = $1;
+  }
+  else
+  {
+    $dump = @._singleName(#actor.contents, $arg);
+    if (!$dump)
+      return;
+  }
+
+
+  if ($dump._dropFn)
+    if ($dump._dropFn())
+      return ;
+
+  if($dump == #actor.inUse)
+    @.use () ;
+
+  @._move ($dump, #actor.location) ;
+  echo("You drop ",$dump.name,".\n") ;
+  @._emote("drops ", $dump.name, ".") ;
+} chmod(&@.drop,"W:rs") ;
+
+
+func @.steal
+{
+  splitParse("from", "*** steal <what> from <whom>?\n");
+
+  $victim=@._singleVis(#actor.location.contents, $second);
+  if (!$victim)
+    return;
+
+  if ((!CREATOR(#actor) && $victim.mobile) || $victim.widget) {
+    echo("You can't steal from ", $victim.name, ".\n");
+    return;
+  }
+  
+  $what_item=@._singleName($victim.contents, $first, 
+                           str($victim.name, " isn't carrying that."));
+  if (!$what_item) return ;
+
+  if (#actor.level>19) {
+    if (#actor.level>$victim.level)
+      $success=1;
+    else
+      $success=0;
+  } else {
+    $success=(random(100)<#actor.level*5);
+  }
+
+  if ($victim.level>19)
+    if($victim.level>#actor.level)
+      $success = 0;
+
+  if (!$victim.level) $success=1; /* so we can steal from mobiles!! */
+
+  if ($success) {
+    echo("You steal ", $what_item.name, " from ", $victim.name, " and ");
+    @._move($what_item, #actor);
+  }
+  else
+    echo("You try to steal ", $what_item.name, " from ", $victim.name, " and ");
+
+  if ($victim.level>19) {
+    if ($victim.level>=#actor.level)
+      $vict_detect=1;
+    else
+      $vict_detect=0;
+  } else {
+    if (#actor.level>19)
+      $vict_detect=0;
+    else
+      $vict_detect=(random(100)<$victim.level*5);
+  }
+  if ($vict_detect) {
+    echo("are detected!\n");
+    if ($success)
+      echoto($victim, #actor.name, " just stole ", $what_item.name, " from you!\n");
+    else
+      echoto($victim, #actor.name, " just tried to steal ", $what_item.name, " from you!\n");
+  } else
+    echo("luckily go undetected!\n");
+
+  foreach $player in (#actor.location.contents) {
+    if ($player.player) {
+      if (@._youCanSeeMe($player)) {
+        becomePlayer($player);
+        $victvis=@._iCanSeeYou($victim);
+        becomeMyself;
+        if ($victvis) {
+          if ($player.level>19) {
+            if ($player.level>=#actor.level)
+              $detect=1;
+            else
+              $detect=0;
+          } else $detect=0; /* Put in random() stuff here to make mortals see steals */
+          
+          if (($player!=#actor) && ($player!=$victim)) {
+            if ($detect) {
+              if ($success)
+                echoto($player, #actor.name, " just stole ", $what_item.name, " from ", $victim.name, "!\n");
+              else
+                echoto($player, #actor.name, " tried to steal ", $what_item.name, " from ", $victim.name, "!\n");
+              if ($player.level>19) {
+                if ($vict_detect)
+                  echoto($player, "  [Detected]\n");
+                else
+                  echoto($player, "  [Not Detected]\n");
+              }
+            }
+	  }
+        }
+      }
+    }
+  }
+} chmod (&@.steal, "W:rs");
+
+/* 
+ *****************************************************************************
+ * COMMANDS FOR LOOKING
+ *****************************************************************************
+ */
+
+func @.ex
+{
+  bundleArgs ;
+
+  if ($#==0)
+    @.examine() ;
+  else
+    @.examine($arg) ;
+} chmod(&@.ex, "W:rs") ;
+
+
+func @.examine
+{
+  minArgs(1,"*** examine what?") ;
+  bundleArgs ;
+  @.look($arg) ;
+} chmod(&@.examine, "W:rs") ;
+
+
+func @.i { @.inv() ; } chmod (&@.i, "W:rs");
+
+func @.inv
+{
+  echo("You are ", @._levelName(#actor.level, #actor.sex), " ",
+		 #actor.name, #actor.nameTag, " ") ;
+  if (#actor.sex==NEUTER)
+    echo("(genderless)\n") ;
+  if (#actor.sex==FEMALE)
+    echo("(female)\n") ;
+  if (#actor.sex==MALE)
+    echo("(male)\n") ;
+
+  if (#actor.contents == NULL)
+    echo("  You are not carrying anything.\n") ;
+  else {
+    echo("  Items carried:\n") ;
+    foreach $thing in (#actor.contents) {
+      echo("    ", $thing.name) ;
+      if ($thing.cloakingDevice && WIZ(#actor)) echo(" [cloak]") ;
+      if (#actor.inUse == $thing) echo (" (in use)") ;
+      if (#actor.weapon == $thing) echo(" (wielded)") ;
+      echo("\n") ;
+    }
+    
+    echo("Current load: ", #actor.load, ", maximum load: ", @._maxLoad(#actor.level),"\n\n");
+  }
+} chmod (&@.inv, "W:rs");
+
+func @.l
+{
+  if ($# == 0) @.look () ;
+  else {
+    bundleArgs;
+    @.look($arg);
+  }
+} chmod(&@.l, "W:rs");
+
+func @.look
+{
+  $here = #actor.location;
+  if($here == NULL) {
+    echo("you aren't anywhere, so you see nothing\n");
+    return;
+  }
+
+
+  if ($# == 0) {
+    $here._preLookFn ($here) ;
+    if($here.name != NULL)
+      echo("\n",$here.name);
+    if (!#actor.quickLook || #actor.verbose) {
+      if($here.description != NULL)
+        echo($here.description);
+      if($here._describeFn != NULL)
+        $here._describeFn () ;
+    }
+    echo ("\n") ;
+    if($here.contents != NULL) {
+      foreach $thing in ($here.contents) {
+        if (($thing.widget || $thing.mobile) && !($thing.invis)) {
+          /* Is it dName or dname - it varies in drogon.h ! */
+          if ($thing.dName || $thing.dname)
+            echo ("  ",$thing.dName, $thing.dname,"\n");
+          else echo ("  There is ",$thing.name," here.\n");
+        }
+      }
+    }
+    $other = 0 ;
+    if(listcount($here.contents) > 0) {
+      foreach $person in ($here.contents)
+        if ($person != #actor && $person.player > 0) {
+          if (@._iCanSeeYou ($person))
+            {
+              if (!$other) {
+                $other = 1;
+                echo("\nOther people here:\n") ;
+              }
+  
+              echo("  ");
+              if ($person.invis) {
+                if ($person.invis<10)
+                  echo($person.invis, " :");
+                else
+                  echo($person.invis, ":");
+              } else echo ("   ");
+              echo(@._levelName($person.level, $person.sex), " ");
+              echo($person.name, $person.nameTag,"\n");
+            }
+        }
+    }
+/*    echo("\n");  do we need this??? */
+    $here._postLookFn ($here) ;
+    return;
+  }
+
+  bundleArgs;
+
+  $nm = @._ambVis(#actor.contents, $arg);
+  if ($nm==0) {
+    $nm = @._ambVis(#actor.location.contents, $arg);
+    if ($nm==0)
+      $nm = @._ambVis(#actor.location.scenery, $arg);
+  }
+  if ($nm!=1) {
+    echo(@.notSureWhat, "\n");
+    return;
+  }
+
+  $at=@._ambMatch;
+
+  if ($at.player)
+    echo(@._levelName($at.level, $at.sex), " ", $at.name, $at.nameTag);
+  else if ($at.mobile)
+    echo($at.name);
+  else echo($at.name, ": ");
+
+  if ($at.description)
+    echo($at.description, "\n");
+  else {
+    if (!$at._describeFn)
+      echo("  You see nothing special.\n");
+    else
+      $at._describeFn () ;
+  }
+
+  if ($at.player || $at.mobile) {
+    echo("  ", $at.name, " is in tip-top condition.\n");
+
+    foreach $item in ($at.contents)
+      if ($item.cloakingDevice)
+        $cloak=1;
+
+    if (!$cloak || (WIZ(#actor) && ($at.mobile || (#actor.level>$at.level)))) {
+      foreach $item in ($at.contents) {
+        if (!$plshown) {
+          echo("  Carrying:\n");
+          $plshown=1;
+        }
+        echo("    ", $item.name) ;
+        if (WIZ(#actor))
+          if ($item.cloakingDevice)
+            echo(" [cloak]") ;
+        if ($item==$at.inUse)
+          echo(" (in use)") ;
+        if ($item==$at.weapon)
+          echo(" (wielded)") ;
+
+        echo("\n") ;
+      }
+      if ($plshown)
+        echo("\n") ;
+    }
+  }
+} chmod(&@.look, "W:rs") ;
+
+func @._quickLook
+{
+  #actor.quickLook=1 ;
+  @.look() ;
+  #actor.quickLook=NULL ;
+} chmod(&@.__quickLook, "W:rs") ;
+
+/* 
+ *****************************************************************************
+ * COMMANDS FOR CHANGING PLAYER STATUS
+ *****************************************************************************
+ */
+
+func @.earmuffs
+{
+  if ($# == 0)
+  {
+    if (#actor.earmuffs)
+      echo("You cannot currently hear any shouts.\n");
+    else
+      echo("You can currently hear all shouts.\n");
+    return ;
+  }
+
+  if ($1 == "on")
+  {
+    #actor.earmuffs = 1 ;
+    echo("You cannot now hear any shouts.\n") ;
+    return ;
+  }
+
+  if ($1 == "off")
+  {
+    #actor.earmuffs = NULL ;
+    echo("You can now hear all shouts.\n") ;
+    return ;
+  }
+
+  echo("*** earmuffs [on|off]\n");
+
+}
+
+func @.nametag
+{
+  bundleArgs;
+
+  if ($#)
+    #actor.nameTag=str(" ", $arg);
+  else
+    #actor.nameTag=NULL;
+
+  echo ("You are now ", @._levelName(#actor.level, #actor.sex), " ", #actor.name, #actor.nameTag, "\n") ;
+}
+
+func @.cdesc
+{
+  bundleArgsNLs;
+
+  #actor.description = str("\n",$arg);
+  echo("Description set\n");
+
+} chmod (&@.cdesc, "W:rs");
+
+/* 
+ *****************************************************************************
+ * MISCELLANEOUS COMMANDS
+ *****************************************************************************
+ */
+
+func @.xflags
+{
+  echo ("\nDrongo universe control flags:\n");
+  echo ("      sal: ", Util.salmsg, "\n");
+}
+
+
+/*
+xflags:
+
+Drogon universe control flags:
+      sal: Access level is 0: All access
+ maxmorts: No limit currently set.
+   maxwiz: No limit currently set.
+   maxppr: No limit currently set.
+   xshout: Shouting is ENABLED.
+  xwshout: W-Shouting is ENABLED.
+   xemote: Emote prefix is DISABLED.
+  xattack: General attacking is ENABLED.
+      xpk: Player killing is ENABLED.
+     xmpk: Mobile-player killing is ENABLED.
+     xmaw: Mobiles attacking wizards has been ENABLED [Irn-Bru]
+     xwam: Wizards attacking mobiles is DISABLED.
+   xbuild: Online building is ENABLED.
+*/
+
+/* 
+ *****************************************************************************
+ * BATTLE COMMANDS
+ *****************************************************************************
+ */
+
+func @.wield
+{
+  if ($#==0) {
+    #actor.weapon=bareHandsItem;
+    echo("You are now wielding nothing.\n");
+    return;
+  }
+  bundleArgs;
+
+  $what=@._singleName(#actor.contents, $arg);
+
+  if ($what==NULL)
+    return;
+
+  if ($what.power==0) {
+    echo("That's not a weapon!\n");
+    return;
+  }
+
+  #actor.weapon=$what;
+  
+  echo("You wield ", $what.name, ".\n");
+  @._visEmote("wields ", $what.name, ".");
+} chmod(&@.wield, "W:rs");
+
+func @.attack
+{
+  if (#actor.fighting) {
+    echo("You are already in a fight!\n");
+    return;
+  }
+
+  minArgs(1, "*** attack whom?");
+  bundleArgs;
+
+  $mob=@._singleName(#actor.location.contents, $arg);
+
+  if (!$mob)
+    return;
+
+  if (!$mob.mobile) {
+    echo("There is no mobile here with that name.\n");
+    return;
+  }
+
+  if ($mob.fighting) {
+    echo($mob.name, " is already fighting!\n");
+    return;
+  }
+
+  if ($mob.mxattack) {
+    echo($mob.mxattack, "\n");
+    return;
+  }
+
+  echo("<!> You attack ", $mob.name, " !\n");
+  @._visEmote("<!> ", #actor.name, " attacks ", $mob.name, "!\n");
+
+  $mob.fighting = #actor;
+  #actor.fighting = $mob;
+  $mob.myturn = NULL;
+  @._mobilefight($mob);
+
+} chmod(&@.attack, "W:rs");
+
+func @.flee
+{
+  if (!#actor.fighting) {
+    echo("You are not in a fight, so why do you want to flee?\n");
+    return;
+  }
+
+  #actor.fighting.fighting = NULL;
+  #actor.fighting = NULL;
+
+  $num = listcount(#actor.location.exits);
+
+  if (!$num) 
+    $exit = NULL;
+  else 
+    $exit=listelem(#actor.location.exits, random(listcount(#actor.location.exits))+1);
+
+  if ($exit.hidden)
+    $exit = NULL;
+
+  echo("You drop everything and flee in a random direction!\n");
+  @._leko(#actor.name, " has dropped everything and fled!\n");
+
+  $cost=(#actor.money/100);
+  echo("The Dungeon Master takes ", $cost, " pobblebeads for breaking the fight.\n");
+  #actor.money=#actor.money-$cost;
+
+  foreach $item in (#actor.contents)
+    @._move($item, #actor.location);
+
+  $followers = #actor.followers;
+  #actor.followers = NULL;
+  if ($exit) 
+    @._go($exit.name);
+  #actor.followers = $followers;
+
+} chmod(&@.flee, "W:rs");
+

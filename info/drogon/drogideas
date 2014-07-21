@@ -1,0 +1,344 @@
+"Rotating rooms puzzle"
+"---------------------"
+"Imagine taking three rotating cylinders with rooms in one side, so the rooms rotate around the middle of the block.
+"Now, stuff these blocks on top of each other, so that as they rotate, the rooms occasionally line up.
+"Each room has one door, and where necessary, a way up or down.
+"On the bottom level there is an entrance from, say, the south.
+"The room outside it has a lever which is operated by player 1 while player 2 steps in and rotates.
+"The lever rotates the bottom level one way, and the middle level the other way (but not as often).
+"Eventually the two rooms line up and player 2 goes up.
+"The second level has one room with another lever in, off of the rotating room.
+"Player 2 rotates round to here and steps out.
+"This is where the fun starts because both players have now got a lever, but player 1's only rotates the bottom 2 levels.
+"The idea is player 1 now rotates all the way to the top, but if they don't pull the right levers at this point,
+"the top two rooms don't line up.
+"Player 1 now goes all the way to the top, where he collects all the treasure and runs.
+
+------------
+
+"The walkie-talkies
+"------------------
+"These are designed to help players attempting two player puzzles - because
+"lesser mortals can't shout that much. They allow the owners to
+"communicate over long distances (until the batteries die).
+"However, just to annoy the players, they have an intelligence
+"factor built in, whereby they take what is being said and deform
+"it slightly - putting nots in here and there, making up their
+"own sentences if they feel bored - things like 'ok, pull the
+"lever again now.' or 'can you stay there for a while, I've got
+"to go to toilet.'
+
+------------
+
+"Player-interaction
+"------------------
+"I feel we ought to try to encourage player-interaction and role-playing.
+"Daneel, Vagnerr and Brona all collaborated to get to wiz level,
+"however they are all from the same place, which probably helped.
+"We've got to find some way of encouraging mortals to work at a
+"problem together - which gives rise to the idea of multi-player
+"quests. It should be possible to come up with some implementable
+"(ie. not involving too much work for Bru) for quests which can
+"only be completed by two or more players - for example a section
+"with a revolving room which player one gets in, while player two
+"pulls the lever outside it - or a guard guarding a treasure room
+"who can be distracted by one player into a side room while the
+"other gets the treasure. Even more ambitious - a massive brawl
+"scene with loads of baddy mobiles, where one player wouldn't have
+"a chance. Possibly a new command, say DEFEND, which allows a
+"strong player to take over from a weak player in a fight.
+
+----------
+
+Magic scrolls
+Climbing high walls
+Reincarnation by potion at end of quest.
+Doors close unless pressure pads stood on.
+Two man boats.
+
+
+
+ Diamond *n Gem *n Sapphire *n Amber *n Pearl *n Jet *n Onyx *n Agate *n Marble *n Opal *n Ruby *n Topaz *n Garnet *n Zircon *n Sard *n Jasper *n Bloodstone *n Quartz
+
+
+  Isolan, #22.
+  Macleod, #24.
+  Shaggy, #29.
+  Eggnog, #31.
+  Dreamer, #32.
+  Volcane, #33.
+  Kai, #34.
+  Gly, #35.
+  Shadowspawn, #36.
+  Blodwyn, #38.
+  Arcadia, #39.
+  felix, #41.
+  hecate, #42.
+  Ildara, #43.
+  Moonchilde, #44.
+  Xanax, #45.
+  Andreas, #46.
+  Patrick, #47.
+  Feyd, #48.
+  Metamorph, #49.
+  Dino, #51.
+  Alexa, #52.
+  Sepulchrave, #53.
+  Ice-P, #54.
+  Nefarious, #55.
+  Storm, #56.
+  machiavelli, #57.
+  danc, #58.
+  Snooze, #59.
+  Klimel, #60.
+  Juicer, #61.
+  Anthony, #62.
+  Tage, #63.
+  Kolfar, #64.
+  insane, #65.
+  Parade, #66.
+  zeus, #67.
+  Ondine, #68.
+  Paul, #69.
+  Kerux, #70.
+  julius, #71.
+  Sunthar, #72.
+  Psyche, #73.
+  Bing, #74.
+  Mister, #75.
+  avangion, #76.
+  Talisman, #77.
+  Aryan, #78.
+  Eliza, #79.
+  Treato, #140.
+  Zoppy, #141.
+  Questor, #142.
+  Caliburn, #143.
+  Wibble, #144.
+  Belgarath, #145.
+  Shadowmere, #146.
+  Elsidor, #147.
+  Sandle, #148.
+  Starfire, #149.
+  Raft the Moose, #150.
+  Nuitari, #151.
+  Solinari, #152.
+  MoonShot, #153.
+  New, #154.
+  Jitsu, #155.
+  Mystia, #156.
+  Tarkin, #157.
+  Kylorian, #158.
+  Cthulhu, #159.
+  Phoenix, #160.
+  Silkcut, #161.
+  Elmyra, #162.
+  Yeti, #163.
+  Pestilence, #164.
+  Polution, #165.
+  Wobble, #166.
+  Nene, #167.
+  Gysm, #168.
+  Root, #169.
+  Rasta, #170.
+  Keredomo, #171.
+  Vance, #172.
+  Gazzer, #173.
+  Fake DEATH, #174.
+  Poledra, #175.
+  rhak, #176.
+  Someone, #177.
+  kill, #178.
+  Pendragon, #179.
+  Lona, #180.
+  Abdalac, #181.
+  Arcman, #182.
+  Tep, #183.
+  Giblett, #184.
+  Aderyn, #185.
+  Mayflower, #186.
+  Phazor, #187.
+  Mentor, #188.
+  Lorthal, #189.
+  Sherlock, #190.
+  barlow, #191.
+  diarmuid, #192.
+  Warrior's Soul, #193.
+  Shandra, #194.
+  BlackHawk, #195.
+  BONDO, #196.
+  RacerX, #197.
+  Kylara, #198.
+  dreamweaver, #199.
+  furball, #200.
+  chris, #201.
+  102, #202.
+  Caine, #203.
+  Yoric, #204.
+  BOO-PAH, #205.
+  Fluffs, #206.
+  Stoney, #207.
+  Jumping, #208.
+  Data, #209.
+  Exidor, #210.
+  Nightbird, #211.
+  High Lord DeSpayre, #212.
+  Elmore, #213.
+  Torak, #214.
+  Jesus, #215.
+  Venus, #216.
+  RamJam, #217.
+  Vostak, #218.
+  CyrDalen, #219.
+  Rand, #220.
+  Avon, #221.
+  Grima, #222.
+  Ironman, #223.
+  Harlequin, #224.
+  Agima, #225.
+  Tarball, #226.
+  Smurf, #227.
+  sharna, #228.
+  Oronwe, #229.
+  Llanich, #230.
+  Gwin, #231.
+  Laurie, #232.
+  Aryk, #233.
+  Set, #234.
+  Ching, #235.
+  Merlin, #236.
+  Dapper, #237.
+  Nobody, #238.
+  Hawkeye, #239.
+  Davidm, #240.
+  Grut, #241.
+  Finn, #242.
+  Katana, #243.
+  Dr.Bones, #244.
+  Andrew, #245.
+  Simon, #246.
+  Nancelle, #247.
+  Splinterscat, #248.
+  Fritz, #249.
+  Thisbe, #250.
+  Triste, #251.
+  Talen, #252.
+  Jethro Cybermage, #253.
+  Danger, #254.
+  Zoraster, #255.
+  Ambrosia, #256.
+  Fred, #257.
+  Alhambra, #258.
+  Gata, #259.
+  Enya, #260.
+  Kwisatz Haderach, #261.
+  Delph, #262.
+  Peterkin, #263.
+  Ana Ng, #264.
+  baku, #265.
+  Imperator, #266.
+  Hyriff, #267.
+  The Vampire Lestat, #268.
+  Turbo, #269.
+  vug, #270.
+  Raistlin, #271.
+  Zed, #272.
+  Hazel, #273.
+  lisp, #274.
+  Lobbstarr, #275.
+  Sybella, #276.
+  Black Francis, #277.
+  Draz, #278.
+  Aurora, #279.
+  Qalor, #280.
+  Eternal, #281.
+  Sandy, #282.
+  Zebidee, #283.
+  Endore, #284.
+  Onyx, #285.
+  Elresire, #286.
+  falcor, #287.
+  Kavien, #288.
+  Jools, #289.
+  Sturm, #290.
+
+There are strange markings on the walls - hieroglyphics, washing instructions,
+some fragments of C programs. You might just be able to read some of it...
+                         \|/
+                         ~O~        
+              <o>        /|\             
+   /           |
+ _/__          |
+  TT           |			<--.   X
+  ||           |			    \_/
+  ||           |			     |
+  ||           |			     |
+__++__________ | __
+              ]|[			
+					  
+char*s=(char*)e&3==2||e!=f?a++:--b;
+
+
+Summary of the Wimp Debate
+
+Heather feels that wimp mode makes the game too easy and would like there to be some disadvantage to it (other than increased penalty for fleeing - this isn't enough offset to make it worth someone's while to turn it off); it should be immediately obvious when someone has wimp mode turn on; people at level 17 or 18 will spend all their time collecting treasures with wimp mode on rather than fighting - so no skill is needed to get to immortal; it shouldn't be possible to switch in and out of wimp mode quickly and easily and treasure should be worth less; the inconvenience of losing everything when you start fight outweighs the pbs you gain from winning; wimp  mode will only be turned off to attack a mobile and so players can't get quick advancement by killing other players because the other players will automatically flee - so the pbs taken for fleeing should be given to the other player. And wimp mode shouldn't be on by default.
+
+Wimp mode doesn't stop mobiles from attacking you - it just means you flee automatically at the point when you would have got killed and pay twice as much as you would for a normal flee. It doesn't stop anyone or anything from attacking you - so you only need it on if you are worried about lag. It doesn't discourage people from attacking mobiles - what does is being discussed downstairs.. I agree with Heather though that if you attack a player and he flees, you get the pbs. Then there is Astaroth's  suggestion that the point at which wimp mode flees is dynamically altered depending on how much of a wimp you have been in the past.
+
+
+cdesc An old(ish), yet wise(ish) man, he devotes his life to the studyes of magic. *n Areas he is researching into are the flying broomstick and shrinking *n potions... He is very fond of his home land, and wears a t-shirt bearing the *n a picture of Irn-Bru and the slogon: *n Sir, when a man is tired of Drogon, he is tired of life.
+
+cdesc An old(ish), yet wise(ish) man, he devotes his life to the studyes of magic. *n Areas he is researching into are the flying broomstick and shrinking *n potions... He is very fond of his home land, and pleased for Sturm and *n Aurora. He is wearing a special wizard's robe/dinner jacket for the *n occasion.
+
+cdesc An old(ish), yet wise(ish) man, he devotes his life to the studyes of magic. *n Areas he is researching into are the flying broomstick and shrinking *n potions... He is very fond of his home land, and pleased for Sturm and *n Aurora. He is wearing a special wizard's robe/dinner jacket for the *n occasion. It is getting rather dirty. He is looking slightly exhausted.
+
+
+cdesc An old(ish), yet wise(ish) man, with a kind look and caring face. He wears a *n long black gown studded with jewels which glitter in the light, and a *n pointed hat marked with astrological sigils. He devotes a lot of time to *n the studyes of magick, in particular flying carpets and various forms of *n potion. Although he is always helping out drogonians in distress, he does *n enjoy setting devious puzzles and traps for them. *n He is now happily married to a lovely and beautiful woman, who is *n currently adventuring in the land of America.
+
+cdesc A young(ish), but wise(ish) man, with a kind look and a glint in his eye. *n He is impeccably dressed in a (custard pie resistant) smart tuxedo (from *n Fritz's Custard Proof Clothing), wearing black shoes so incredibly well *n polished, you can't tell that they are black. He is looking his mimsiest, *n this being a somewhat special occasion, and not a little nervous. Why? *n Because he likes life, and today (barring accident, disaster, or act of *n gods) he marries the woman he loves, the lovely Catharine, fairest lady in *n all of Drogon. Etc.
+
+
+elements in #255: .attacker .beingBooted .blind .brainDrain .builder .checkMoney
+ .createTime .deaf .description .dumb .email .fastHeal .fighting .guest .hp .idl
+eTime .idleWarn .invisible .ipAddress .level .load .location .loginTime .logoutT
+ime .mailBox .money .name .newMoney .opponent .paralized .player .sex .statueTim
+e .taskPending .tickets .toDo .turn .verbose .weight .wimp
+
+elements in #6: ._newTempWidget ._saveCard ._saveLottery ._saveMemberList ._save
+PostOffice ._save_bboards .cet0 .cet1 .cet2 .cet3 .cet4 .cet5 .cet6 .cet7 .epoch
+ .li00 .li01 .li02 .li03 .li04 .li05 .li06 .li07 .li08 .li09 .li10 .li11 .li12 .
+li13 .li14 .li15 .li16 .li17 .li18 .li19 .lo02 .lo03 .lo04 .lo08 .lo09 .lo10 .lo
+11 .lo12 .lo13 .lo14 .lo15 .lo16 .lo17 .lo18 .lo19 .lp00 .lp01 .lp02 .lp03 .lp04
+ .lp05 .lp06 .lp07 .lp08 .lp09 .lp10 .lp11 .lp12 .lp13 .lp14 .lp15 .lp16 .lp17 .
+lp18 .lp19 .mobileList .name .playerList .roomList .sal .salName0 .salName1 .sal
+Name2 .salName3 .salName4 .salSetBy .swamp_forestMsg1 .swamp_swampMsg1 .uRoomLis
+t .uWidgetList .util .widgetList
+
+elements in #119: .__enteringEmote .__leavingEmote ._description ._enteringEmote
+ ._leavingEmote ._nameTag .attacker .beingBooted .blind .brainDrain .builder .ch
+eckMoney .dEmote .dSay .deaf .description .disguiseTime .disguised .dumb .email
+.fastHeal .fighting .guest .home .hp .idleTime .idleWarn .invisible .ipAddress .
+level .load .location .loginTime .logoutTime .mailBox .monLog .money .name .name
+Tag .newMoney .opponent .originalLoc .paralized .player .prompt .sex .statueTime
+ .superInvisible .taskPending .tickets .toDo .turn .verbose .weapon .weight .wim 
+
+FOOD:
+pp_food_:
+ziti
+steak
+salad
+potatoes
+chicken
+beans
+butter
+dressing
+
+pp_serving_:
+ziti
+steak
+potatoes
+salad
+butter
+beans
+chicken
+dressing

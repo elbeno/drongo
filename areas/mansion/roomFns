@@ -1,0 +1,116 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include  "drogon.h"
+#include   "rooms.h"
+#include "widgets.h"
+#include "mobiles.h"
+
+
+/***************************************************************************/
+/* Going through the gates?                                                */
+/***************************************************************************/
+
+func mansion_road_02._preExitFn
+{
+  if ( ($1 == mansion_road_03) && (mansion_gates.closed) )
+    {  echo ("The gates are closed.\n") ; return 1 ; }
+  else
+    return 0 ;
+}
+
+func mansion_road_03._preExitFn
+{
+  if ( ($1 == mansion_road_02) && (mansion_gates.closed) )
+    {  echo ("The gates are closed.\n") ; return 1 ; }
+
+
+/** Check for getting into the mansion too **/
+
+  if ($1 == mansion_loHall_03)
+    { echo ("You can't get through the shimmering veil covering the entranceway.\n") ; return 1 ; }
+
+  return 0 ;
+}
+
+
+/***************************************************************************/
+/* Going North from the cellar?                                            */
+/***************************************************************************/
+
+func mansion_cellar_01._preExitFn
+{
+  if ($1 != mansion_cellar_03)
+    return 0 ;
+
+  if (mansion_ale.moved)
+    return 0 ;
+
+  echo (@.noGo) ;
+  
+  return 1 ;
+}
+
+
+/***************************************************************************/
+/* Trying to leave the folly? Lose all if the peacock is still alive!      */
+/***************************************************************************/
+
+func mansion_folly._preExitFn
+{
+  if (mansion_peacockBush.location == generalStore) /* Dead */
+    return 0 ;
+
+  foreach $thing in (#actor.contents)
+    if ($thing.home != #actor)
+      @._move ($thing, #actor.location) ;
+
+  echo ("You feel a sense of enlightenment as you leave the folly.\n") ;
+  return 0 ;
+}
+
+
+func mansion_grass_01.drink
+{
+  if ($1 == "water")
+	{ mansion_grass_01._drink () ; return ; }
+
+  if ( ($1 == "from") && ($2 == "fountain") )
+	{ mansion_grass_01._drink () ; return ; }
+
+  if ($# != 0)
+  {
+    bundleArgs ;
+    @.drink ($arg) ;
+  }
+  else
+    @.drink () ;
+
+}
+
+
+func mansion_grass_01._drink
+{
+  /**/ if (#actor.sex == MALE)
+    #actor.sex = FEMALE ;
+  else if (#actor.sex == FEMALE)
+    #actor.sex = GENDERLESS ;
+  else
+    #actor.sex = MALE ;
+
+  @._visEmote ("drinks water from the fountain.") ;
+
+  echo ("You drink some water from the fountain.\n");
+  echo ("The water is very cold and most refreshing, however, after a few\n") ;
+  echo ("minutes, you feel strange ... Almost like a new person!\n") ;
+
+}

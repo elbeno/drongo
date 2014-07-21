@@ -1,0 +1,382 @@
+/***************************************************************\
+* Room description file for Logic Island 			*
+* Submitted by Bugblatter djt1000@uk.ac.cam.hermes		*
+\***************************************************************/
+
+/* Revision History
+ 
+ Date   | Modifications
+--------+-------------------------------------------------------
+31Jan94 | Wizards Tower rooms created
+03Feb94 | Store room added
+05Feb94 | Cleaning Cupboard Added
+19Feb94 | Paths added
+        | Beach locations added
+03Mar94 | Tidied up!
+04Mar94 | Moved so island faces west!
+05Mar94 | Added indoors flags, as well as rxfetches!
+        | Scenery added to cave
+--------+-------------------------------------------------------
+04Mar94 | Submitted to Irn-Bru
+--------+-------------------------------------------------------
+11Aug94 | Rooms for potion puzzle added
+--------+-------------------------------------------------------
+?????94 | Submitted to Irn-Bru
+--------+-------------------------------------------------------
+
+*/	
+
+#include <drogon.h>
+
+/**************************\
+* General Island Locations *
+\**************************/
+
+/* Path to Wiz Tower */
+{
+  ROOM ("A Cobbled Path", "island2_wizPath") ;
+  RDESC = "
+  This is a well tended cobbled path, which runs to the north-east and
+  west. To the northeast in the distance is a tall solitary tower which
+  rises against the deep blue sky. To the north of the road is an area of
+  woodland, and in the distance to the south you can see the sea,
+  although you cannot see any way to get to either directly." ;
+
+  SCENERY ("a wizards tower", "*") ; SDESC = "
+  The tower appears to radiate a strong blue-ish magic!" ;
+  SCENERY ("woodland", "*") ; SDESC = "
+  This deep green wood looks very peaceful." ;
+}
+
+/* Clifftop path */
+{
+  ROOM ("A Clifftop Path", "island2_cliffPath") ;
+  RDESC = "
+  This is really a trail, not a path. It follows the cliff tops, leading
+  south and then turning southwest. It also heads inland to the north,
+  towards a wood in the distance." ;
+}
+
+/* Path to woodland */
+{
+  ROOM ("A narrow path", "island2_narrowPath") ;
+  RDESC = "
+  This is a narrow, twisting path, which leads both to the north and to
+  the south. Open areas of grassland lie to the south, and to the north
+  lies a luscious green woodland. The path leading north turns northeast
+  into the wood. To the east you can make out a tall tower rising
+  majestically into the blue sky. " ;
+
+  SCENERY ("a wizards tower", "*") ; SDESC = "
+  The tower appears to radiate a strong blue-ish magic!" ;
+  SCENERY ("woodland", "*") ; SDESC = "
+  This deep green wood looks very peaceful." ;
+} 
+
+/* Path to village */
+{
+  ROOM ("A gravel path", "island2_gravelPath") ;
+  RDESC = "
+  This gravel path is lined with beatiful flowers and is obviously cared
+  for by someone with meticulous attention to detail. To the east you can
+  make out a tall tower, and to the north lies an area of woodland. You
+  can follow the path east, or to a small village west. Or at least you
+  could, if there weren't all those rocks on the path blocking the way!"
+  ;
+
+  SCENERY ("a wizards tower", "*") ; SDESC = "
+  The tower appears to radiate a strong blue-ish magic!" ;
+  SCENERY ("woodland", "*") ; SDESC = "
+  This deep green wood looks very peaceful." ;
+  SCENERY ("rockfall", "*") ; SDESC = "
+  A mysterious rockfall. But there are no cliffs for them
+  to fall from. The rocks are grey and have a blue-ish
+  tinge around their edges. Strange!" ;
+}
+
+/* Crossroads */
+{
+  ROOM ("A crossroads", "island2_crossRoads") ;
+  RDESC = "
+  There are four paths leading away from this crossroads.  To the south
+  is a grassed path, to the north lies a twisting path which leads into a
+  wood. A cobbled path leads east, and a gravel path leads west." ;
+
+  SCENERY ("a wizards tower", "*") ; SDESC = "
+  The tower appears to radiate a strong blue-ish magic!" ;
+  SCENERY ("woodland", "*") ; SDESC = "
+  This deep green wood looks very peaceful." ;
+}
+
+
+/*************************\
+* The Wizards Tower Rooms *
+\*************************/
+
+/* The Entrance Hall */
+{
+  ROOM ("Tower Entrance", "island2_wizTower_01") ;
+  RDESC = "
+  The entrance hall to the tower is very bare. The room is like the
+  outside; just stone! There is a staircase that climbs the 20 or so
+  metres to the ceiling. There are a pair of open wooden doors in the
+  south wall, and a path from them leads southwest." ;
+  INDOORS ;
+
+  SCENERY ("a stone staircase", "*") ; SDESC = "
+  A stone staircase curls around the wall up to the ceiling. The
+  stairway is lit by several torches." ;
+  SCENERY ("wooden doors", "*") ; SDESC = "
+  The two studded wooden doors stand ten metres high, and are currently
+  open." ;
+}
+
+/* The 1st Floor */
+{
+  ROOM ("The Puzzle Room", "island2_wizTower_02") ;
+  RDESC = "
+  You are in a stone walled room, a staircase leads up and down. In front
+  of you are three doors: a gold, a silver and a bronze. Each has a
+  plaque beside it in the same colour as the door. On the north side of
+  the stone needle is another plaque. Also, a door labelled 'Cleaners
+  Room' is under the stairs." ;
+  INDOORS ;
+
+  SCENERY ("a stone staircase", "*") ; SDESC = "
+  A stone staircase curls around the wall up to the ceiling. The
+  stairway is lit by several torches." ;
+}
+
+{
+  ROOM ("The Bronze Room", "island2_wizTower_03") ;
+  RDESC = "
+  You are standing in a completely bronze room, bronze walls, bronze
+  ceiling and a bronze floor. Even the door out is made of bronze." ;
+  NO_SUMMON_IN ; NO_SUMMON_OUT ; RXFETCH ; INDOORS ;
+
+  SCENERY ("a bronze door", "*") ; SDESC = "
+  The door is made completely of bronze." ;
+}
+
+{
+  ROOM ("The Silver Room", "island2_wizTower_04") ;
+  RDESC = "
+  You are standing in a completely silver room, silver walls, silver
+  ceiling and a silver floor. Even the door out is made of silver." ;
+  NO_SUMMON_IN ; NO_SUMMON_OUT ; RXFETCH ; INDOORS ;
+
+  SCENERY ("a silver door", "*") ; SDESC = "
+  The door is made completely of silver." ;
+}
+
+{
+  ROOM ("The Gold Room", "island2_wizTower_05") ;
+  RDESC = "
+  You are standing in a completely gold room, gold
+  walls, gold ceiling and a gold floor. Even the
+  door out is made of gold." ;
+  NO_SUMMON_IN ; NO_SUMMON_OUT ; RXFETCH ; INDOORS ;
+
+  SCENERY ("a bronze door", "*") ; SDESC = "
+  The door is made completely of gold." ;
+}
+
+/* The Second Floor */
+{
+  ROOM ("Bugblatters Lounge", "island2_wizTower_06") ;
+  RDESC = "
+  You are standing in a room with incredible magical presence. This is
+  clearly the work of a powerful wizard. A sofa wraps around half of the
+  wall, with a coffee table placed neatly in front of it. Behind the sofa
+  are several windows. There is also a small cupboard here." ;
+  INDOORS ;
+
+  SCENERY ("window", "*") ; SDESC = "
+  The window gives a lovely view of the island." ;
+}
+
+/* The Third Floor */
+{
+  ROOM ("Bugblatters Study", "island2_wizTower_07") ;
+  RDESC = "
+  The work area of Bugblatter, this is not a place where mortals feel
+  comfortable. The room is lavishally furnished with green leather and
+  oak.  There is an oak desk, chair and drinks cabinet. A window gives a
+  pleasent view of the island, and there are four pictures in the room." ;
+  ;
+  NO_TP_IN ; NO_SUMMON_IN ; INDOORS ;
+
+  SCENERY ("pictures", "*") ; SDESC = "
+  The four pictures are disributed about the walls of this room. They
+  depict the life of a human wizard. Firstly as a young adventurer, then
+  as a dabbler in magic - playing with potions, then as an enchanter, and
+  finally as a wiser magic user!" ;
+
+  SCENERY ("window", "*") ; SDESC = "
+  The leaded window gives a lovely view of the island." ; 
+}
+
+/* The Roof */
+{
+  ROOM ("The Tower Roof", "island2_wizTower_08") ;
+  RDESC = "
+  From the top of this tower you can just see the main
+  continent of Drogon, and you have a superb view of the island, and the
+  surrounding sea." ;
+  NO_TP_IN ; NO_SUMMON_IN ;
+}
+
+/* The Store Cupboard, for the ingots */
+{
+  ROOM ("Store Cupboard", "island2_wizTower_09") ;
+  RDESC = "
+  A quite boring cupboard, there is barely enough room for you in here!" ;
+  NO_TP_IN ; NO_SUMMON_IN ; INDOORS ;
+}
+
+/* The Broom cupboard, for the hard puzzle */
+{
+  ROOM ("Cleaners Store", "island2_wizTower_10") ;
+  RDESC = "
+  This is the cleaners store cupboard. There are no objects of any real
+  interest in here." ;
+  RXFETCH ; INDOORS ;
+}
+
+
+/***********\
+* The Beach *
+\***********/
+
+/* A clifftop */
+{
+  ROOM ("A Grassy Clifftop", "island2_cliffTop") ;
+  RDESC = "
+  From here you have a beautiful view south over the large
+  expanse of calm ocean. A path leads down and south to a golden beach,
+  and a grassy path leads east before turning to the north." ;
+
+  SCENERY ("the sea", "*") ; SDESC = "
+  A beautiful, calm, blue ocean." ;
+}
+
+/* A golden sandy beach */
+{
+  ROOM ("A Golden Sandy Beach", "island2_beach_01") ;
+  RDESC = "
+  The sea stretches out to the south, and a cliff blocks your way to the
+  north. The beach stretches east and appears to be the only way out of
+  here. Just into the sea some rocks jut out of the water preventing you
+  from landing or
+  swimming here." ;
+}
+
+{
+  ROOM ("A Golden Sandy Beach", "island2_beach_02") ;
+  RDESC = "
+  The sea stretches out to the south. The beach stretches to the east and
+  to the northwest. To the north is a cliff face, in which are carved
+  some stone steps. Just into the sea some rocks jut out of the water
+  preventing you from landing or swimming here." ;
+
+  SCENERY ("stone steps", "*") ; SDESC = "
+  The steps are carved out of the cliff, and lead up." ;
+  SCENERY ("rocks", "*") ; SDESC = "
+  They stick up out of the water and look very sharp!" ;
+}
+
+{
+  ROOM ("A Golden Sandy Beach", "island2_beach_03") ;
+  RDESC = "
+  The sea stretches out to the west. The beach continues to the
+  southeast. To the northeast is an entrance to a cave carved out of the
+  cliff face." ;
+
+  SCENERY ("cave entrance", "*") ; SDESC = "
+  The cave looks like it has been carced naturally by the passage of
+  time, and lots of water!" ;
+  SCENERY ("rocks", "*") ; SDESC = "
+  They stick up out of the water and look very sharp!" ;
+}
+
+{
+  ROOM ("A Damp Cave", "island2_beach_cave") ;
+  RDESC = "
+  A cave smelling of the sea. The entrance is to the southwest. The walls
+  are made of rock, as the cave has been formed slowly over the passage
+  of time. There is an inscription carved into the wall." ;
+  INDOORS ; 
+}
+
+
+/**************\
+* The Woodland *
+\**************/
+
+{
+  ROOM ("The Edge of the Wood", "island2_wood_edge") ;
+  RDESC = "
+  You are standing at the southern edge of a wood. A path leads southwest
+  before turning south, and another leads into the forest north." ;
+}
+
+{
+  ROOM ("Woodland", "island2_wood_06") ;
+  RDESC = "
+  You are standing is some woodland. Paths lead north, south, northeast,
+  northwest, southeast and southwest." ;
+}
+
+{
+  ROOM ("Woodland", "island2_wood_04") ;
+  RDESC = "
+  You are standing is some woodland. Paths lead west, northwest,
+  southwest and south." ;
+}
+
+{
+  ROOM ("Woodland", "island2_wood_05") ;
+  RDESC = "
+  You are standing is some woodland. Paths lead west, northwest,
+  southwest and north." ;
+}
+
+{
+  ROOM ("Woodland", "island2_wood_01") ;
+  RDESC = "
+  You are standing is some woodland. Paths lead east, southeast,
+  northeast and north." ;
+}
+
+{
+  ROOM ("Woodland", "island2_wood_02") ;
+  RDESC = "
+  You are standing is some woodland. Paths lead east, northeast,
+  southeast and south." ;
+}
+
+{
+  ROOM ("Woodland", "island2_wood_03") ;
+  RDESC = "
+  You are standing is some woodland. Paths lead south, southeast and
+  southwest." ;
+}
+
+{
+  ROOM ("A Pit", "island2_wood_07") ;
+  RDESC = "
+  You are standing in a pit that has been dug into the floor of the
+  woodland above. There is a small mouse hole in the eastern wall." ;
+}
+
+
+/*************\
+* The Village *
+\*************/
+
+{
+  ROOM ("The Village", "island2_village_01") ;
+  RDESC = "
+  Just a room at the moment. The village will be completed soon! As soon
+  as there is a puzzle to put in it - a maze?" ;
+}

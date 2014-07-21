@@ -1,0 +1,173 @@
+/***************************************************************\
+* Map description file for Logic Island 			*
+* Submitted by Bugblatter djt1000@uk.ac.cam.hermes		*
+\***************************************************************/
+
+/* Revision History
+ 
+ Date   | Modifications
+--------+-------------------------------------------------------
+31Jan94 | Wizards Tower objects created
+19Feb94 | Paths added
+        | Beach added
+03Mar94 | Checked over!
+04Mar94 | Moved so island faces west!
+--------+-------------------------------------------------------
+04Mar94 | Submitted to Irn-Bru
+--------+-------------------------------------------------------
+
+*/
+
+#include <drogon.h>
+#include "rooms.h"
+
+/* Link to the sea
+ ******************\
+
+The only location you can link to is island2_beach_03 as the other two
+beach locations are rocky. This location faces
+
+/* The Island Paths
+ *******************/
+
+BI_CONNECT (island2_crossRoads, island2_narrowPath, "north", "south") ;
+BI_CONNECT (island2_crossRoads, island2_cliffPath, "south", "north") ;
+BI_CONNECT (island2_crossRoads, island2_wizPath, "east", "west") ;
+BI_CONNECT (island2_crossRoads, island2_gravelPath, "west", "east") ;
+ 
+/* Map of Island Paths
+ **********************\
+
+                                   WOODLAND
+                                      |
+                                     n/s
+                                      |
+                                  Narrow Path
+                                      |
+                                     n/s
+          e                  e        |        e              e
+VILLAGE - / - Gravel Path  - /  - Crossroads - / - Wiz Path - / - WIZ TOWER
+          w                  w        |        w              w
+                                     n/s
+                                      |
+                                  Cliff Path
+                                      |
+                                      /
+                   CLIFF & BEACH - e\s
+                            
+*/
+
+/* The Wizards Tower Map
+ ************************/
+
+BI_CONNECT (island2_wizPath, island2_wizTower_01, "ne", "sw") ;
+
+BI_CONNECT (island2_wizTower_01, island2_wizTower_02, "up", "down") ;
+BI_CONNECT (island2_wizTower_02, island2_wizTower_06, "up", "down") ;
+BI_CONNECT (island2_wizTower_06, island2_wizTower_07, "up", "down") ;
+BI_CONNECT (island2_wizTower_07, island2_wizTower_08, "up", "down") ;
+
+/* Map of Bugblatter's Tower
+ ****************************\
+
+
+			   	   ROOF
+				     |
+				    u/d 
+				     |
+				 BUGS STUDY
+				     |
+				    u/d
+				     |
+	 STORE CUPBOARD	--------BUGS LOUNGE
+				     |
+				    u/d     ____  BRONZE ROOM
+				     |     /
+	  CLEANERS ROOM	 -------PUZZLE ROOM-----  SILVER ROOM
+				     |     \____  
+				    u/d           GOLD ROOM
+				     |
+				  ENTRANCE
+     				    /
+				  e\w
+ 				 /
+*/
+
+/* The Beach
+ ************/
+
+BI_CONNECT (island2_cliffPath, island2_cliffTop, "south", "east") ;
+
+BI_CONNECT (island2_cliffTop, island2_beach_02, "down", "up") ;
+BI_CONNECT (island2_cliffTop, island2_beach_02, "south", "north") ;
+BI_CONNECT (island2_beach_01, island2_beach_02, "west", "east") ;
+BI_CONNECT (island2_beach_02, island2_beach_03, "nw", "se") ;
+BI_CONNECT (island2_beach_03, island2_beach_cave, "ne", "sw") ;
+
+/* Map of the Beach
+ *******************\
+
+                                     e
+                         Cliff Top - / ->   Cave
+                             |       w          \ nw/se       
+                           un/ds         Beach -
+                    e        |        ne /       
+         Beach ---- / ---- Beach ---- \  
+                    w                 sw
+*/
+
+/* The Wood
+ ***********/
+
+BI_CONNECT (island2_narrowPath, island2_wood_edge, "north", "sw") ;
+
+BI_CONNECT (island2_wood_edge, island2_wood_06, "north", "south") ;
+BI_CONNECT (island2_wood_edge, island2_wood_05, "ne", "sw") ;
+BI_CONNECT (island2_wood_edge, island2_wood_01, "nw", "se") ;
+
+BI_CONNECT (island2_wood_05, island2_wood_06, "nw", "se") ;
+BI_CONNECT (island2_wood_05, island2_wood_04, "north", "south") ;
+BI_CONNECT (island2_wood_05, island2_wood_01, "west", "east") ;
+
+BI_CONNECT (island2_wood_04, island2_wood_02, "west", "east") ;
+BI_CONNECT (island2_wood_04, island2_wood_06, "sw", "ne") ;
+BI_CONNECT (island2_wood_04, island2_wood_03, "nw", "se") ;
+
+BI_CONNECT (island2_wood_03, island2_wood_06, "south", "north") ;
+BI_CONNECT (island2_wood_03, island2_wood_02, "sw", "ne") ;
+
+BI_CONNECT (island2_wood_02, island2_wood_06, "se", "nw") ;
+BI_CONNECT (island2_wood_02, island2_wood_01, "south", "north") ;
+
+BI_CONNECT (island2_wood_01, island2_wood_06, "ne", "sw") ;
+
+/* Map of the wood
+ ******************\
+
+                         3
+                       / | \
+                     2---+---4
+                     | \ | / |
+                     |   6   |
+                     | / | \ |
+                     1---+---5
+                       \ | /
+                   Edge of Forest
+                        /
+                       |
+*/
+
+
+/* The Village
+ **************/
+
+BI_CONNECT (island2_gravelPath, island2_village_01, "west", "east") ;
+
+/* Map of the Village 
+ *********************\
+
+Just a dummy room at the moment
+
+*/
+
+

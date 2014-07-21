@@ -1,0 +1,151 @@
+#include <drogon.h>
+
+{
+  ROOM ("A Sandy Shore", "Winker_Beach_SandyShore") ;
+  RDESC = "
+  The shoreline here begins to taper slightly, and farther
+  to the east the beach ends in a sand bar which juts out 
+  into the sea. Sand dunes lie to the northeast, backed by
+  cliffs which curve away north and to the east, providing
+  nesting sites for a myriad of seabirds. Back to the west, 
+  the sands are more golden, and to the northwest a track 
+  winds up the cliffs to a tiny house." ;
+  SCENERY ("seabirds", "*") ; SDESC = "
+  The seabirds, mostly gulls, are wheeling around the
+  clifftops on the thermals provided by the warm ocean." ;
+}
+
+{
+  ROOM ("A Sand Bar", "Winker_Beach_SandBar") ;
+  RDESC = "
+  The beach ends abruptly here in a sand bar. To the east
+  the cliffs loom up, and the noise of seabirds fills the air.
+  Waves crash against the base of the cliffs." ;
+  SCENERY ("seabirds", "They are making a terrible noise.") ;
+  SCENERY ("waves", "They pound powerfully against the rocks.") ;
+  SCENERY ("cliffs", "The cliffs look stern and treacherous to climb.") ;
+}
+
+{
+  ROOM ("Lost in the Sand Dunes", "Winker_Dunes_1") ;
+  RDESC = "
+  The sand dunes surround you, and you can't tell which
+  way is which. There is some coarse grass growing nearby." ;
+  SCENERY ("coarse grass", "The grass is swaying gently in the sea breeze.");
+}
+
+{
+  ROOM ("Lost in the Sand Dunes", "Winker_Dunes_2") ;
+  RDESC = "
+  The sand dunes surround you, and you can't tell which
+  way is which. There is some coarse grass growing nearby." ;
+  SCENERY ("coarse grass", "The grass is swaying gently in the sea breeze.");
+}
+
+{
+  ROOM ("Lost in the Sand Dunes", "Winker_Dunes_3") ;
+  RDESC = "
+  The sand dunes surround you, and you can't tell which
+  way is which. There is some coarse grass growing nearby." ;
+  SCENERY ("coarse grass", "The grass is swaying gently in the sea breeze.");
+}
+
+{
+  ROOM ("Lost in the Sand Dunes", "Winker_Dunes_4") ;
+  RDESC = "
+  The sand dunes surround you, and you can't tell which
+  way is which. There is some coarse grass growing nearby." ;
+  SCENERY ("coarse grass", "The grass is swaying gently in the sea breeze.");
+}
+
+{
+  ROOM ("Lost in the Sand Dunes", "Winker_Dunes_5") ;
+  RDESC = "
+  The sand dunes surround you, and you can't tell which
+  way is which. There is some coarse grass growing nearby." ;
+  SCENERY ("coarse grass", "The grass is swaying gently in the sea breeze.");
+}
+
+{
+  ROOM ("Behind the Sand Dunes", "Winker_BehindDunes") ;
+  RDESC = "
+  The dunes have stopped here and a sheer cliff wall is to 
+  the north. To the south are some wind-blown sand dunes.
+  Looking up you can see some seabirds nesting in the cliffs." ;
+  SCENERY ("seabirds", "They are squabbling over nest sites.") ;
+}
+
+{
+  ROOM ("A Small Bedroom", "Winker_SmallBedroom") ;
+  RDESC = "
+  This is a small room, with wooden floorboards and a low sloping 
+  ceiling. There is a small bed up against one wall, and a 
+  rather ancient persian rug partially covers the floor. Looking
+  out through a small leaded window you can see a large forest to
+  the north. A door to the west is ajar." ;
+  SCENERY ("persian rug", "It's very old and threadbare.") ;
+  SCENERY ("small bed", "It looks fairly comfortable - if you are four feet tall!") ;
+  SCENERY ("small leaded window", "*") ; SDESC = "
+  The glass in this window has deformed over the years so that it is
+  noticeably thicker at the bottom than at the top." ;
+  INDOORS ;
+}
+
+{
+  ROOM ("A Dingy Landing", "Winker_DingyLanding") ;
+  RDESC = "
+  There are no windows here, and the only light to reach this landing
+  is filtering through from the bedroom to the east. The oil lamp on one
+  wall looks like it has been broken for a long time. The floorboards here
+  creak rather a lot, and the walls are plastered unevenly. A steep
+  staircase leads down." ;
+  SCENERY ("oil lamp", "*") ; SDESC = "
+  A kind of tarry substance lies in the bowl, covering the wick. It looks 
+  beyond redemption." ;
+  INDOORS ;
+}
+
+{
+  ROOM ("A Steep Staircase", "Winker_SteepStaircase") ;
+  RDESC = "
+  There is not much light here, and the staircase is very steep
+  and narrow. You have to watch your step, and your head, because
+  the ceiling is very low here. There is no bannister, and the
+  stairs continue up or down, bounded by a wall on both sides." ;
+  INDOORS ;
+}
+
+{
+  ROOM ("A Cramped Hallway", "Winker_CrampedHallway") ;
+  RDESC = "
+  You are standing in a hallway with a very low ceiling. A smell
+  of fish is wafting through an open door to the east, and the 
+  front door to this hovel is to the south. A narrow staircase
+  leads up." ; 
+  INDOORS ;
+}
+
+{
+  ROOM ("A Small Kitchen", "Winker_SmallKitchen") ;
+  RDESC = "
+  A strong odour of fish greets you as you enter this room. Daylight
+  streams in through the thick glass of a small window, illuminating
+  a table. There is a small wood-burning stove in the corner of the room." ;
+  SCENERY ("wood-burning stove", "*") ; SDESC = "
+  The stove looks as if it once provided a lot of heat in this
+  small room. Now only the ashes of its last fuel remain." ;
+  SCENERY ("table", "It looks like it's on its last legs.") ;
+  INDOORS ;
+}
+
+{
+  ROOM ("Outside a Small House", "Winker_OutsideHouse") ;
+  RDESC = "
+  You are outside a tiny one-up one-down which faces south
+  a short distance from the clifftop. The entrance to the
+  house is through a thick wooden door to the north. A path
+  to the southeast leads down the cliff to the beach, and a
+  strong breeze is blowing in from the sea." ;
+  SCENERY ("thick wooden door", "*") ; SDESC = "
+  The wood is dry and smooth, aged by the salty air." ;
+}

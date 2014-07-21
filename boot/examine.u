@@ -1,0 +1,302 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @.EX
+{
+  wizardCommand;
+
+  if ($#==0) $thing=#actor.location;
+  else {
+    bundleArgs;
+  
+    $nm = @._ambVis(#actor.contents, $arg);
+    if ($nm==0)
+    {
+      $nm = @._ambVis(#actor.location.contents, $arg);
+      if ($nm==0)
+        $nm = @._ambVis(#actor.location.scenery, $arg);
+    }
+
+    if ($nm>1)
+    {
+      echo(@.notSureWhat, "\n");
+      return;
+    }
+
+    if ($nm==0)
+    {
+      $thing=atoobj($1);
+      if (!$thing)
+      {
+        echo("I don't see what you want to examine here.\n");
+        return;
+      }
+    } else $thing=@._ambMatch;
+  }
+
+  if ($thing.room)
+    @._EXroom($thing);
+
+  if ($thing.scenery && !islist($thing.scenery))
+  {
+    echo("SCENERY: ", $thing.name, ", ", $thing);
+    if ($thing.description=="*")
+      echo("\n  No description.\n");
+    else
+      echo($thing.description, "\n");
+    if ($thing.text)
+      echo("Text:", $thing.text, "\n");
+    else
+      echo("No Text.\n");
+  }
+
+  if ($thing.mobile)
+    @._EXmobile($thing);
+
+  if ($thing.player)
+    @._EXplayer($thing);
+
+  if ($thing.widget)
+    @._EXwidget($thing);
+    
+
+  if ($thing.link)
+  {
+    echo("Destination: ",$thing.destination.name);
+    echo(" (",$thing.destination,")\n");
+  }
+
+/*  echo("\n"); */
+} chmod(&@.EX, "W:rs");
+
+func @._EXroom
+{
+  echo("ROOM: ", @._itemStats($1));
+  
+  if ($1.description)
+    echo($1.description, "\n");
+  else echo("\n");
+  
+  echo("Std. Functions:");
+  if ($1._preExitFn)
+    echo(" preExit");
+  if ($1._postExitFn)
+    echo(" postExit");
+  if ($1._preEnterFn)
+    echo(" preEnter");
+  if ($1._postEnterFn)
+    echo(" postEnter");
+  if ($1._preLookFn)
+    echo(" preLook");
+  if ($1._postLookFn)
+    echo(" postLook");
+  if ($1._describeFn)
+    echo(" describeFn");
+  echo("\n");
+  
+  echo("Std. Flags:");
+  
+  if ($1.haven)
+    echo(" HAVEN");
+  if ($1.noSummonIn)
+    echo(" NO_SUMMON_IN (", $1.noSummonIn, ")");
+  if ($1.noSummonOut)
+    echo(" NO_SUMMON_OUT (", $1.noSummonOut, ")");
+  if ($1.noTpIn)
+    echo(" NO_TP_IN (", $1.noTpIn, ")");
+  if ($1.noTpOut)
+    echo(" NO_TP_OUT (", $1.noTpOut, ")");
+  if ($1.noHome)
+    echo(" NO_HOME (", $1.noHome, ")");
+  if ($1.rxfetch)
+    echo(" RXFETCH");
+  if ($1.indoors)
+    echo(" INDOORS");
+  echo("\n");
+  
+  if ($1.scenery)
+  {
+    foreach $thg in ($1.scenery)
+    {
+      echo("SCENERY: ", $thg.name);
+      if ($thg.description!="*")
+	echo($thg.description, "\n");
+      else echo("\n");
+    }
+  }
+} chmod(&@._EXroom, "W:rs");
+
+func @._EXmobile
+{
+  echo(@._itemstats($1));
+  
+  if ($1.dName)
+    echo("\n", $1.dName);
+
+  if ($1.description)
+    echo($1.description, "\n");
+  else
+    echo("\n");
+
+  if ($1.fixed)
+    echo("MFIXED: ", $1.fixed, "\n");
+  if ($1.enterTxt)
+    echo("MENTER: ", $1.enterTxt, "\n");
+  if ($1.exitTxt)
+    echo("MEXIT:", $1.exitTxt, "\n");
+  echo("Value:", $1.value, "/", ($1.value*5)/4, ", hp: ", $1.hp, "/", $1.maxhp, 
+", t:", $1.sleep, ", wep:");
+
+  if ($1.weapon)
+    echo($1.weapon.power);
+  else echo("0");
+
+  echo(", arm:");
+
+  if ($1.totalArmour)
+    echo($1.totalArmour);
+  else echo("0");
+
+  echo(", atk. prob:", $1.attack, "%\n");
+  echo("Home: ", $1.home, ", ", $1.home.name, ", ");
+  if ($1.map)
+    echo("map contains ", listcount($1.map), " locations.\n");
+  else
+    echo("No map.\n");
+  
+  echo("Std. Flags:");
+  if ($1.mattackpk)
+    echo(" MATTACKPK");
+  echo(".\n");
+} chmod(&@._EXmobile, "W:rs");
+
+func @._EXplayer
+{
+  echo($1.name, ", ", $1, " [", $1.nameTag, " ] ");
+  
+  /* Should there be a function call to determine this next bit? */  
+  if ($1.sex==NEUTER)
+    echo("genderless");
+  if ($1.sex==FEMALE)
+    echo("female");
+  if ($1.sex==MALE)
+    echo("male");
+  
+  if ($1.description)
+    echo($1.description, "\n");
+  else
+    echo("No description.\n");
+  
+  echo("*** Level ", $1.level);
+  if ($1.taskPending)
+    echo(" [TP]");
+  echo(", ", @._levelName($1.level, $1.sex), ".\n");
+  
+  if ($1.level>#actor.level) {
+    echo("*** Further information not available at this time ***\n");
+    return;
+  }
+  
+  echo("*** ", $1.money, " pbs, ", $1.hp, "/", @._maxHp($1.level),
+	" hps, ", $1.load, "/", @._maxLoad($1.level), " load, ", $1.mana,
+	"/", @._maxMana($1.level), " mana\n");
+
+  if ($1.createTime)  
+    echo("  Character created at ", strtime($1.createTime), "\n");
+  if ($1.loginTime)
+    echo("  Last connected at    ", strtime($1.loginTime));
+    if (ARCH(#actor))
+    {
+      if ($1.ipnum)
+        echo(" from ", $1.ipnum,"\n");
+      else
+        echo("\n");
+    }
+    else
+    {
+      echo("\n");
+    }
+
+/*  if (listsearch(@.onlinePlayers, $1))
+    echo("  (currently logged on)\n"); */
+  
+} chmod(&@._EXplayer, "W:rs");
+
+func @._EXwidget
+{
+  echo("WIDGET: ", @._itemStats($1));
+  if ($1.description)
+    echo($1.description, "\n");
+  else echo("\n");
+  
+  if ($1.text)
+    echo("Text:\n------\n", $1.text, "\n------\n");
+  else
+    echo("No Text.\n");
+  if ($1.dName)
+    echo("WDNAME=", $1.dName, "\n");
+  if ($1.fixed)
+    echo("WFIXED=", $1.fixed, "\n");
+  echo("Stats: v:", $1.value, ", w:", $1.weight, ", p:", $1.power);
+  echo(", a:", $1.armour, ", t:", $1.sleep, ".\n");
+  if ($1.home)
+  {
+    echo("Home: ", $1.home, ", ", $1.home.name, " (");
+    if ($1.home.mobile)
+      echo("mobile)\n");
+    else if ($1.home.room)
+      echo("room)\n");
+    else if ($1.home.player)
+      echo("player)\n");
+    else echo("unknown)\n");
+  } else echo("No Home.\n");
+  echo("Std. Functions:");
+  if ($1._openFn)
+    echo(" open");
+  if ($1._closeFn)
+    echo(" close");
+  if ($1._searchFn)
+    echo(" search");
+  if ($1._rideFn)
+    echo(" ride");
+  if ($1._moveFn)
+    echo(" move");
+  if ($1._pushFn)
+    echo(" push");
+  if ($1._pullFn)
+    echo(" pull");
+  if ($1._turnFn)
+    echo(" turn");
+  if ($1._shakeFn)
+    echo(" shake");
+  if ($1._eatFn)
+    echo(" eat");
+  if ($1._drinkFn)
+    echo(" drink");
+  if ($1._specialGetFn)
+    echo(" specialGet");
+  if ($1._dropFn)
+    echo(" drop");
+  if ($1._describeFn)
+    echo(" describe");
+  echo("\n");
+  
+  echo("Std. Flags:");
+  if ($1.edible)
+    echo(" WEDIBLE");
+  if ($1.drinkable)
+    echo(" WDRINKABLE");
+  if ($1.xFetch)
+    echo(" WXFETCH");
+  if ($1.sticky)
+    echo(" WSTICKY");
+  if ($1.invis)
+    echo(" WINVISIBLE");
+  if ($1.special)
+    echo(" WSPECIAL");
+  if ($1.cloakingDevice)
+    echo(" WCLOAK");
+  echo("\n");
+} chmod(&@._EXwidget, "W:rs");
+

@@ -1,0 +1,218 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+/*
+ * Listening functions for Lincas puppy.
+ *
+ */
+
+#include <drogon.h>
+#include  "owner.h"
+#include    "pet.h"
+
+func linca_puppy._listen
+{
+
+  if (regcmp ($1, "^Sparky, lick.*"))
+    { #self._lick ($1) ;	return ; }
+
+  if (regcmp ($1, "^Sparky, sit.*"))
+    { #self._sit ($1) ; 	return ; }
+
+  if (regcmp ($1, "^Sparky, lie down.*"))
+    { #self._lieDown ($1) ;	return ; }
+
+  if (regcmp ($1, "^Sparky, come here.*"))
+    { #self._comeHere ($1) ;	return ; }
+
+  if (regcmp ($1, "^Sparky, play dead.*"))
+    { #self._playDead ($1) ;	return ; }
+
+  if (regcmp ($1, "^Sparky, attack.*"))
+    { #self._attack ($1) ;	return ; }
+
+/* Default action */
+
+  if (regcmp ($1, "^Sparky,"))
+    @._reko (#self.location, "Sparky barks, and bounds around at the sound of her name.\n") ;
+
+}
+
+func linca_puppy._duh
+{
+  @._reko (#self.location, "Sparky looks up soulfully, trying to understand.\n") ;
+}
+
+
+/*
+ * Lick a player.
+ *
+ */
+
+func linca_puppy._lick
+{
+
+/* Isolate victims name */
+
+  $s = regexp ($1, " [a-zA-Z]*$") ; $s = regexp ($s, "[^ ].*") ;
+
+  if ($s == "me")
+    $s = #actor.name ;
+
+  $num = @._ambVis(#actor.location.contents, $s) ;
+
+  if ($num != 1)
+    return #self._duh () ;
+
+  $p = @._ambMatch ;
+
+/* Arches are too fearsome to lick! */
+
+  if ( ARCH ($p) )
+  {
+    @._leko (
+"Sparky looks at ", $p.name, ", and decides not to lick someone so 
+powerful, but to lick ", #actor.name, " instead!\n") ;
+
+    echo ("Sparky looks at ", $p.name, ", and decides not to lick someone so
+powerful, but to lick you instead!\n") ;
+
+    $p = #actor ;
+  }
+
+  becomePlayer ($p) ;
+
+  @._leko (
+"Sparky barks, wags her tail joyfully, bounds over to ", #actor.name, "
+and starts to lick ", @._himHer (#actor), " coldly and wetly!\n") ;
+
+  echo ("Sparky barks, wags her tail joyfully, bounds towards you and 
+starts to lick you coldly and wetly!\n") ;
+
+  becomeMyself ;
+}
+
+
+/*
+ * Sit.
+ *
+ */
+
+func linca_puppy._sit
+{
+  if (random(20) == 0)
+    @._reko (#self.location,
+    "Sparky bounds around, yapping loudly and disobediently!\n") ;
+  else
+    @._reko (#self.location,
+    "Sparky obediently sits down and looks up expectantly.\n") ;
+}
+
+
+/*
+ * Lie down.
+ *
+ */
+
+func linca_puppy._lieDown
+{
+  @._reko (#self.location,
+"Sparky lies down, laying her head on her paws and looking up with
+her soulful brown eyes.\n") ;
+}
+
+
+/*
+ * Come here.
+ *
+ */
+
+func linca_puppy._comeHere
+{
+  @._leko (
+"Sparky gets up, walks over to ", #actor.name, ", and lies down\n",
+"at ", @._hisHer (#actor), " feet.\n") ;
+
+  echo ("Sparky gets up, walks over to you, and lies down at your feet.\n") ;
+}
+
+
+/*
+ * Play dead.
+ * 
+ */
+
+func linca_puppy._playDead
+{
+  @._reko (#self.location, 
+"Sparky rolls over onto her back, with her tongue lolling out
+pathetically, before turning over and sitting up once more.\n") ;
+}
+
+
+/*
+ * Attack a player.
+ *
+ */
+
+func linca_puppy._attack
+{
+
+/* Wizards (level >= 20) can give the attack order */
+
+  if ( !( WIZ (#actor) ) )
+    return #self._duh () ;
+
+/* Isolate victims name */
+
+  $s = regexp ($1, " [a-zA-Z]*$") ; $s = regexp ($s, "[^ ].*") ;
+
+  if ($s == "me")
+    $s = #actor.name ;
+
+  $num = @._ambVis(#actor.location.contents, $s) ;
+
+  if ($num != 1)
+    return #self._duh () ;
+
+  $p = @._ambMatch ;
+
+
+/* Sparky won't attack Arches, Linca or Winker */
+
+  if ( ARCH ($p) || ($p == LINCA) || ($p == WINKER) )
+  {
+    @._leko (
+"Sparky looks at her friend ", $p.name, ", ignores the command and 
+decides to attack ", #actor.name, " instead!\n") ;
+
+    echo ("Sparky looks at her friend ", $p.name, ", ignores your command and
+decides to attack you instead!\n") ;
+
+    $p = #actor ;
+  }
+
+  becomePlayer ($p) ;
+  
+  @._leko (
+"Sparky barks and jumps up at ", #actor.name, ", knocking ", 
+@._himHer (#actor), " off ", @._hisHer (#actor), " feet,
+and starts to lick ", @._hisHer (#actor), " face enthusiastically!\n") ;
+
+  echo ("Sparky barks and jumps up at you, knocking you off your feet! She 
+starts to lick your face a little too enthusiastically, suffocating you!\n") ;
+
+  @._geko ("\n<!> ", #actor.name, " has been licked to death by Linca's puppy!\n") ;
+  @._resurrect (0) ;
+  becomeMyself ;
+}
+

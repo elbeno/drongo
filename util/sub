@@ -1,0 +1,107 @@
+#!/usr/bin/bash
+# Submission script
+# Usage: sub file
+# Where file is the name of a file containing uber source to be
+# preprocessed then submitting.
+# This version relies on a modified usubmit program.
+
+MUD=/home/bjd1000/drongo
+FRIDGE=$MUD/main/fridge
+if [ ! -s $FRIDGE/serverhost ]
+then
+  echo serverhost file not found - is server running? >&2
+  exit 1
+fi
+
+UMUDHOST=`cat < $FRIDGE/serverhost`
+UMUDPORT=6999
+UMUDLOGIN=Toaster
+UMUDPASS=`cat $FRIDGE/toasterpass`
+LOCK=$FRIDGE/sub.lock
+ERRFILE=$FRIDGE/error.`hostname`.$USER
+_haslock=0
+
+function clearup() {
+	rm -f /tmp/prepro.errs2 /tmp/prepro.err /tmp/$USER.code;
+	if [ $_haslock -eq 1 ]
+	then
+		rm $LOCK
+	fi
+	echo >&2 Tidied up.
+        echo $1 > $ERRFILE
+        exit $1
+}
+
+trap "clearup 200" INT
+
+export UMUDHOST UMUDPORT UMUDLOGIN UMUDPASS
+
+if [ ! -s $1 ]
+then
+  echo >&2 '*** File is empty - not submitting ***'
+  clearup 0
+fi
+
+echo >&2 File submission: $1
+echo >&2 Preprocessing..
+
+/lib/cpp -traditional -P -I$MUDINCLUDEDIR $1 /tmp/$USER.code > /tmp/prepro.err 2>/tmp/prepro.errs2
+cat /tmp/prepro.errs2 >>/tmp/prepro.err
+
+if [ -s /tmp/prepro.err ]
+then
+  echo >&2 FATAL ERROR PREPROCESSING FILE $1:
+  cat >&2 /tmp/prepro.err
+  rm -f $LOCK /tmp/prepro.err /tmp/$USER.code
+  echo 200 >$ERRFILE
+  clearup 200
+fi
+
+while [ -s $LOCK ]
+do
+  _locked=1;
+  if [ ! $_printed ]
+  then
+    echo >&2 The submit lock is currently held by `cat $LOCK`
+    _printed=1;
+  fi
+  echo >&2 waiting...
+  sleep 5
+done
+
+echo >&2 Lock acquired.
+_haslock=1
+whoami > $LOCK
+chmod +w $LOCK
+
+echo >&2 Submitting..
+
+# gawk -f /homes/rws13/mud/game/misc/universe_all_funcs /tmp/$USER.code > /tmp/$USER.codeadd
+# cat /tmp/$USER.codeadd >> /tmp/$USER.code
+mv -f /tmp/$USER.code $FRIDGE/8.code
+
+date >&2
+$MUD/util/usubmit -q -c >/tmp/usub.out
+date >&2
+
+_errfound=0
+
+if tail -5 /tmp/usub.out | fgrep ' line'  >/dev/null
+then
+  echo >&2 FATAL ERROR SUBMITTING FILE $1:
+  /lib/cpp -traditional -I$MUDINCLUDEDIR $1 | gawk -f $MUD/util/get_real_line.awk lookingfor=`fgrep 'line' /tmp/usub.out | sed 's/[^ ]* //g'` >&2
+  echo >&2 Original 'um' error:
+  fgrep 'line' /tmp/usub.out >&2
+  cp $FRIDGE/8.code /tmp/errcode
+  chmod +w /tmp/errcode
+  echo >&2 Compile output:
+  tail +4 /tmp/usub.out
+  rm -f /tmp/usub.out $LOCK
+  echo 200 >$ERRFILE
+  clearup 200
+fi
+
+cat /tmp/usub.out
+
+echo >&2 Finished.
+clearup 0

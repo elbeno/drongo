@@ -1,0 +1,462 @@
+/* mode: -*- c -*- */
+#include <drogon.h>
+#include "/homes/rws13/mud/game/misc/players.h"
+#include "/homes/dtm10/drongo/defines.h"
+
+#define SHORT 0
+#define LONG 1
+#define NOTHING -1
+#define REPORT " report"
+#define COMMENT ""
+#define roomMustHaveArea if (!(#actor.location.area)) { echo ("This room is not in an area.\nIf it should be, use 'bug <message>' to report this.\n"); return; }
+
+func @.comment
+{
+  roomMustHaveArea;
+  $clist=#actor.location.area.commentList;
+
+  if (($1=="list") && ($#==1)) {
+    @.commentlist();
+    return;
+  }
+
+  if ($1=="read") {
+    @.commentread($2);
+    return;
+  }
+
+  if ($1=="del") {
+    @.commentdel($2);
+    return;
+  }
+
+  if ($1=="reply") {
+    bundleArgsFrom(3);
+    @.commentreply($2,$arg);
+    return;
+  }
+
+  bundleArgs;
+  if ($#<5) {
+    echo(@._commentSyntax());
+    return;
+  }
+
+  $list=@._bitsubmit(#actor.location.area.commentList,$arg,"comment","COMMENT",COMMENT);
+  #actor.location.area.commentList=$list;
+}
+
+func @.commentlist
+{
+  roomMustHaveArea;
+  $clist=#actor.location.area.commentList;
+  $fullname=#actor.location.area.fullname;
+  if (listcount($clist)) {
+    echo("List of comments for ",$fullname,"  (n) means 'n' attachments\n");
+    echo(@._displaybitlist($clist,listcount($clist),LONG),"\n");
+    return;
+  }
+  echo("No comments for ",$fullname,"\n");
+}
+
+func @.commentread
+{
+  roomMustHaveArea;
+  $clist=#actor.location.area.commentList;
+  @._bitread($clist,$1,"comment","COMMENT");
+}
+
+func @.commentdel
+{
+  roomMustHaveArea;
+  $clist=#actor.location.area.commentList;
+  $owner=#actor.location.owner;
+  if ((#actor!=$owner) && (#actor.level<29) && (#actor!=$comment.from)) {
+    echo("You can't delete other people's comments when in other people's areas.\n");
+    return;
+  }
+  $list=@._bitdel($clist,$1,"comment","COMMENT",COMMENT);
+  if ($list=="null") 
+    return;
+  #actor.location.area.commentList=$list;
+  return;
+}
+
+func @.commentreply
+{
+  roomMustHaveArea;
+  $clist=#actor.location.area.commentList;
+  bundleArgsFrom(2);
+  @._bitreply($clist,$1,"comment","COMMENT",COMMENT,$arg);
+}
+
+func @.bug
+{
+  if (#actor.level==29) {
+    if ($1=="list") {
+      @.buglist();
+      return;
+    }
+    
+    if ($1=="reply") {
+      bundleArgsFrom(3);
+      @.bugreply($2,$arg);
+      return;
+    }
+
+    if ($1=="read") {
+      @.bugread($2);
+      return;
+    } 
+    
+    if ($1=="del") {
+      @.bugdel($2);
+      return;
+    }
+  }
+
+  if ($#<5) {
+    echo(@.bitSyntax("bug"));
+    return;
+  }
+  bundleArgs;
+
+  $list=@._bitsubmit(Util.buglist,$arg,"bug","BUG",REPORT);
+  Util.buglist=$list;
+} ACCESS(@.bug)
+
+func @.buglist
+{
+  creatorCommand;
+  @._bitlist(Util.buglist,NOTHING,"bug","BUG",REPORT,LONG);
+}
+
+func @.bugread
+{
+  creatorCommand;
+  @._bitread(Util.buglist,$1,"bug","BUG",REPORT);
+}
+
+func @.bugdel
+{
+  creatorCommand;
+  $list=@._bitdel(Util.buglist,$1,"bug","BUG",REPORT);
+  if ($list=="null") 
+    return;
+  Util.buglist=$list;
+  return;
+}
+
+func @.bugreply
+{
+  creatorCommand;
+  if ($#<2) {
+    echo(@._bitDealSyntax("bug"));
+    return;
+  }
+  bundleArgsFrom(2);
+  @._bitreply(Util.buglist,$1,"bug","BUG",REPORT,$arg);
+}
+
+func @.idea
+{
+  if (#actor.level==29) {
+    if ($1=="list") {
+      @.idealist();
+      return;
+    }
+    
+    if ($1=="read") {
+      @.idearead($2);
+      return;
+    } 
+
+    if ($1=="del") {
+      @.ideadel($2);
+      return;
+    }
+  }
+
+  if ($#<5) {
+    echo(@._bitSyntax("idea"));
+    return;
+  }
+  bundleArgs;
+
+  $list=@._bitsubmit(Util.idealist,$arg,"idea","IDEA",REPORT);
+  Util.idealist=$list;
+} ACCESS(@.idea)
+
+func @.idealist
+{
+  creatorCommand;
+  @._bitlist(Util.idealist,NOTHING,"idea","IDEA",REPORT,LONG);
+}
+
+func @.idearead
+{
+  creatorCommand;
+  @._bitread(Util.idealist,$1,"idea","IDEA",REPORT);
+}
+
+func @.ideadel
+{
+  creatorCommand;
+  $list=@._bitdel(Util.idealist,$1,"idea","IDEA",REPORT);
+  if ($list=="null") 
+    return;
+  Util.idealist=$list;
+  return;
+}
+
+func @.typo
+{
+  if (#actor.level==29) {
+    if ($1=="list") {
+      @.typolist();
+      return;
+    }
+    
+    if ($1=="read") {
+      @.typoread($2);
+      return;
+    } 
+
+    if ($1=="del") {
+      @.typodel($2);
+      return;
+    }
+  }
+
+  if ($#<5) {
+    echo(@._bitSyntax("typo"));
+    return;
+  }
+  bundleArgs;
+
+  $list=@._bitsubmit(Util.typolist,$arg,"typo","TYPO",REPORT);
+  Util.typolist=$list;
+} ACCESS(@.typo)
+
+func @.typolist
+{
+  creatorCommand;
+  @._bitlist(Util.typolist,NOTHING,"typo","TYPO",REPORT,LONG);
+}
+
+func @.typoread
+{
+  creatorCommand;
+  @._bitread(Util.typolist,$1,"typo","TYPO",REPORT);
+}
+
+func @.typodel
+{
+  creatorCommand;
+  $list=@._bitdel(Util.typolist,$1,"typo","TYPO",REPORT);
+  if ($list=="null") 
+    return;
+  Util.typolist=$list;
+  return;
+}
+
+func @._bitsubmit
+{
+  if (!($num=listcount($1)))
+    $num=0;
+  $num = $num + 1;
+
+  $obj=objectnew();
+  $obj.from=#actor;
+  $obj.where=#actor.location;
+  $obj.text=$2;
+  $obj.subtime=time();
+  log(strtime(), " ", #actor.name, " ",$4,"s ", $elem, " in ", #actor.location, "(", #actor.location.name, ")\n");
+  if ($5==COMMENT) {
+    echo("Comment ",$num," added for ",#actor.location.area.fullname,"\n");
+  } else {
+    echo("Your ",$3," has been submitted to the Creators.\n");
+    echoto(Milamber,#actor.name," has submitted a ",$3," (number ",$num,")\n");
+    echoto(Sidhe,#actor.name," has submitted a ",$3," (number ",$num,")\n");
+  }
+  return (listappend($1,$obj));
+} ACCESS(@._bitsubmit)
+
+func @._bitreply
+{
+  if (!($num=atoi($2))) {
+    echo(@._bitSyntax($3));
+    echo("Not a valid number.\n");
+    return;
+  }
+  if(!($elem=listelem($1,$num))) {
+    echo("There aren't that many ",$3,$5,"s.\n");
+    return;
+  }
+  log(strtime(), " ", #actor.name, " ",$4," REPLYs ", $elem, " in ", #actor.location, "(", #actor.location.name, ")\n");
+  if ($5==COMMENT) {
+    echo($3,$5," ",$num," replied to.\n");
+  } else {
+    echoto(Sidhe,$3,$5," ",$num," replied to.\n");
+    echoto(Milamber,$3,$5," ",$num," replied to.\n");
+  }
+  $obj=objectnew();
+  $elem=@._getbitreply($elem);
+  $elem.reply=$obj;
+  $obj.text=$6;
+  $obj.from=#actor;
+  $obj.subtime=time();
+  $obj.where=#actor.location;
+}
+
+func @._getbitreply
+{
+  if (!($1.reply)) {
+    return $1;
+  }
+  return @._getbitreply($1.reply);
+}
+
+func @._bitdel
+{
+  if (!($num=atoi($2))) {
+    echo("Not a valid number.\n");
+    return "null";
+  }
+  if(!($elem=listelem($1,$num))) {
+    echo("There aren't that many ",$3,$5,"s.\n");
+    return "null";
+  }
+  log(strtime(), " ", #actor.name, " ",$4," DELs ", $elem, " in ", #actor.location, "(", #actor.location.name, ")\n");
+  if ($5==COMMENT) {
+    echo("Comment ",$num," deleted for ",#actor.location.area.fullname,"\n");
+  } else {
+    echoto(Sidhe,$3," number ",$num," deleted.\n");
+    echoto(Milamber,$3," number ",$num," deleted.\n");
+  }
+  $list=listdrop($1, $elem);
+  @._bitdelelem($elem);
+  return $list;
+}
+
+func @._bitdelelem
+{
+  if ($1.reply)
+    @._bitdelelem($1.reply);
+  objectdestroy($1);
+}
+
+func @._bitread
+{
+  if (!($num=atoi($2))) {
+    echo(@._bitSyntax($3));
+    return;
+  }
+  if (!($elem=listelem($1,$num))) {
+    echo("There aren't that many ",$3,$5,"s.\n");
+    return;
+  }
+  if ($5==COMMENT)
+    echo("Area : ",$elem.where.area.fullname,"\n");
+
+  echo("From ",$elem.from.name," in ", $elem.where," (",$elem.where.name,") on ", strtime($elem.subtime),"\n");
+  echo("-- ",$elem.text,"\n\n");
+  @._bitreadreply($elem);
+}
+
+func @._bitreadreply
+{
+  $reply=$1.reply;
+  if ($reply) {
+    echo("Comment from ",$reply.from.name," in ",$reply.where," (",$reply.where.name,") on ",strtime($reply.subtime),"\n");
+    echo("-- ",$reply.text,"\n\n");
+    @._bitreadreply($reply);
+  } 
+}
+
+func @._bitlist
+{
+  if (listcount($1)) {
+    echo("List of current ",$3,$5,"s:\n");
+    echo(@._displaybitlist($1,listcount($1),$6),"\n");
+    return;
+  }
+  echo("No ",$3,"s!\n");
+}
+
+func @._displaybitlist
+{
+  $elem=listelem($1,$2);
+  $desc=str($2);
+  $desc=str(@._repeatText(3-strlen($desc)," "),$desc,". ");
+  if ($3==LONG)
+    $desc=str($desc," (", @._bitgetstars($elem),") ");
+  $desc=str($desc,strtime($elem.subtime));
+  $descp=str($elem.from.name," : ",$elem.where," (",$elem.where.name,")\n");
+  if ((strlen($desc)+strlen($descp))>76) 
+    $desc=str($desc,"\n",@._repeatText(10," "),$descp);
+  else
+    $desc=str($desc,": ",$descp);
+  
+  
+
+  if (!$2)
+    return "";
+
+  if ($2==1)
+    return $desc;
+  
+  return str(#self._displaybitlist($1, $2-1,$3), $desc);
+} ACCESS(@._displaybitlist)
+
+func @._bitgetstars
+{
+  if ($1.reply)
+    return 1 + @._bitgetstars($1.reply);
+  else
+    return 0;
+  
+}
+
+/*
+func @.dMail
+{
+  creatorCommand;
+  minArgs(2,"*** dMail <person> <message>");
+  bundleArgsFrom(2);
+  
+  if (!($who=atoobj($1))) {
+    $who=@._singleName(Util.players, $1, @.noOneInLand);
+    if (!$who)
+      return;
+  }
+  if (!$who.mbx) {
+    echo($who.name, " has no mailbox.\n");
+    return;
+  }
+  
+  if (!(@._dMail)) {
+    echo("Dmail isn't working at the moment.  it *should* be in soon.\n");
+    return;
+  }
+
+  @._dMail($who,str("Your area : ",#actor.location," (",#actor.location.name,")"),$arg);
+  echo("dmail sent to ",$who.name,"\n");
+}
+*/
+
+func @._bitSyntax
+{
+  $text=str("*** ",$1," <5 or more words describing the ",$1," information>\n");
+  if (#actor.level>=25)
+    return str($text,"*** ",$1," list | read <number> | del <number> | reply <number>\n");
+  else
+    return ($text);
+}
+
+func @._commentSyntax
+{
+  $text="*** comment <5 or more words of comment on this area>\n*** comment list | read <number> | del <number>\n";
+  return($text);
+}
+

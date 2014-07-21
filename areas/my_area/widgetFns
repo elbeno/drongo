@@ -1,0 +1,285 @@
+#include <drogon.h>
+#include <parse.h>
+#include "rooms.h"
+#include "widgets.h"
+#include "mydefines.h"
+
+Winker_sandcastle.Status = BUILT ;
+Winker_floorboard.Status = NAILED ;
+
+func Winker_floorboard._describeFn
+{
+  if (Winker_floorboard.Status == NAILED)
+    {
+    echo ("\n  A rough floorboard which is slightly split and particularly\n",
+          "  creaky. A couple of nails have been hammered inexpertly into\n",
+          "  one end, and have bent over, splintering the wood.\n") ;
+    @._visEmote ("examines a loose floorboard.") ;
+    }
+  else
+    {
+    echo ("\n  The floorboard has come away from the joist, revealing a small\n",
+          "  cache underneath.\n") ;
+    @._visEmote ("examines a broken floorboard.") ;
+    } 
+} 
+
+func Winker_sandcastle._describeFn
+{
+  if (Winker_sandcastle.Status == BUILT)
+    {
+    echo ("\n  A large sand castle with crenellations along the turrets.\n",
+          "  Somebody obviously took great pains to make this, but\n",
+          "  the sand is beginning to dry slightly and it doesn't look\n",
+          "  as stable as it might be.\n") ;
+    @._visEmote ("examines a sand castle.") ;
+    } 
+    else
+    {
+    echo ("\n  An ordinary-looking mound of dry sand.\n") ;
+    @._visEmote ("examines the remnants of a sand castle.") ;
+    } 
+} 
+
+func Winker_pink_seashell.listen
+{
+  if (#actor.location == Winker_Dunes_1)
+    {
+    echo ("It seems as if you can quite faintly hear the sea.\n") ;
+    }
+  else if (#actor.location == Winker_Dunes_2)
+    {
+    echo ("It seems as if you can hear the sea faintly.\n") ;
+    }
+  else if (#actor.location == Winker_Dunes_3)
+    {
+    echo ("It seems as if you can hear the sea quite faintly.\n") ;
+    }
+  else if (#actor.location == Winker_Dunes_4)
+    {
+    echo ("It seems as if you can faintly hear the sea.\n") ;
+    }
+  else if (#actor.location == Winker_Dunes_5)
+    {
+    echo ("It seems as if you can hear the sea, faintly.\n") ;
+    }
+  else
+    {
+    echo ("It seems as if you can hear the sea very faintly in the distance.\n") ;
+    }
+  @._visEmote ("listens to a pink sea shell.") ;
+}
+
+func Winker_mini_snowstorm._shakeFn
+{
+  echo ("As you shake the snowstorm, the vortices within get stronger\n",
+        "and stronger. Suddenly a strong wind lifts you off the ground\n",
+        "and you find yourself surrounded by a blizzard! Just as suddenly\n",
+        "the effect stops and you find yourself in...\n") ;
+  @._visEmote ("is engulfed by a blizzard and disappears!") ;
+  if (#actor.location == Winker_SmallBedroom)
+    {
+    @._moveply(swirlingVoid) ;
+    }
+  else
+    {
+    @._moveply(Winker_SmallBedroom) ;
+    }
+  @._visEmote("appears in a flurry of snowflakes, which soon melt.\n") ;
+}
+
+func Winker_sandcastle._destroycastle
+{
+  Winker_sandcastle.Status = CRUMBLED ; 
+  Winker_sandcastle.name = "a small mound of sand" ;
+  Winker_sandcastle.dName = "A small mound of sand lies here." ;
+} 
+
+
+func Winker_sandcastle._buildcastle
+{
+  Winker_sandcastle.Status = BUILT ;
+  Winker_sandcastle.name = "a sand castle" ; 
+  Winker_sandcastle.dName = "There is a sand castle here." ;
+} 
+
+func Winker_fish_stewpot._searchFn
+{
+  if (Winker_silverearring.location == Winker_silverearring.home)
+    {
+    echo ("Scraping around in the remains of the stew, your fingers find something\n",
+          "smooth, hard and cold hidden in the depths of the pot. After working it\n",
+          "free you see that it is an old silver earring!\n") ;
+    @._move (Winker_silverearring, Winker_SmallKitchen) ; 
+    @._visEmote ("searches a small black pot.") ;   
+    return 1 ;
+    }
+  else
+    {
+    return 0 ;
+    }
+}
+   
+func Winker_sandcastle._searchFn
+{
+  if (Winker_sandcastle.Status == BUILT) 
+    {
+    @._visEmote ("searches a sand castle, which crumbles immediately.") ;
+    Winker_sandcastle._destroycastle() ;
+    Winker_sandcastle.restoreTime = time() + Mins(5) ;
+    if (Winker_shinypebble.location == Winker_shinypebble.home)
+      {
+      @._move (Winker_shinypebble, Winker_Beach_SandyShore) ;
+      echo ("The dry sand castle crumbles when you touch it, revealing\n",
+            "a small shiny pebble!\n") ;
+      }
+    else
+      {
+      echo ("The dry sand castle crumbles when you touch it!\n") ;
+      }
+    }
+  else
+    {
+    return 0 ;
+    } 
+} 
+
+func Winker_floorboard._pullFn
+{
+  if (Winker_floorboard.Status == NAILED) 
+    {
+    @._visEmote ("pulls up a loose floorboard, which breaks.") ;
+    if (Winker_pieceofeight.location == Winker_pieceofeight.home)
+      {
+      @._move (Winker_pieceofeight, Winker_DingyLanding) ;
+      Winker_floorboard._break() ;
+      Winker_floorboard.restoreTime = time() + Mins(5) ;
+      echo ("The floorboard breaks when you try to pull it up, revealing\n",
+            "a cache which contains a piece of eight!\n") ;
+      }
+    else
+      {
+      echo ("The floorboard breaks when you try to pull it up, revealing\n",
+            "an empty cache underneath the floor.\n") ;
+      }
+    }
+  else
+    {
+    echo ("You cannot pull up any more floorboards.\n") ;
+    @._visEmote ("tries to pull up a floorboard, but fails.") ;
+    } 
+} 
+
+func Winker_floorboard._reset
+{
+  Winker_floorboard.Status = NAILED ; 
+  Winker_floorboard.name = "a loose floorboard" ;
+  Winker_floorboard.dName = "There is a loose floorboard here." ;
+} 
+
+
+func Winker_floorboard._break
+{
+  Winker_floorboard.Status = BROKEN ;
+  Winker_floorboard.name = "a broken floorboard" ; 
+  Winker_floorboard.dName = "There is a broken floorboard here." ;
+} 
+
+func Winker_fishingrod._takebaitoff
+{
+  Winker_fishingrod.name = "a fishing rod" ;
+  #actor.load = #actor.load - Winker_fishingrod.weight + RODWEIGHT ;
+  Winker_fishingrod.weight = RODWEIGHT ;
+  $bait = Winker_fishingrod.baitison ;
+  @._offerObject($bait) ;
+  Winker_fishingrod.baitison = NULL ;
+} chmod (&Winker_fishingrod._takebaitoff, "W:rs") ;
+
+func Winker_fishingrod.bait
+{
+
+  if($# == 1) {
+    $arg = $1 ;
+  } else {
+    splitParse("with", "*** bait (rod with) <what> (or 'bait <what>')?") ;
+    $arg = $second ;
+  }
+/*
+  $nm = @._ambName(#actor.contents, $arg) ;
+  if ($nm == 0)
+    $nm = @._ambName(#actor.location.contents, $arg) ;
+
+  if ($nm != 1) 
+    {
+    echo(@.notSureWhat, "\n") ;
+    return ;
+    }
+*/
+  $bait = @._singleName(#actor.contents, $arg, "You aren't holding that.") ;
+  if ($bait == NULL)
+    return ;
+
+  if (Winker_fishingrod.baitison)
+    {
+    echo ("The rod is already baited.\n") ;
+    return ;
+    }
+
+  if ($bait.edible)
+    {
+    echo ("You put ", $bait.name, " on the hook of the fishing rod.\n") ;
+    Winker_fishingrod.baitison = $bait ;
+    Winker_fishingrod.name = "a baited fishing rod" ;
+    @.__move($bait, specialStore) ;
+    Winker_fishingrod.weight = Winker_fishingrod.weight + $bait.weight ;
+    }
+  else
+    {
+    echo ("You can't bait the rod with that.\n") ;
+    }
+} chmod (&Winker_fishingrod.bait, "W:rs") ;
+
+func Winker_fishingrod.cast
+{
+  if (#actor.location == Winker_Beach_SandBar)
+    {
+    echo ("With a flick of your wrist, the line goes spinning out and\n",
+          "lands in the water with a gentle splash.\n") ;  
+    @._visEmote ("casts a fishing line out into the water.") ;       
+    if (Winker_fishingrod.baitison && Winker_fish.location == Winker_fish.home)
+      {
+      echo ("You feel a tugging on the line, and reel it in to find a silver\n",
+            "fish wriggling on the end of it!\n") ;
+      @._visEmote ("reels in a line with a silver fish wriggling on it!") ;
+      @._move (Winker_fish, #actor) ;
+      Winker_fishingrod._takebaitoff() ;
+      }
+    else
+      {
+      echo ("After waiting for a while with no luck, you reel in the\n", 
+            "empty line.\n") ;
+      @._visEmote ("reels in an empty line.") ;
+      }
+    }
+  else
+    {
+    echo ("There is nowhere here to cast the line.\n") ;
+    }
+}
+
+func Winker_fish._dropFn
+{
+  if (#actor.location == Winker_Beach_SandBar)
+    {
+    echo ("You drop the fish, which flaps around on the sand for a\n",
+          "while, before finding the sea and swimming off.\n") ;
+    @._visEmote ("drops a fish, which wriggles its way into the sea and swims away.") ;
+    @.__move(Winker_fish, Winker_fish.home) ;
+    #actor.load = #actor.load - Winker_fish.weight ;
+    return 1 ;
+    }
+  else
+    {
+    return 0 ;
+    }
+}

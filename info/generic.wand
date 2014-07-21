@@ -1,0 +1,98 @@
+<I>>
+Someone (Irn-Bru) says: "generic magic wand"
+Fetch generic magic wand
+*** Object was being carried by Irn-Bru.
+Fetched a generic magic wand from Irn-Bru.
+<I>>l wand
+a generic magic wand:
+  This is a standard white magic wand with black tips. You notice some
+  tiny writing scribbled on the side.
+<I>>
+Someone (Irn-Bru) says: "use it"
+use wand
+readYou make a generic magic wand ready for use.
+<I>> wand
+
+  After USE, you may:
+    consider <player or mobile>, info <object>,
+    pZap <player> oZap <object>,
+    roomFx <text> or worldFx <text>
+
+<I>>
+Someone (Irn-Bru) says: "pZap players"
+giggle
+Someone (Irn-Bru) says: "oZap player"
+
+Borogove giggles like a little schoolgirl.
+<I>><!> a camel has been killed by Xenomorph with a dinosaurs claw!
+
+Someone (Irn-Bru) says: "oZap object"
+
+*** Douglas has disconnected.
+who
+Someone (Irn-Bru) says: "sonia [0123]"
+
+
+ Player               Idle     On for  Level
+--------------------------------------------
+ Fricka ............. 0:00:41  0:00:46 Adventurer
+*Thisbe ............. 0:00:01  0:02:26 Mature Witch
+ Michael Valiant .... 0:00:06  0:05:03 Lemming
+ Xenomorph .......... 0:00:01  0:09:22 Parlour magician (K)
+ Demetrius .......... 0:00:01  0:11:58 Lemming
+ Monty .............. 0:00:56  0:12:45 Lemming
+ Spanner the Sad .... 0:00:03  0:22:41 Parlour magician
+ Incognita .......... 0:00:13  0:32:16 Dabbler in magic
+^Irn-Bru ............ 0:00:02  0:37:03 <@> Creator
+ Bivator ............ 0:00:00  1:13:04 Adventurer
+ Fresnel ............ 0:00:00  1:23:33 Lemming (K)
+^Borogove ........... 0:00:00  2:25:59 Arch Wizard
+There are 11 other players visible to you.
+
+<I>>"
+Someone (Irn-Bru) says: "ssay"
+^R
+
+Someone (Irn-Bru) says: "sem"
+
+Someone (Irn-Bru) says: "shere"
+
+Someone (Irn-Bru) says: "sget"
+
+*** Douglas has connected.
+
+Someone (Irn-Bru) says: "shome"
+    
+Someone (Irn-Bru) says: "sgo <dir>"
+"sonia 0123?  
+You say: "sonia 0123?"
+<I>>sonia 1
+Someone (Irn-Bru) nods.
+Sonia activity level is 1: Always follow Borogove.
+<I>>
+Someone (Irn-Bru) says: "sonia 0"
+"oh - on-line help. Ok
+
+Someone (Irn-Bru) says: "sonia 1"
+
+Sonia enters, swinging her hips in a most sexy and suggestive manner!
+
+Someone (Irn-Bru) says: "etc."
+You say: "oh - on-line help. Ok"
+<I>>sonia 2
+Sonia activity level is 2: Always follow Borogove, a MAN.
+<I>>sonia 3
+Sonia activity level is 3: Wander at random.
+<I>>sonia 0
+Sonia activity level is 0: Deactivated.
+<I>>
+Someone (Irn-Bru) says: "sonia 0 - dactivate"
+nod
+Borogove nods.
+<I>>
+Someone (Irn-Bru) says: "1 - follow someone"
+
+Someone (Irn-Bru) says: "2 - follow a MAN"
+
+Someone (Irn-Bru) says: "3 - wander at random"
+

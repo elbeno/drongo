@@ -1,0 +1,2 @@
+$MUDUTILDIR/sub pet | $MUDUTILDIR/extract pet.h
+$MUDUTILDIR/sub petFns

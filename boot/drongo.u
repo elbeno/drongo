@@ -1,0 +1,252 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @._hmmss			/* X	Return time as H:MM:SS		*/
+{
+  $t=$1;
+  $h=$t / 3600;
+  $t=$t-($h*3600);
+  $m=$t / 60;
+  $t=$t-($m*60);
+  $s=$t;
+
+  $tim=str($h);
+
+  if ($m<10)
+    $tim=str($tim, ":0", $m);
+  else
+    $tim=str($tim, ":", $m);
+
+  if ($s<10)
+    $tim=str($tim, ":0", $s);
+  else
+    $tim=str($tim, ":", $s);
+
+  return $tim;
+}
+
+func @._calcTotArmour		/* XW	Calculate a player's armour	*/
+{
+  $tarm=0;
+  foreach $widg in ($1.contents) {
+    if ($widg.armour)
+      $tarm=$tarm+$widg.armour;
+  }
+  
+  $1.totalArmour=$tarm;
+} chmod(&@._calcTotArmour, "W:rs");
+
+func @._compLocs		/* X	Comparison for groupsorting pw	*/
+{
+  return ($1.location==$2.location);
+}
+
+func @._sub			/* X	Sorting routine			*/
+/* Find all items (index >$1 which are == ($1), and swap them in under $1) */
+{
+  $itnum=1;
+  $key=listelem($2, $1);
+  $result=$2;
+  $putin=$1+1;
+
+  foreach $it in ($2)
+  {
+    if ($itnum>$1) {
+      if ($3($it,$key)) {
+        $old=listelem($result, $putin);
+        $result=listsetelem($result, $putin, $it);
+        $result=listsetelem($result, $itnum, $old);
+        $putin=$putin+1;
+      }
+      
+    }
+    
+    $itnum=$itnum+1;
+  }
+  
+  return $result;
+}
+
+func @._groupSort		/* X	Flexible list sorting routine	*/
+/* groupSort(list, comparisonFunc)
+   returns list with 'equal' elements grouped tgether */
+{
+  $iter=1;
+  $result=$1;
+  
+  foreach $it in ($1)
+  {
+    $result=@._sub($iter, $result, $2);
+    $iter=$iter+1;
+  }
+  
+  return $result;
+}
+
+func @._resetInvent		/* XW	Reset player's items		*/
+{
+  foreach $item in ($1.contents) {
+    @._resetObject($item);
+  }
+  
+} chmod(&@._resetInvent, "W:rs");
+
+
+/* Argh these functions assume there must be n objects in order
+   to return the number for level n. Horrible! Change it! */
+
+func @._minScore
+{
+  $lev=atoobj($1);
+  if (!$lev)
+    return(@._minscore);
+  return($lev._minscore);
+} chmod(&@._minScore, "W:rs");
+
+func @._maxMana
+{
+  $lev=atoobj($1);
+  if (!$lev)
+    return(@._maxmana);
+  return($lev._maxmana);
+} chmod(&@._maxMana, "W:rs");
+
+func @._manaRestore
+{
+  $lev=atoobj($1);
+  if (!$lev)
+    return(@._manarestore);
+  return($lev._manarestore);
+} chmod(&@._manaRestore, "W:rs");
+
+func @._maxHp
+{
+  $lev=atoobj($1);
+  if (!$lev)
+    return(@._maxhp);
+  return($lev._maxhp);
+} chmod(&@._maxHp, "W:rs");
+
+func @._hpRestore
+{
+  $lev=atoobj($1);
+  if (!$lev)
+    return(@._hprestore);
+  return($lev._hprestore);
+} chmod(&@._hpRestore, "W:rs");
+
+func @._maxLoad
+{
+  $lev=atoobj($1);
+  if (!$lev)
+    return(@._maxload);
+  return($lev._maxload);
+} chmod(&@._maxLoad, "W:rs");
+
+func @._resetObject		/* XW	Replace an object		*/
+{
+  if ($1.mobile) {
+    /* Restore mobiles hps */
+    $1.hp=$1.maxhp;
+    @._reko($1.home, "
+            Suddenly ", $1.name, " appears out of nowhere!\n");
+    @.__move($1, $1.home);
+    return;
+  }
+
+  @._reko ($1.location,
+    "*** The Dungeon Master appears, picks something up, then vanishes!\n");
+  if ($1.special)
+  {
+    $restime=time();
+    $moveto=specialStore;
+  }
+  else
+  {
+    $restime=NULL;
+    $moveto=$1.home;
+  }  
+
+  @._reko ($moveto,
+    "*** The Dungeon Master appears, drops something then vanishes!\n");
+  @._move($1, $moveto);
+  $1.restoreTime=$restime;
+} chmod(&@._resetObject, "W:rs");
+
+func @._offerObject		/* XW	Zap an object			*/
+{
+  $what=$1;
+
+  if ($what.sleep==-1)
+    $what.restoreTime=time()+3*$what.value;
+  else
+    $what.restoreTime=time()+$what.sleep;
+
+  if ($1.special)
+    @._move($what, specialStore);
+  else
+    @._move($what, generalStore);
+
+} chmod(&@._offerObject, "W:rs");
+
+func @._use			/* XW	Make player use object		*/
+{
+  #actor.inUse = $1 ;
+  #actor._use = $1 ;
+}
+
+func @._useMana
+{
+  if ($1>#actor.mana) {
+    echo("** You don't have enough mana to do this!\n");
+    #actor.mana=#actor.mana-($1/2);
+    if (#actor.mana<0)
+      #actor.mana=0;
+    return 1;
+  }
+
+  #actor.mana=#actor.mana-$1;
+  return 0;
+} chmod(&@._useMana, "W:rs");
+
+
+/* get and take money - both are protected so that wizards cannot be demoted
+   or promoted by just pobble loss/gain */
+
+func @._takeMoney
+{
+  #actor.money=#actor.money-atoi($1) ;
+  if (#actor.money < 0)
+    #actor.money = 0;
+  if (#actor.money < @._minScore(#actor.level))
+  {
+    if (!WIZ(#actor))
+    {
+      #actor.level = #actor.level - 1 ;
+      echo("You have been demoted to ", @._levelName(#actor.level, #actor.sex),"!\n");
+    }
+    else
+      #actor.money = @._minScore(#actor.level);
+  }
+} chmod (&@._takeMoney, "W:rs") ;
+
+func @._giveMoney
+{
+  #actor.money=#actor.money+atoi($1) ;
+  if (#actor.money > @._minScore(29))
+  {
+    #actor.money = @.minScore(29);
+    return ;
+  }
+  if (#actor.money > @._minScore(#actor.level + 1))
+  {
+    if (!WIZ(#actor))
+    {
+      #actor.level = #actor.level + 1 ;
+      echo("You have been promoted to ", @._levelName(#actor.level, #actor.sex),"!\n");
+    }
+    else
+      #actor.money = @.minScore(#actor.level + 1);
+  }
+} chmod (&@._giveMoney, "W:rs") ;

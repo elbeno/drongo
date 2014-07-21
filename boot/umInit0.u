@@ -1,0 +1,117 @@
+/* umInit0 */
+/***************************************************************************/
+/***        ---------INITIALIZE SERVER INTERNAL VARIABLES----------      ***/
+/***************************************************************************/
+
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+@.uptime = time() ;
+@.Huh = "Sorry, I don't understand.\n" ;
+@.voiceInHead = "A voice in your head whispers:\n  \"" ;
+@.eVoice = "\"\n" ;
+@.notSureWho = "I'm not sure who you mean. Please be more specific." ;
+@.notSureWhat= "I'm not sure what you mean. Please be more specific." ;
+@.findNothing = "I find nothing with that name." ;
+@.noOneHere = "There is no-one with that name here." ;
+@.noOneInLand="There is no-one in the land with that name." ;
+@.onlyDoToPeople = "You can only perform this spell on people." ;
+@.noGo = "You can't go that way!\n" ;
+
+@.DMPoke = "
+*** The Dungeon Master appears, pokes you in your ribs to see if you are still
+    alive then vanishes!\n" ;
+
+
+Util.sal = 0 ;
+Util.salmsg = "Access level is 0: All access." ;
+Util.util = 1 ;
+Util.name = "The Land of Drongo" ;
+
+/* objects defined on Util:
+._saveCard ._saveLottery ._saveMemberList ._saveSBL ._save_bboards
+.cet0 .cet1 .cet2 .cet3 .cet4 .cet5 .cet6 .cet7
+.connects connects since reload
+.epoch
+.li00 .li01 .li02 .li03 .li04 .li05 .li06 .li07 .li08 .li09 .li10 .li11 .li12 .l
+i13 .li14 .li15 .li16 .li17 .li18 .li19 .lo01 .lo02 .lo03 .lo04 .lo05 .lo06 .lo0
+9 .lo10 .lo11 .lo12 .lo13 .lo14 .lo15 .lo16 .lo17 .lo18 .lo19 .lp00 .lp01 .lp02
+.lp03 .lp04 .lp05 .lp06 .lp07 .lp08 .lp09 .lp10 .lp11 .lp12 .lp13 .lp14 .lp15 .l
+p16 .lp17 .lp18 .lp19      LLU list - login logout player
+.maxConnects .maxMortSet .maxMorts .maxWiz .maxWizSet
+.mobileList .pkList .playerList .roomList .siteBanList .widgetList .uWidgetList
+.uRoomList      Some lists
+.name           "The Land of Drongo"
+.pEnd .pMore    Footers for pager messages
+.sal .salName0 .salName1 .salName2 .salName3 .salName4  access lvl and messages
+.swamp_forestMsg1 .swamp_swampMsg1   "The forest/swamp is too ... that way."
+.tip            #8202 -> "a small stone"
+.wump_arrowDesc "Fine example of Drogon craftmanship..."
+*/
+
+
+/* Hit point, load info. */
+{
+ #0._maxhp = 0; #0._maxload = 50; #0._minscore = 0;
+ #0._maxmana = 1; #0._manarestore = 2; #0._hprestore = 0;
+ #1._maxhp = 0; #1._maxload = 100; #1._minscore = 100;
+ #1._maxmana = 5; #1._manarestore = 2; #1._hprestore = 0;
+ #2._maxhp = 0; #2._maxload = 150; #2._minscore = 250;
+ #2._maxmana = 5; #2._manarestore = 2; #2._hprestore = 0;
+ #3._maxhp = 0; #3._maxload = 150; #3._minscore = 500;
+ #3._maxmana = 5; #3._manarestore = 2; #3._hprestore = 0;
+ #4._maxhp = 150; #4._maxload = 150; #4._minscore = 1000;
+ #4._maxmana = 5; #4._manarestore = 2; #4._hprestore = 8;
+ #5._maxhp = 200; #5._maxload = 200; #5._minscore = 5000;
+ #5._maxmana = 5; #5._manarestore = 2; #5._hprestore = 10;
+ #6._maxhp = 250; #6._maxload = 250; #6._minscore = 10000;
+ #6._maxmana = 5; #6._manarestore = 2; #6._hprestore = 13;
+ #7._maxhp = 300; #7._maxload = 300; #7._minscore = 50000;
+ #7._maxmana = 10; #7._manarestore = 3; #7._hprestore = 15;
+ #8._maxhp = 350; #8._maxload = 350; #8._minscore = 100000;
+ #8._maxmana = 10; #8._manarestore = 3; #8._hprestore = 18;
+ #9._maxhp = 400; #9._maxload = 400; #9._minscore = 150000;
+ #9._maxmana = 15; #9._manarestore = 3; #9._hprestore = 20;
+ #10._maxhp = 450; #10._maxload = 450; #10._minscore = 200000;
+ #10._maxmana = 15; #10._manarestore = 3; #10._hprestore = 23;
+ #11._maxhp = 500; #11._maxload = 500; #11._minscore = 250000;
+ #11._maxmana = 20; #11._manarestore = 3; #11._hprestore = 25;
+ #12._maxhp = 550; #12._maxload = 550; #12._minscore = 300000;
+ #12._maxmana = 25; #12._manarestore = 3; #12._hprestore = 28;
+ #13._maxhp = 600; #13._maxload = 600; #13._minscore = 350000;
+ #13._maxmana = 25; #13._manarestore = 3; #13._hprestore = 30;
+ #14._maxhp = 650; #14._maxload = 650; #14._minscore = 400000;
+ #14._maxmana = 25; #14._manarestore = 3; #14._hprestore = 33;
+ #15._maxhp = 700; #15._maxload = 700; #15._minscore = 450000;
+ #15._maxmana = 25; #15._manarestore = 3; #15._hprestore = 35;
+ #16._maxhp = 750; #16._maxload = 700; #16._minscore = 500000;
+ #16._maxmana = 25; #16._manarestore = 3; #16._hprestore = 38;
+ #17._maxhp = 800; #17._maxload = 750; #17._minscore = 600000;
+ #17._maxmana = 30; #17._manarestore = 4; #17._hprestore = 40;
+ #18._maxhp = 850; #18._maxload = 800; #18._minscore = 700000;
+ #18._maxmana = 40; #18._manarestore = 4; #18._hprestore = 43;
+ #19._maxhp = 900; #19._maxload = 800; #19._minscore = 800000;
+ #19._maxmana = 50; #19._manarestore = 4; #19._hprestore = 45;
+ #20._maxhp = 1000; #20._maxload = 1000; #20._minscore = 1000000;
+ #20._maxmana = 200; #20._manarestore = 5; #20._hprestore = 50;
+ #21._maxhp = 2000; #21._maxload = 2000; #21._minscore = 5000000;
+ #21._maxmana = 500; #21._manarestore = 15; #21._hprestore = 100;
+ #22._maxhp = 2000; #22._maxload = 2000; #22._minscore = 5000000;
+ #22._maxmana = 1000; #22._manarestore = 25; #22._hprestore = 100;
+ #23._maxhp = 2000; #23._maxload = 2000; #23._minscore = 5000000;
+ #23._maxmana = 1000; #23._manarestore = 25; #23._hprestore = 100;
+ #24._maxhp = 2000; #24._maxload = 2000; #24._minscore = 5000000;
+ #24._maxmana = 1000; #24._manarestore = 25; #24._hprestore = 100;
+ #25._maxhp = 10000; #25._maxload = 10000; #25._minscore = 10000000;
+ #25._maxmana = 5000; #25._manarestore = 100; #25._hprestore = 500;
+ #26._maxhp = 10000; #26._maxload = 10000; #26._minscore = 10000000;
+ #26._maxmana = 5000; #26._manarestore = 100; #26._hprestore = 500;
+ #27._maxhp = 10000; #27._maxload = 10000; #27._minscore = 10000000;
+ #27._maxmana = 5000; #27._manarestore = 100; #27._hprestore = 500;
+ #28._maxhp = 10000; #28._maxload = 10000; #28._minscore = 10000000;
+ #28._maxmana = 5000; #28._manarestore = 100; #28._hprestore = 500;
+ #29._maxhp = 100000; #29._maxload = 100000; #29._minscore = 100000000;
+ #29._maxmana = 50000; #29._manarestore = 10000; #29._hprestore = 5000;
+}
+

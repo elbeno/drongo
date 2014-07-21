@@ -1,0 +1,35 @@
+#!/bin/sh
+SERVERDIR=/atreus/mjr/hacks/mud/main/fridge
+SERVERPID=$SERVERDIR/server_pid
+SERVERTOUCH=$SERVERDIR/server_lives
+
+if [ ! -f $SERVERPID ]; then
+	echo "no server process id in $SERVERPID"
+	exit 2
+fi
+
+# server pid is in the file, created at boot-time
+SPID=`cat $SERVERPID`
+
+# create the touchfile
+touch $SERVERTOUCH
+if [ $? != 0 ]; then
+	echo "cannot create touch file $SERVERTOUCH"
+	exit 2
+fi
+
+# signal the server to remove the touch file
+echo "sending a kill -CONT to pid $SPID"
+kill -CONT $SPID
+if [ $? != 0 ]; then
+	echo "kill failed. server must be dead."
+	exit 1
+fi
+
+if [ -f $SERVERTOUCH ]; then
+	echo "touch file is still present. server must be dead"
+	exit 1
+fi
+
+echo "server seems to be alive and kicking"
+exit 0

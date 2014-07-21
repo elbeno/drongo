@@ -1,0 +1,19 @@
+/* create the first room, and someone in it. */
+{
+$limbo = objectnew();
+$limbo.nam = "The Lab";
+
+$wiz = objectnew();
+$wiz._loc = $limbo;
+$wiz.nam = "Jerry Cornelius";
+chown($wiz,$wiz);
+
+
+$limbo._ply = listadd($limbo._ply,$wiz);
+echo("First room is ",$limbo,"\n");
+}
+	#1.true = 1;
+
+@._newplayer("bob");
+@._newplayer("guest");
+@._newplayer("guest2");

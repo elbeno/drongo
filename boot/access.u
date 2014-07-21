@@ -1,0 +1,44 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @._cannotChange
+{
+  if (!($obj=atoobj($1)))
+    return 1;
+
+  if (#actor.level>=29)
+    return;
+
+  if ($obj.owner==#actor)
+    return;
+
+  return 1;
+}
+
+func @._cannotAccess
+{
+  if (!($obj=atoobj($1)))
+    return 1;
+
+  if (#actor.level>=25)
+    return;
+
+  if ($obj.owner==#actor)
+    return;
+
+  if ($obj.owner)
+    return 1;
+
+  if ($obj.player)
+    return 1;
+
+  if (($obj.from) && ($obj.sub) && ($obj.text))
+    return 1;
+
+  if (($obj.where) && ($obj.from) && ($obj.subtime) && ($obj.text))
+    return 1;
+
+  return;
+}
+

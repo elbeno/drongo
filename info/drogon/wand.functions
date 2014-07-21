@@ -1,0 +1,90 @@
+/* VARARGS1 */
+void
+iobput(iob,va_alist)
+Iob     *iob;
+va_dcl
+{
+        register char   *s;
+        va_list ap;
+
+        if(iob == (Iob *)0 || iob->state != IOSTATE_OK)
+                return;
+
+        if(lastiob != iob) {
+                lastiob = iob;
+                onewrt++;
+        }
+
+        va_start(ap);
+        while((s = va_arg(ap,char *)) != (char *)0) {
+                while(*s /** && *s != MATCH_CHAR **/ && iob != (Iob *)0) {
+
+/** Do a CR for every NL ... GH **/
+
+                        if (*s == '\n') {
+                                if(--iob->oBufcnt)
+                                        *iob->oBufp++ = '\r' ;
+                                else {
+                                        iobflush(iob);
+                                        continue ;
+                                }
+                        }
+                        if(--iob->oBufcnt)
+                                *iob->oBufp++ = *s++;
+                        else
+                                iobflush(iob);
+                }
+        }
+        va_end(ap);
+}
+
+
+@._dirName (n) ;
+
+n: 0 - north, 1 - ne, etc. 8 - unknown - I'll make 8 & 9 up/down if you like.
+
+You need the _preExitFns.
+
+>  Local echo any string
+>  Global echo (pre-defined effects only)
+>  Silent teleport/invis/vis
+>  Identify arch woz in a room (or atleast Ged)
+
+Leko/Geko is ok as long as it's logged. (which heathers & shadomweres
+are). I won't let you silently Leko & Geko, you must have an effect:
+Eg. Heather snaps her fingers, shadownere waves her staff...
+
+Silent teleport? No. It must be visible as normal. (If you are
+invisible, it will be silent to mortals, but not other wizards).
+
+Id an Arch. No. (whats the pint of there being an arch facility if you
+can just see them?
+
+Your broomstick will be intersting ... (do wizards use broomsticks?)
+
+The xtal ball will be ok. you'll probably have to supply the object
+number of the room though (like teleport). Searching through the rooms
+names list takes too long.
+  {
+    $tmp = #actor.location ;
+    #actor.location = $targetRoom ;
+    @.look () ;
+    #actor.location = $tmp ;
+  }
+
+Re-directing say * emote - it's possibe, but I'm NOT having "spy"
+cameras in my mud. If you want to listen to someone, you have to be in their
+room.
+
+  NO_SUMMON_IN, NO_SUMMON_OUT, NO_TP_IN, NO_TP_OUT
+
+Is what you want in your special room. you then need a wand function to
+get you into them, or something like the swirling barrier that heather
+has.
+
+_specialDropFn, _specialGetFn... Look in the monastery code for a
+specialGetFn in the chalice -- thats how it works.
+
+
+Sorry that it's been down today. We have problems at our end. Be up soon.
+

@@ -1,0 +1,21 @@
+#include <drogon.h>
+#include "rooms.h"
+#include "widgets.h"
+#include "mydefines.h"
+
+func Winker_Dunes_1._postExitFn
+{
+  foreach $tmp in (#actor.location.contents)
+  { 
+    if ($tmp.widget)
+    {
+      @._offerObject($tmp) ;
+      @._leko ("A large seagull swoops down, picks up ",$tmp.name," and carries it off!\n") ;
+    }
+  }
+  return 0 ;
+}
+
+Winker_Dunes_2._postExitFn = Winker_Dunes_3._postExitFn = Winker_Dunes_1._postExitFn ;
+Winker_Dunes_4._postExitFn = Winker_Dunes_5._postExitFn = Winker_Dunes_1._postExitFn ;
+

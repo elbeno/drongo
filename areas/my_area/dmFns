@@ -1,0 +1,52 @@
+#include <drogon.h>
+#include "widgets.h"
+#include "rooms.h"
+#include "mydefines.h"
+
+func @.dm_winker
+{  
+  $now = time() ;
+  
+  if ($now > Winker_sandcastle.restoreTime)
+  {
+    @.dm_ResetSandcastle() ;
+  } 
+  if ($now > Winker_floorboard.restoreTime)
+  {
+    @.dm_ResetFloorboard() ;
+  } 
+}
+
+func @.dm_ResetSandcastle
+{
+  archWizCommand ;
+  if (Winker_sandcastle.Status != BUILT)
+  {
+    Winker_sandcastle._buildcastle() ;
+    Winker_sandcastle.restoreTime = NULL ;
+    @._reko (Winker_Beach_SandyShore,
+             "The Dungeon Master appears, rebuilds a sand castle and vanishes!\n") ;
+  }
+  else
+  {
+    echo("The sandcastle is already built!\n") ;
+  }
+}
+
+
+func @.dm_ResetFloorboard
+{
+  archWizCommand ;
+  if (Winker_floorboard.Status != NAILED)
+  {
+    Winker_floorboard._reset() ;
+    Winker_floorboard.restoreTime = NULL ;
+    @._reko (Winker_DingyLanding,
+             "The Dungeon Master appears, nails down a new floorboard and vanishes!\n") ;
+  }
+  else
+  {
+    echo("The floorboard is not broken!\n") ;
+  }
+}
+

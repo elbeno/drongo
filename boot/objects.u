@@ -1,0 +1,500 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+func @.open
+{
+  minArgs(1, "Open what?") ;
+
+  bundleArgs;
+
+  $nm = @._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n") ;
+    return ;
+  }
+
+  $widget = @._ambMatch;
+  if ($widget._openFn == NULL) {
+    echo ("You can't open that.\n") ;
+    return ;
+  }
+  $widget._openFn () ;
+} chmod (&@.open, "W:rs") ;
+
+func @.close
+{
+  minArgs(1, "Close what?") ;
+
+  bundleArgs;
+
+  $nm = @._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n") ;
+    return ;
+  }
+
+  $widget = @._ambMatch;
+  if ($widget._closeFn == NULL) {
+    echo ("You can't close that.\n") ;
+    return ;
+  }
+  $widget._closeFn () ;
+} chmod (&@.open, "W:rs") ;
+
+func @.lock
+{
+  splitParse("with", "*** lock <what object> with <what key>?\n");
+
+  $nm=@._ambName(#actor.contents, $first);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $first);
+
+  if ($nm==0) {
+    echo ("There is no ", $first, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._lockFn == NULL) {
+    echo("You can't lock that.\n");
+    return;
+  }
+
+  $nm=@._ambName(#actor.contents, $second);
+
+  if ($nm!=1) {
+    echo(@.notSureWhat, "\n");
+    return;
+  }
+
+  $key=@._ambMatch;
+
+  $widget._lockFn($key);
+} chmod(&@.lock, "W:rs");
+
+func @.unlock
+{
+  splitParse("with", "*** unlock <what object> with <what key>?\n");
+
+  $nm=@._ambName(#actor.contents, $first);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $first);
+
+  if ($nm==0) {
+    echo ("There is no ", $first, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._unlockFn == NULL) {
+    echo("You can't lock that.\n");
+    return;
+  }
+
+  $nm=@._ambName(#actor.contents, $second);
+
+  if ($nm!=1) {
+    echo(@.notSureWhat, "\n");
+    return;
+  }
+
+  $key=@._ambMatch;
+
+  $widget._unlockFn($key);
+} chmod(&@.unlock, "W:rs");
+
+func @.push
+{
+  minArgs(1, "*** push what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._pushFn == NULL) {
+    echo("Pushing ", $widget.name, " has no effect.\n");
+    return;
+  }
+
+  $widget._pushFn();
+} chmod(&@.push, "W:rs");
+
+func @.pull
+{
+  minArgs(1, "*** pull what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._pullFn == NULL) {
+    echo("Pulling ", $widget.name, " has no effect.\n");
+    return;
+  }
+
+  $widget._pullFn();
+} chmod(&@.pull, "W:rs");
+
+func @.search
+{
+  minArgs(1, "*** search what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._searchFn == NULL) {
+    echo("Searching ", $widget.name, " yields nothing.\n");
+    return;
+  }
+
+  $widget._searchFn();
+} chmod(&@.search, "W:rs");
+
+func @.read
+{
+  minArgs(1, "*** read what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+  {
+    $inloc=1;
+    $nm=@._ambName(#actor.location.contents, $arg);
+  }
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1)
+  {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._readFn)
+    $widget._readFn();
+  else
+  {
+    if ($widget.text)
+      echo($widget.text, "\n");
+    else
+      echo("There is nothing to read.\n");
+
+    if ($inloc)
+      @._visEmote("reads ", $widget.name, ".");
+    else
+      @._visEmote("reads something ", @._heShe, " is holding.");
+
+    return;
+  }
+
+} chmod(&@.read, "W:rs");
+
+func @.turn
+{
+  minArgs(1, "*** turn what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._turnFn == NULL) {
+    echo("Turning ", $widget.name, " has no effect.\n");
+    return;
+  }
+
+  $widget._turnFn();
+} chmod(&@.turn, "W:rs");
+
+func @.move
+{
+  minArgs(1, "*** move what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._moveFn == NULL) {
+    echo("Moving ", $widget.name, " has no effect.\n");
+    return;
+  }
+
+  $widget._moveFn();
+} chmod(&@.move, "W:rs");
+
+func @.ride
+{
+  minArgs(1, "*** ride what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._rideFn == NULL) {
+    echo("You can't ride that!\n");
+    return;
+  }
+
+  $widget._rideFn();
+} chmod(&@.ride, "W:rs");
+
+func @.shake
+{
+  minArgs(1, "*** shake what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._shakeFn == NULL) {
+    echo("Shaking ", $widget.name, " has no effect.\n");
+    return;
+  }
+
+  $widget._shakeFn();
+} chmod(&@.shake, "W:rs");
+
+func @.eat
+{
+  minArgs(1, "*** eat what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget.edible) {
+    if ($widget._eatFn)
+      $widget._eatFn();
+    else {
+      echo("You eat ", $widget.name, ".\n");
+      @._visEmote("eats ", $widget.name, ".\n");
+      @._offerObject($widget);
+    }
+  } else echo("You can't eat ", $widget.name, "!\n");
+} chmod(&@.eat, "W:rs");
+
+func @.drink
+{
+  minArgs(1, "*** drink what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget.drinkable) {
+    if ($widget._drinkFn)
+      $widget._drinkFn();
+    else {
+      echo("You drink ", $widget.name, ".\n");
+      @._visEmote("drinks ", $widget.name, ".\n");
+      @._offerObject($widget);
+    }
+  } else echo("You can't drink ", $widget.name, "!\n");
+} chmod(&@.drink, "W:rs");
+
+func @.enter
+{
+  minArgs(1, "*** enter what?");
+
+  bundleArgs;
+
+  $nm=@._ambName(#actor.contents, $arg);
+
+  if ($nm==0)
+    $nm=@._ambName(#actor.location.contents, $arg);
+
+  if ($nm==0) {
+    echo ("There is no ", $arg, " here.\n") ;
+    return ;
+  }
+
+  if ($nm>1) {
+    echo (@.notSureWhat,"\n");
+    return;
+  }
+  
+  $widget=@._ambMatch;
+
+  if ($widget._enterFn == NULL) {
+    echo("You can't enter ", $widget.name, ".\n");
+    return;
+  }
+
+  $widget._enterFn();
+} chmod(&@.enter, "W:rs");
+

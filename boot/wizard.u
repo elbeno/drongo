@@ -1,0 +1,1101 @@
+#ifndef _DROGON_H_
+#include "drogon.h"
+#endif
+
+/* WIZARD COMMANDS */
+
+/* 
+ *****************************************************************************
+ * COMMANDS FOR VISIBILITY
+ *****************************************************************************
+ */
+
+func @.invis
+{
+  /* there aren't any effects here yet */
+
+  wizardCommand ;
+  $lvl = atoi($1);
+  $eff = atoi($2);
+  if ($# >= 1) {
+    if ($lvl == -1 || $# > 2) {
+      echo ("invis [<level> [<effect>] ]\n") ;
+      return ;
+    }
+  }  else $lvl = #actor.level ;
+
+  if ($lvl > #actor.level) {
+    echo ("You can't go that invisible!\n") ;
+    return ;
+  }
+
+  if ($# < 2)
+    $eff = 3 ;
+
+  foreach $plr in (#actor.location.contents)
+    if ($plr.player)
+      if ($plr != #actor)
+        if (@._youCanSeeMe($plr))
+          $couldsee=listadd($couldsee, $plr);
+
+  #actor.invis = $lvl ;
+
+  foreach $plr in (#actor.location.contents)
+    if ($plr.player)
+      if ($plr != #actor)
+        if (@._youCanSeeMe($plr))
+          $cansee=listadd($cansee, $plr);
+
+  foreach $plr in (#actor.location.contents)
+    if ($plr.player) {
+      $osee=listsearch($couldsee, $plr);
+      $nsee=listsearch($cansee, $plr);
+      if (!$osee && $nsee) {
+        @._tellNAME ($plr, #actor) ;
+        echoto ($plr," appears with a blinding flash and a cloud of blue smoke!\n") ;
+      }
+      
+      if ($osee && !$nsee) {
+        echoto ($plr, #actor.name, " disappears with a blinding flash and a cloud of blue smoke!\n") ;
+      }
+    }
+
+  echo ("Set invisibility to ",$lvl,".\n") ;
+  
+} chmod (&@.invis,"W:rs") ;
+
+func @.vis
+{
+  if ($# == 1) @.invis (0,$1);
+  else @.invis(0) ;
+} chmod(&@.vis, "W:rs");
+
+func @.seeme
+{
+  wizardCommand;
+  bundleArgs;
+
+  if ($#==0) {
+    if (#actor._seeme) {
+      echo("Players who can see you when invisible:\n");
+      foreach $p in (#actor._seeme) {
+	echo("  ", $p.name, "\n");
+      }
+    } else echo("Your seeme list is empty.\n");
+    return;
+  }
+      
+  $who = @._singleVis(@.onlinePlayers, $arg);
+
+  if (!$who) {
+    return;
+  }
+
+  if (listsearch(#actor._seeme, $who)) {
+    echo($who.name, " is already on your seeme list!\n");
+    return;
+  }
+
+  #actor._seeme=listadd(#actor._seeme, $who);
+
+  echo($who.name, " added to your seeme list.\n");
+} chmod (&@.seeme, "W:rs") ;
+
+func @.noseeme
+{
+  wizardCommand;
+
+  minArgs(1, "noseeme <person>|'-all'");
+
+  bundleArgs;
+
+  if ($arg=="-all") {
+    echo("Seeme list cleared.\n");
+    #actor._seeme=NULL;
+    return;
+  }
+
+  $who=match($arg, #actor._seeme, "name");
+
+  if (!$who) {
+    echo("That player isn't in your list.\n") ;
+    return ;
+  }
+
+  #actor._seeme=listdrop(#actor._seeme, $who) ;
+
+  echo($who.name, " dropped from your seeme list.\n") ;
+} chmod (&@.noseeme, "W:rs") ;
+
+func @.sil
+{
+  numArgs(1,"*** sil <level>") ;
+  @.invis($1) ;
+}  chmod (&@.sil, "W:rs") ;
+
+/* 
+ *****************************************************************************
+ * COMMANDS FOR MOVEMENT
+ *****************************************************************************
+ */
+
+func @.tp
+{
+  wizardCommand;
+  numArgs(1, "*** tp where?");
+
+  echo("You wave your hands and mutter \"Ippyarear, I'm out-a here\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Ippyarear, I'm out-a here\" ...");
+
+  if (@._useMana(10))
+    return;
+
+  $here = #actor.location;
+
+  $dest = atoobj ($1);
+
+  if (!$dest) { echo ("There is a monkey in the tree.\n"); return; }
+
+  if ($dest.room != 1 && #actor.level <22)
+  {
+      echo ("That is not a valid room number.\n") ;
+      return ;
+  }
+
+  if ($here.noTpOut >= #actor.level) {
+    echo("A localised magical force prevents the teleport.\n");
+    return;
+  }
+
+  if ($dest.noTpIn >= #actor.level) {
+    echo("A remote magical force prevents the teleport.\n");
+    return;
+  }
+
+  if (@._playerNotAdmitted(#actor,$dest)) {
+    echo("A remote magical force prevents the teleport.\n");
+    return;
+  }
+
+  @._visEmote ("disappears with a flash and a cloud of white smoke!\n");
+  @._moveply($dest) ;
+  @._visEmote ("appears with a flash and a cloud of white smoke!\n") ;
+} chmod (&@.tp, "W:rs");
+
+func @.join
+{
+  wizardCommand;
+
+  minArgs(1, "*** join whom?");
+
+  bundleArgs;
+
+  $num = @._ambVis(@.onlinePlayers, $arg);
+
+  if ($num==0)
+    $num = @._ambName(Util.mobiles, $arg);
+
+  if ($num==0) {
+    echo(@.voiceInHead, @.noOneInLand, @.eVoice);
+    return;
+  }
+  if ($num>1) {
+    echo(@.voiceInHead, @.notSureWho, @.eVoice);
+    return;
+  }
+
+  $who=@._ambMatch;
+
+  @.tp($who.location);
+} chmod (&@.join, "W:rs");
+
+func @.jf
+{
+  wizardCommand ;
+  minArgs(1, "*** jf (join and follow) whom?") ;
+
+  bundleArgs ;
+
+  $who = @._singleVis(@.onlinePlayers, $arg) ;
+  if (!$who)
+    return ;
+
+  @.join($arg) ;
+  @.follow($arg) ;
+}
+
+func @.enterTxt
+{
+  wizardCommand;
+  minArgs(1, "*** enterTxt <text>");
+  bundleArgs;
+
+  #actor._enteringEmote=$arg;
+
+  echo("Sample output:\n");
+  echo("Someone (", #actor.name, ") ", $arg, "\n");
+} chmod(&@.enterTxt, "W:rs");
+
+func @.exitTxt
+{
+  wizardCommand;
+  minArgs(1, "*** exitTxt <exit text>");
+  bundleArgs;
+
+  #actor._leavingEmote=$arg;
+
+  echo("Sample output:\n");
+  echo("Someone (", #actor.name, ") ", $arg, " <direction>.\n");
+} chmod(&@.exitTxt, "W:rs");
+
+/* need jf here */
+
+/* 
+ *****************************************************************************
+ * COMMANDS FOR FINDING THINGS
+ *****************************************************************************
+ */
+
+/* ow does not function properly with cloaks yet. */
+func @.ow
+{
+  wizardCommand;
+  minArgs(1, "*** ow what?");
+
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Rapading, where is thing\"...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Rapading, where is thing\"...");
+  @._echoToArchesHere("  (looking for '", $arg, "'") ;
+
+  if (@._useMana(20)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  if (!($what=atoobj($arg))) {
+    $num = @._ambName(Util.widgets, $arg);
+    
+    if ($num>1) {
+      @._echoToArchesHere(" - ambig.)\n");
+      echo(@.voiceInHead, @.findNothing, @.eVoice);
+      return;
+    }
+    
+    if (!($num)) {
+      @._echoToArchesHere(" - no match)\n");
+      echo(@.voiceInHead, @.notSureWhat, @.eVoice);
+      return;
+    }
+    
+    $what=@._ambMatch;
+  }
+
+  @._echoToArchesHere(" - ", $what, ", '", $what.name, "' [", $what.location, ", ", $what.location.name, "])\n");
+
+  $l = $what.location;
+
+  echo(@.voiceInHead, $l.name, ", ", $l, ".", @.eVoice);
+} chmod(&@.ow, "W:rs");
+
+func @.mw
+{
+  wizardCommand;
+  minArgs (1, "*** mw whom?");
+  bundleArgs;
+  @.mWhere ($arg);
+} chmod(&@.mw, "W:rs");
+
+func @.pw
+{
+  wizardCommand;
+  minArgs(1, "*** pw whom?");
+  bundleArgs;
+  @.pWhere ($arg);
+} chmod(&@.pw, "W:rs");
+
+/* 
+ *****************************************************************************
+ * COMMANDS FOR MAKING PEOPLE DIE
+ *****************************************************************************
+ */
+
+func @.zap
+{
+  wizardCommand ;
+  minArgs(1, "*** zap <player>");
+  bundleArgs;
+
+  echo ("You wave your hands and mutter \"Alikadap, do me a zap\" ...\n");
+  @._visEmote ("waves ", @._hisHer(#actor), " hands and mutters \"Alikadap,",
+               " do me a zap\" ...\n");
+
+  @._echoToArchesHere("  (zapping '", $arg, "'");
+
+  if (@._useMana(300)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis(@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if ($who.level > #actor.level) {
+    echo ("*** Your magic backfires!\n") ;
+    $who = #actor ;
+  }
+
+  echoto ($who, "\nA lightning bolt sears from the sky, and, seemingly finding",
+          " nothing else to\nground in, picks you! The pain as your body chars is",
+          " intense, but luckily\nwithin a few seconds, you are dead...\n");
+
+  becomePlayer($who);
+  @._visEmote ("is hit by a bolt of lightning which sears down from the sky.\n");
+
+  @._geko("<!> ", $who.name, " has been killed by a bolt of lightning!\n");
+  @._resurrect(0);
+  becomeMyself;
+} chmod (&@.zap,"W:rs");
+
+func @.scb
+{
+  wizardCommand ;
+  minArgs(1, "*** scb <player>");
+  bundleArgs;
+
+  echo ("You wave your hands and mutter \"Alirust, self combust\" ...\n");
+  @._visEmote ("waves ", @._hisHer(#actor), " hands and mutters \"Alirust,",
+               " self combust\" ...\n");
+
+  @._echoToArchesHere("  (scbing '", $arg, "'");
+
+  if (@._useMana(300)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis(@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if ($who.level > #actor.level) {
+    echo ("*** Your magic backfires!\n") ;
+    $who = #actor ;
+  }
+
+  echoto ($who, "\nYou suddenly feel very hot. Very VERY hot! You seem to be",
+          " burning up\nfrom the inside! Luckily the pain soon subsides, because",
+          " within a few\nseconds you are dead...\n");
+
+  becomePlayer($who);
+  @._visEmote ("suddenly looks very hot and bothered, before bursting",
+           " into flames\nbefore your eyes!\n"); 
+
+  @._geko("<!> ", $who.name, " has spontaneously combusted!\n");
+  @._resurrect(0);
+  becomeMyself;
+} chmod (&@.scb,"W:rs");
+
+func @.skeet
+{
+  wizardCommand ;
+  minArgs(1, "*** skeet <player>");
+  bundleArgs;
+
+  echo ("You wave your hands and mutter \"Alireet, wiz skeet\" ...\n");
+  @._visEmote ("waves ", @._hisHer(#actor), " hands and mutters \"Alireet,",
+               " wiz skeet\" ...\n");
+
+  @._echoToArchesHere("  (skeeting '", $arg, "'");
+
+  if (@._useMana(300)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis(@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if ($who.level > #actor.level) {
+    echo ("*** Your magic backfires!\n") ;
+    $who = #actor ;
+  }
+
+  @.shout("PULL!") ;
+  @._geko("You hear a LOUD twanging sound in the distance...\n") ;
+
+  becomePlayer($who);
+  @._visEmote ("is catapulted high into the air above you!\n") ;
+  becomeMyself;
+
+  echo("You cast a fireball shooting up into the air ...\n") ;
+  @._visEmote("casts a fireball shooting up into the air ...\n") ;
+
+  echoto ($who, "\nYou suddenly get catapulted high into the air! You don't really",
+          "\nhave time to enjoy the view, however, before you are hit by a huge",
+          "\nfireball which burns you to a crisp and scatters your ashes over the",
+          "\nLand of Drongo!\n");
+
+  becomePlayer($who);
+  @._geko("<!> ", $who.name, " has been fried by a fireball!\n");
+  @._resurrect(0);
+  becomeMyself;
+} chmod (&@.skeet,"W:rs");
+
+/* 
+ *****************************************************************************
+ * COMMANDS FOR GETTING INFORMATION
+ *****************************************************************************
+ */
+
+func @.wmi
+{
+  wizardCommand;
+  echo(@.voiceInHead, #actor.location.name, ", Id: ", #actor.location, ".", @.eVoice);
+} chmod(&@.wmi, "W:rs");
+
+func @.pc
+{
+  wizardCommand;
+
+  minArgs(1, "*** pc whom?");
+
+  bundleArgs;
+
+  $num = @._singleName(Util.players, $arg);
+  
+  if (!$num)
+    return;
+
+  $who=@._ambMatch;
+
+  @.EX($who);
+} chmod(&@.pc, "W:rs");
+
+func @.mc
+{
+  wizardCommand;
+
+  minArgs(1, "*** mc whom?");
+  bundleArgs;
+  $num = @._singleName(Util.mobiles, $arg);
+
+  if (!$num)
+    return;
+
+  $who=@._ambMatch;
+
+  @.EX($who);
+} chmod(&@.mc, "W:rs");
+
+/* oc is not a drogon command */
+
+func @.oc
+{
+  wizardCommand;
+
+  minArgs(1, "*** oc what?");
+  bundleArgs;
+  $num = @._singleName(Util.widgets, $arg);
+
+  if (!$num)
+    return;
+
+  $who=@._ambMatch;
+
+  @.EX($who);
+} chmod(&@.oc, "W:rs");
+
+func @.mmatch
+{
+  wizardCommand;
+  minArgs(1, "*** mmatch what?");
+  bundleArgs;
+  @._matchlist(Util.mobiles, $arg, "Mobiles");
+} chmod(&@.mmatch, "W:rs");
+
+func @.pmatch
+{
+  wizardCommand;
+  minArgs(1, "*** pmatch what?");
+  bundleArgs;
+  @._matchlist(Util.players, $arg, "Players");
+} chmod(&@.pmatch, "W:rs");
+
+func @.omatch
+{
+  wizardCommand;
+  minArgs(1, "*** omatch what?");
+  bundleArgs;
+  @._matchlist(Util.widgets, $arg, "Objects");
+} chmod (&@.omatch,"W:rs");
+
+func @._matchlist
+{
+  $mat = 0;
+
+  foreach $w in ($1)
+  {
+    if (match($2,$w,"name"))
+    {
+      if ($mat==0)
+        echo($3," matched:\n");
+
+      echo("  ", $w, ", ", $w.name, "\n");
+      $mat = $mat + 1;
+    }
+  }
+
+  if ($mat==0)
+    echo("No matches found.\n");
+  else {
+    if ($mat==1)
+      echo("1 match found.\n");
+    else
+      echo($mat, " matches found.\n");
+  }
+} chmod(&@._matchlist, "W:rs");
+
+/* 
+ *****************************************************************************
+ * MISCELLANEOUS COMMANDS
+ *****************************************************************************
+ */
+
+func @.wwind
+{
+  minArgs(1, "*** wwind whom?");
+
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Huradind, whirlwind\" ...\n");
+  @._visEmote("waves ", @._hisHer(#actor), " hands and mutters \"Huradind, whirlwind\" ...");
+
+  @._echoToArchesHere("  (wwinding '", $arg, "'");
+
+  if (@._useMana(250)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis (@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if (WIZ($who) && $who.level >= #actor.level) 
+  {
+    echo ("*** Your magic backfires!\n") ;
+    $who = #actor ;
+  }
+
+  if (($n = listcount(Util.rooms)) == NULL)
+    return ;
+
+  $randnum = random($n) + 1 ;
+  $randroom = listelem(Util.rooms,$randnum) ;
+
+  becomePlayer($who) ;
+  @._visEmote("is picked up and carried off by a whirlwind!\n");
+  echo("A whirlwind springs up from nowhere and advances towards you! You get\n",
+       "sucked up in it and carried off! You get tossed and turned and all\n",
+       "jumbled up! After what seems like an eternity, it subsides and you find\n",
+       "that you are now in ...\n");
+  @._moveply($randroom);
+  becomeMyself ;
+
+} chmod (&@.wwind, "W:rs") ;
+
+func @.LOOK
+{
+  wizardCommand;
+
+  $rom=#actor.location;
+  echo($rom.name, " [", $rom, "]\n");
+  echo("--- description:", $rom.description, "\n");
+  echo("--- scenery:\n");
+  foreach $wid in ($rom.scenery)
+    echo("  ", $wid.name, " [", $wid, "]\n");
+  echo("--- widgets:\n");
+  foreach $wid in ($rom.contents) {
+    if ($wid.widget)
+      echo("  ", $wid.name, " [", $wid, "]\n");
+  }
+
+} chmod(&@.LOOK, "W:rs");
+
+func @.monlog
+{
+  wizardCommand;
+  if ($1 == "on") #actor.monLog = 1 ;
+  else if ($1 == "off") #actor.monLog = NULL ;
+  if (#actor.monLog == 1) echo ("You are monitoring log-ins.\n") ;
+  else echo ("You are not monitoring log-ins.\n") ;
+} chmod (&@.monlog, "W:rs") ;
+
+func @.boot
+{
+  wizardCommand ;
+  minArgs(1,"*** boot <player>") ;
+  bundleArgs;
+  $who = @._singleVis(@.onlinePlayers, $arg) ;
+
+  echo ("You wave your hands and mutter \"Zapakaloot, give player the boot\" ...\n\n");
+  @._visEmote ("waves ", @._hisHer(#actor), " hands and mutters \"Zapakaloot, give player the boot\" ...\n");
+
+  @._echoToArchesHere("  (booting '", $arg, "'");
+
+  if (@._useMana(200)) {
+    @._echoToArchesHere(" - not enough mana)\n");
+    return;
+  }
+
+  $who = @._singleVis(@.onlinePlayers, $arg) ;
+  if (!$who) {
+    @._echoToArchesHere(" - no match)\n");
+    return ;
+  }
+
+  @._echoToArchesHere(" - ", $who.name, ")\n");
+
+  if ($who.level > #actor.level) {
+    echo ("*** Your magic backfires!\n") ;
+    $who = #actor ;
+  }
+
+  @._reko(#actor.location,
+          "A huge boot materialises in the air above you, wobbles a little before\n",
+          "firing a jet engine and screaming off into the distance!\n") ;
+  echoto ($who, 
+          "\nA huge jet-powered boot descends screaming from above, catches you, and\n",
+          "kicks you right out of the universe!\n") ;
+
+  becomePlayer($who);
+  @._leko("\nA huge jet-powered boot descends screaming from above, catches ");
+  @._lekoNAME();
+  @._leko("\nand kicks ", @._himHer($who), " right out of the ", 
+           "universe!\n") ;
+
+/*  $loc = $who.location ; */
+  @._boot ($who) ;
+/*  @._reko ($loc, 
+           "\nA huge jet-powered boot descends screaming from above, catches ",
+           $who.name, ",\nand kicks ", @._himHer($who), " right out of the ", 
+           "universe!\n") ; */
+} chmod (&@.boot,"W:rs");
+
+func @.fetch
+/* Fetch macros	*/
+
+#define echoFETCHalready(WTYPE) @._echoToArchesHere(\
+         " - already carrying ", $obj, " - WTYPE)\n"); \
+     echo("*** You are already carrying ", $obj.name, ".\n");
+#define echoFETCHfailure(WTYPE) @._echoToArchesHere(\
+		" - failure for ",$obj," - WTYPE)\n"); \
+		echo ("*** You cannot fetch ", $obh,".\n");
+#define echoFETCHmoving(WTYPE) @._echoToArchesHere(\
+		" - fetching ", $obj," - WTYPE)\n"); \
+		echo ("*** Fetching ", $obj.name, " from ",\
+		$obj.location.name," (", $obj.location,")\n");
+{
+  wizardCommand;
+  if ($# == 0)
+  {
+    echo ("*** fetch <object number> / <widget>");
+    if (ARCH(#actor))
+      echo (" / <player> / <mobile>");
+    echo ("\n");
+    return;
+  }
+  bundleArgs;
+
+  echo("You wave your hands and mutter \"Marzabetch, do a fetch\" ...\n");
+  @._visEmote ("waves ", @._hisHer (#actor),
+     " hands and mutters \"Marzabetch, do a fetch\" ...");
+  @._echoToArchesHere("  ('", $arg, "'");
+
+  if (!($obj = @._matchAnything($arg))) /*** assignment ***/
+  {
+    @._echoToArchesHere(" - can't match)\n");
+    return;
+  }
+
+  if (@._cannotAccess($obj))
+  {
+    echo ("*** You cannot access that object.\n");
+    @._echoToArchesHere(" - can't access)\n");
+    return;
+  }
+
+  if ($obj.mobile || $obj.player)
+    if (!(ARCH(#actor)))
+    {
+      echo ("*** You can only fetch objects.\n") ;
+      @._echoToArchesHere(" - not object)\n") ;
+      return ;
+    }
+
+  if ($obj.location == #actor)
+  {
+    echo ("*** You are already carrying ",$obj.name,".\n") ;
+    @._echoToArchesHere(" - already carrying.\n") ;
+    return 1;
+  }
+
+  if ($obj.location.player && ($obj.location.level >= #actor.level))
+  {
+    if ($obj.mobile)
+    {
+      echoFETCHfailure(mobile);
+    }
+    else if ($obj.player)
+    {
+      echoFETCHfailure(player);
+    }
+    else
+    {
+        echoFETCHfailure(widget);
+    }
+    return;
+  }
+
+  if ($obj.mobile)
+  {
+    if (($obj.location.rxfetch >= #actor.level) || ($obj.xFetch >= #actor.level))
+    {
+       echoFETCHfailure(mobile);
+       return;
+    }
+
+    echoFETCHmoving(mobile);
+    $obj.hp = $obj.maxhp;
+    $obj.restoreTime = NULL;
+    @._reko($obj.location, $obj.name, " suddenly disappears!\n");
+    @._move($obj, #actor);
+
+    if ($obj.fighting) {
+      if ($obj.fighting.fighting == $obj)
+        $obj.fighting.fighting = NULL;
+      $obj.fighting = NULL;
+    }
+
+    return;
+  }
+
+  if ($obj.widget)
+  {
+    if ($obj.location == #actor)
+    {
+      echoFETCHalready(widget);
+      return;
+    }
+
+    if (($obj.location.rxfetch >= #actor.level) ||
+	 ($obj.xFetch >= #actor.level))
+    {
+      echoFETCHfailure(widget);
+      return;
+    }
+
+    echoFETCHmoving(widget);
+    @._reko($obj.location, $obj.name, " suddenly disappears!\n");
+    @._move($obj, #actor);
+    return;
+  }
+
+  if ($obj.player) {
+    if ($obj.level >= #actor.level) {
+      echoFETCHfailure(player)
+      return;
+    }
+
+    if ($obj.location == #actor) {
+      echoFETCHalready(player);
+      return;
+    }
+
+    if (($obj.location.rxfetch >= #actor.level)
+	|| ($obj.xFetch >= #actor.level))
+    {
+      echoFETCHfailure(player);
+      return;
+    }
+
+    echoFETCHmoving(player);
+
+    if(listsearch(@.onlinePlayers, $obj)) {
+      becomePlayer($obj);
+      @._visEmote("suddenly disappears!\n");
+      becomeMyself($obj);
+    }
+
+    @._move($obj, #actor);
+/*  echoto($obj, 
+	"You have just been fetched.  Feel afraid, feel very afraid...\n");
+*/
+    if ($obj.fighting) {
+      if ($obj.fighting.fighting == $obj)
+        $obj.fighting.fighting = NULL;
+      $obj.fighting = NULL;
+    }
+
+    return;
+  }
+  echo ("*** Sorry - I'm not letting you fetch ",$obj.name,".\n");
+  @._echoToArchesHere(" - invalid object: ",$obj.name,".\n");
+
+} chmod (&@.fetch, "W:rs");
+
+func @.sal
+{
+  wizardCommand ;
+
+  numArgs(1, "*** sal <1-4>");
+
+  $lvl = atoi($1) ;
+
+  if (($lvl == 4) && !CREATOR(#actor))
+  {
+    echo("You don't have the power to set the access level that high.\n") ;
+    return ;
+  }
+
+  if (($lvl == 3) && !ARCH(#actor))
+  {
+    echo("You don't have the power to set the access level that high.\n") ;
+    return ;
+  }
+
+  if ($lvl >= 0 && $lvl < 5)
+    Util.sal = $lvl ;
+  else
+  {
+    echo("*** sal <1-4>\n");
+    return ;
+  }
+
+  if ($lvl == 0)
+  {
+    echo("Access level set to 0 (All access).\n") ;
+    Util.salmsg = "Access level is 0: All access.";
+  }
+
+  if ($lvl == 1)
+  {
+    echo("Access level set to 1 (Registered players only).\n") ;
+    Util.salmsg = "Access level is 1: Registered players only.";
+  }
+
+  if ($lvl == 2)
+  {
+    echo("Access level set to 2 (Wizards/Witches/Wizitches only).\n") ;
+    Util.salmsg = "Access level is 2: Wizards/Witches/Wizitches only.";
+  }
+
+  if ($lvl == 3)
+  {
+    echo("Access level set to 3 (Arch Wizards/Witches/Wizitches only).\n") ;
+    Util.salmsg = "Access level is 3: Arch Wizards/Witches/Wizitches only.";
+  }
+
+  if ($lvl == 4)
+  {
+    echo("Access level set to 4 (Creators only).\n") ;  
+    Util.salmsg = "Access level is 4: Creators only.";
+  }
+
+} chmod (&@.sal, "W:rs") ;
+
+func @.snt
+{
+  wizardCommand ;
+  minArgs(1,"*** snt <\"who\"> <\"nametag\">") ;
+
+  $who = @._singleVis(@.onlinePlayers, $1) ;
+
+  if (!$who)
+    return ;
+
+  if (#actor.level <= $who.level)
+  {
+    $who = #actor ;
+    echo("*** Your magic backfires!\n") ;
+  }
+
+  if ($2)
+    $who.nameTag = str(" ", $2) ;
+  else
+    $who.nameTag = NULL ;
+  echo("Set ", $who.name, "'s nametag to \"", $2, "\".\n") ;
+
+} chmod (&@.snt, "W:rs") ;
+
+/*
+stat:
+
+Some Drogon universe statistics ...
+  Local time:              Sat May 27 20:22:53 1995
+  Server booted:           Sat May 27 09:04:46 1995
+  Universe last reloaded:  Tue May 24 10:14:44 1994
+
+  Number of mobiles:   61 (38 moving, 11 ticking, 12 static)
+  Number of rooms:    908 +  703 online == 1611
+  Number of objects:  490 +  325 online ==  815
+  Number of players:  977 (Level 0: 297, 7-Day access: 164, Free slots: 16)
+  Max.  connects this run:  10, since reload:  17.
+  Total connects this run: 108, since reload:3043.
+
+*/
+
+/*
+  Drogon wizard commands
+  ~~~~~~~~~~~~~~~~~~~~~~                 
+
+  Commands available to Young Wizards:
+    boot, (disguises), enterTxt, exitTxt, invis, jail, 
+    jf, join, llu, mc, mmatch, monlog, mw, noseeme, omatch,  
+    ow, pc, pmatch, pw, pw all, sal, seeme, sil, stat,  
+    teleport, udis, vis, wem, wmi, wsay, wshout, xflags
+
+  Commands available to Mature Wizards:
+    boot, (disguises), enterTxt, EXITS, exitTxt, fetch, invis,
+    jail, jf, join, llu, mc, mmatch, monlog, mw, noseeme,
+    omatch, ow, pc, pmatch, ptask, pw, pw all, sal, scb, 
+    seeme, sil, stat, teleport, udis, vis, wem, wmi, wsay,  
+    wshout, wwind, xflags, zap
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Type "more" for the next page -=-
+more
+
+  Commands available to Senior Wizards:
+    boot, (disguises), enterTxt, EXITS, exitTxt, fetch, invis, 
+    jail, jf, join, Leko, llu, mc, mhug, mmatch, monlog, 
+    mwind, mw, noseeme, omatch, ow, pc, pmatch, ptask, pw, 
+    pw all, sal, scb, seeme, sil, stat, teleport, udis,  
+    vis, wem, wmi, wsay, wshout, wwind, xflags, zap
+
+  Type "wHelp <command>" for more details.  Also type "wHelp magic"
+  for details of all wizard magical spells that you can use and
+  mana amounts. 
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Type "more" for the next page -=-
+more
+
+  Disguises available to all wizards:
+    chicken, ewok, mouse, newt, otter, piggy, puppy,
+    otter, tdevil, toad, pumpkin, rug, hippo
+
+  Young Wizards magic will only work locally.  Mature and Senior 
+  Wizards magic works locally, with some commands that can be done
+  remotely.
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- End of file -=-
+*/
+/*
+*** You have been turned into a X!
+You wave your hands and mutter "Alirig, make a pig" ...
+You wave your hands and mutter "Aalriken, make a chicken" ...
+You wave your hands and mutter "Aliroad, make a toad" ...
+You wave your hands and mutter "Alirok, make an ewok" ...
+You wave your hands and mutter "Alirouse, make a mouse" ...
+You wave your hands and mutter "Alisoot, make a newt" ...
+You wave your hands and mutter "Alirotter, make an otter" ...
+You wave your hands and mutter "Alaruppy, make a puppy" ...
+You wave your hands and mutter "Alirevel, make a devil" ...
+You wave your hands and mutter "Aliarumkin, make a pumpkin!" ...
+You wave your hands and mutter "Alidug, make a rug" ...
+You wave your hands and mutter "Aliwotamus, make a hippopotamus" ...
+
+You wave your hands and mutter "Zakadise, un-disguise" ...
+
+*** You feel all strange! something has happened to you! Best to have a
+    quick look to see whats happened!
+
+
+
+Winker, #354 [, large lumbering hippopotamus. ] male
+  is a large grey plodding hippopotamus with large heavy-set legs,
+  a huge mouth and teeth like wooden pegs.
+Winker heavily plods out <direction>
+Winker plods in heavily.
+Winker, #354 [, a gallant magic carpet. ] male
+  Is a brilliant purple silk rug with gold inlay designs and golden
+  tassles. Just big enough for two people.
+Winker darts out on a magic breeze, heading <direction>
+Winker darts in on a magic breeze.
+Winker, #354 [, a bloated orange pumpkin. ] male
+  is a large and bloated orange pumpkin, hollowed out with round eyes, a
+  triangular nose and a horribly grinning mouth! The whole fase is glowing
+  as if someone has placed a candle inside it's head!
+Winker rolls out <direction>
+Winker rolls in.
+Winker, #354 [, a teddydevil. ] male
+  is a small red-furred teddydevil, with the usual little horns,
+  pointy-tipped tail, and little hearted eyes.
+Winker swoons out <direction>
+Winker swoons in.
+Winker, #354 [, a cute litle labridog puppy! ] male
+  Is a seriously cute little golden labridog puppy, with big paws and
+  those gorgeous big dark eyes! A wet nose and a fast wagging tail
+  completes this cute bundle of fun!
+Winker gives a "yip" and bounds out <direction>
+Winker bounds in and licks everyone!
+Winker, #354 [, an otter. ] male
+  is a large, sleek otter, with velvety fur and dainty little paws.
+  Perfectly groomed whiskers and neat little rounded ears create an
+  effect that is both elegant and adorable.
+Winker pads out <direction>
+Winker pads in.
+Winker, #354 [, a small brown newt. ] male
+  is a small brown newt, crawling on the ground with a skin texture
+  that reminds you of scaley sandpaper. Two beady little green eyes
+  stare vacantly back at you.
+Winker flicks it's tongue, then crawls out <direction>
+Winker crawls in.
+Winker, #354 [, a cute little mouse. ] male
+  A furry little mouse with pink ears, tiny red beady eyes, and a long
+  thin tail. Just big enough to hold in your hand.
+Winker gives a squeak, then scurries <direction>
+Winker scurries in and squeaks.
+Winker, #354 [, a small cute and furry ewok. ] male
+  is a small cute and furry ewok! You just can help but feel all cutsey
+  wootsey to this person! The big eyes stare up at you and you feel all
+  helpless and swooney.
+Winker makes a strange noise then waddles out <direction>
+Winker waddles in.
+Winker, #354 [, a fat pink piggy wiggy! ] male
+  is a small fat pink pig complete with a little piggy nose, little
+  piggy eyes, piggy trotters and a real cute little curly piggy tail!
+Winker plods out <direction>
+Winker plods in.
+Winker, #354 [, a chicken. ] male
+  is a small, scruffy chicken, with a wide-eyed stare - looking piercingly
+  for anything worth running away from. Two wings are used frequently, more
+  to stop the bird from falling over than anything else, it seems.
+Winker gives a cluck, and struts <direction>
+Winker struts in.
+Winker, #354 [, a warty green toad. ] male
+  is a large lumpy toad, covered in warts, with beady little eyes, and a
+  skin-tone that reminds you of a muddy and slime covered puddle. you
+  wouldn't want to kiss me, would you?
+Winker gives a croak, then hops out <direction>
+Winker hops in and croaks.
+
+
+*/

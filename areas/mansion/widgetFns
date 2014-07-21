@@ -1,0 +1,354 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include         "drogon.h"
+#include          "rooms.h"
+#include        "widgets.h"
+#include "../zog/mobiles.h" /* For Zogs Key */
+
+
+#define ALE_MOVE_TIME                   Mins(5)
+#define MANSION_GATE_CLOSE_TIME		Mins(15)
+#define MANSION_GATE_RELOCK_TIME        Mins(45)
+
+
+/***************************************************************************/
+/* mansion_gates._describeFn                                               */
+/***************************************************************************/
+
+func mansion_gates._describeFn
+{
+  echo ("
+  Two large gates which are made out of something that looks like gold! (If
+  it's not gold, then it's a really good paint job!) They are secured to the
+  walls by strong hinges. The gates are currently ") ;
+
+  if (mansion_gates.closed)
+    if (mansion_gates.locked)
+      echo ("closed and locked") ;
+    else
+      echo ("closed") ;
+  else
+    echo ("open") ;
+  echo (".\n") ;
+}
+
+mansion_gates2._describeFn = &mansion_gates._describeFn ;
+
+
+/***************************************************************************/
+/* mansion_gates._openFn, _closeFn                                         */
+/***************************************************************************/
+
+/** Open and Close the mansion gates **/
+
+func mansion_gates._openFn
+{
+  if (mansion_gates.locked)
+  {
+    echo ("The gates are locked.\n") ;
+    @._emote ("fiddles with the gates.") ;
+    return ;
+  }
+
+  mansion_gates.closed    = 0 ;
+  mansion_gates.closeTime = time () + MANSION_GATE_CLOSE_TIME ;
+
+  echo ("The gates swing open.\n") ;
+  @._emote ("opens the gates.") ;
+
+  if (#actor.location == mansion_road_02)
+  {
+    foreach $thing in (mansion_road_03.contents)
+      if ($thing.player)
+        echoto ($thing, "Someone outside the mansion grounds opens the gates.\n") ;
+  }
+  else
+  {
+    foreach $thing in (mansion_road_02.contents)
+      if ($thing.player)
+        echoto ($thing, "Someone inside the mansion grounds opens the gates.\n") ;
+  }
+
+}
+
+func mansion_gates._closeFn
+{
+  if (mansion_gates.closed)
+  {
+    echo ("They are already closed.\n") ;
+    @._emote ("fiddles with the gates.") ;
+    return ;
+  }
+
+  mansion_gates.closed = 1 ;
+  echo ("The gates swing closed.\n") ;
+  @._emote ("closes the gates.") ;
+
+  if (#actor.location == mansion_road_02)
+  {
+    foreach $thing in (mansion_road_03.contents)
+      if ($thing.player)
+        echoto ($thing, "Someone outside the mansion grounds closes the gates.\n") ;
+  }
+  else
+  {
+    foreach $thing in (mansion_road_02.contents)
+      if ($thing.player)
+        echoto ($thing, "Someone inside the mansion grounds closes the gates.\n") ;
+  }
+
+}
+
+mansion_gates2._openFn  = &mansion_gates._openFn ;
+mansion_gates2._closeFn = &mansion_gates._closeFn ;
+
+
+/***************************************************************************/
+/* mansion_gates._lockFn, _unlockFn                                        */
+/***************************************************************************/
+
+func mansion_gates._lockFn
+{
+
+  if (mansion_gates.locked)
+  {
+    echo ("They are already locked.\n") ;
+    @._emote ("fiddles with the gates.") ;
+    return ;
+  }
+
+  if (!mansion_gates.closed)
+  {
+    echo ("The gate is still open.\n") ;
+    @._emote ("fiddles with the gates.") ;
+    return ;
+  }
+
+  if (#actor.location == mansion_road_03)
+  {
+    echo ("The lock seems to be damaged on this side.\n") ;
+    @._emote ("fiddles with the gates.") ;
+    return ;
+  }
+
+  if ($1.skeletonKey == NULL)
+    if ($1 != zogsKey)
+    {
+      echo ("It doesn't seem to fit the lock.\n") ;
+      @._emote ("fiddles with the gates.") ;
+      return ;
+    }
+
+  mansion_gates.locked = 1 ;
+  echo ("The gates are now locked.\n") ;
+  @._emote ("locks the gates.\n") ;
+
+  foreach $thing in (mansion_road_03.contents)
+    if ($thing.player)
+      echoto ($thing, "You hear the rattle of a key in the lock as someone outside the mansion
+grounds locks the gates.\n") ;
+
+}
+
+func mansion_gates._unlockFn
+{
+
+  if (!mansion_gates.locked)
+  {
+    echo ("They are already unlocked.\n") ;
+    @._emote ("fiddles with the gates.") ;
+    return ;
+  }
+
+  if (#actor.location == mansion_road_03)
+  {
+    echo ("The lock seems to be damaged on this side.\n") ;
+    @._emote ("fiddles with the gates.") ;
+    return ;
+  }
+
+  if ($1.skeletonKey == NULL)
+    if ($1 != zogsKey)
+  {
+    echo ("It doesn't seem fit the lock.\n") ;
+    @._emote ("fiddles with the gates.") ;
+    return ;
+  }
+
+  mansion_gates.locked   = 0 ;
+  mansion_gates.lockTime = time () + MANSION_GATE_RELOCK_TIME ;
+
+  echo ("The gates are now unlocked.\n") ;
+  @._emote ("unlocks the gates.") ;
+
+  foreach $thing in (mansion_road_03.contents)
+    if ($thing.player)
+      echoto ($thing, "You hear the rattle of a key in the lock as someone outside the mansion
+grounds unlocks the gates.\n") ;
+
+}
+
+mansion_gates2._lockFn   = &mansion_gates._lockFn ;
+mansion_gates2._unlockFn = &mansion_gates._unlockFn ;
+
+
+/***************************************************************************/
+/* Ride that unicorn!                                                      */
+/***************************************************************************/
+
+func mansion_unicorn._rideFn
+{
+
+  echo ("You get on the unicorn which starts to rock gently. Just as you get used to
+the rocking sensation, it starts to speed up! It gets faster and faster then
+it throws you off, over it's head!") ;
+
+  if (mansion_unicornHorn.location == specialStore)
+  {
+    @._move (mansion_unicornHorn, mansion_nursery) ; /** Vandal! **/
+    echo ("
+In a desperate attempt to save yourself from injury, you make a grab at the
+horn as you fly past. It breaks off and lands beside your bruised rump.") ;
+  }
+  else
+    echo ("
+Finding nothing to grab onto as you fly through the air, you land with
+a heavy thump beside the unicorn.") ;
+
+  echo ("\n") ;
+  @._emote ("rides the unicorn, gets thrown off and lands with a heavy THUD!\n") ;
+}
+
+
+/***************************************************************************/
+/* mansion_violin.play                                                     */
+/***************************************************************************/
+
+func mansion_violin.play  /* When you USE it */
+{
+  echo ("You pluck the strings for a bit, not making much of a tune. It would
+probably make a better sound if you had a bow to play it with.\n") ;
+  @._emote ("plucks some notes from the violin.") ;
+}
+
+
+/***************************************************************************/
+/* mansion_unicorn._describeFn                                             */
+/***************************************************************************/
+
+func mansion_unicorn._describeFn
+{
+  echo ("
+  This is a very solidly constructed unicorn on a pair of rockers. It is
+  fairly large for a childrens toy, you might even be able to ride it
+  yourself, if you were careful. You notice some writing on one of the
+  rockers.") ;
+  if (mansion_unicornHorn.location != specialStore)
+    echo (" It looks like some vandal has broken the horn off!") ;
+  echo ("\n") ;
+}
+
+
+/***************************************************************************/
+/* mansion_ladiesMirror._describeFn                                        */
+/***************************************************************************/
+
+func mansion_ladiesMirror._describeFn
+{
+  /**/ if (#actor.sex == MALE)
+    echo ("\n  There is a pervert staring back at you!\n") ;
+  else if (#actor.sex == FEMALE)
+    echo ("\n  You see am image of a most beautiful woman!\n") ;
+  else
+    echo ("\n  You see a fine-looking person staring back at you.\n") ;
+}
+
+
+/***************************************************************************/
+/* mansion_ale._moveFn                                                     */
+/***************************************************************************/
+
+func mansion_ale._moveFn
+{
+  if (mansion_ale.moved)
+  {
+    echo ("You move the barrel, concealing a passageway to the North.\n") ;
+    @._emote ("moves the barrel, concealing a passageway to the North.") ;
+    mansion_ale.moved = 0 ;
+    @._hideExit (mansion_cellar_01, "north") ;
+  }
+  else
+  {
+    echo ("You move the barrel to one side, revealing a passageway to the North!\n") ;
+    @._emote ("moves the barrel, revealing a passageway to the North.\n") ;
+    mansion_ale.moved = 1 ;
+    @._showExit (mansion_cellar_01, "north") ;
+    mansion_ale.moveTime = time () + ALE_MOVE_TIME ;
+  }
+}
+
+
+/***************************************************************************/
+/* mansion_quill.tickle:                                                   */
+/*	Tickle something with the quil                                     */
+/***************************************************************************/
+
+func mansion_quill.tickle
+{
+  minArgs (1, "*** tickle what or who?") ;
+  bundleArgs ;
+
+  $here = #actor.location ;
+
+  $howMany = @._ambName ($here.contents, $arg) ;
+  $what    = @._ambMatch ;
+
+  if ($howMany == 0)
+    { echo ("There is no ", $arg, " here.\n") ; return ; }
+
+  if ($howMany > 1)
+    { echo (@.notSureWhat, ".\n") ; return ; }
+
+  if ($what._tickleFn != NULL)
+    {  $what._tickleFn () ; return ; }
+
+  if ($what.player)
+  {
+    if (@._iCanSeeYou ($what))
+    {
+      echo ("You tickle ", $what.name, " with the quill!\n") ;
+      if (INVISIBLE (#actor))
+      {
+	echoto ($what, "Someone") ;
+	if (@.youCanSeeMe ($what))
+	  echoto ($what, " (", #actor.name, ")") ;
+      }
+      else
+        echoto ($what, #actor.name) ;
+
+      echoto ($what, " tickles you with a swans quill!\n") ;
+      echoto ($what, "You collapse in a fit of uncontrollable laughter!\n") ;
+
+      becomePlayer ($what) ;
+      @._visEmote ("collapses in a fit of uncontrollable laughter!") ;
+      becomeMyself ;
+    }
+    else
+      echo ("There is no ", $arg, " here.\n") ;
+
+    return ;
+  }
+  else
+    echo ("Nothing happens.\n") ;
+
+}

@@ -1,0 +1,30 @@
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include "drogon.h"
+#include  "owner.h"
+
+{
+  MOBILE
+  (
+    "a cute lil mouse", "zelda_mouse", FEMALE,
+     0, 0, 0,
+     ZELDA
+  )
+
+  MDESC  = "
+  Squeaky is a cute lil grey mouse, with pink ears and tail. She is small and
+  adorable, but if tampered with can be very viscious with vampire-like
+  fangs.";
+  MDNAME  = "There is a cute lil mouse here, looking for attention.";
+  MXATTACK= "How dare you try to attack a lil mousey. How cruel!";
+  $mobile.weight = 2000 ;
+}

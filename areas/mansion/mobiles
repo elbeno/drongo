@@ -1,0 +1,89 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include "drogon.h"
+#include  "rooms.h"
+
+
+/***************************************************************************/
+/* The suit of armour. This will patrol the hallways of the mansion        */
+/***************************************************************************/
+
+{
+  MOBILE
+  (
+    "a suit of armour", "mansion_armour", MALE,
+    400, 1200, Mins(50),
+    mansion_loHall_01
+  )
+  MATTACKPK ;
+  MATTACK = 50 ;
+  MFIXED  = "It's far too large and heavy to lift." ;
+  MDNAME  = "A suit of armour stands nearby." ;
+  MENTER  = "A suit of armour clanks in." ;
+  MEXIT   = "A suit of armour clanks out." ;
+  MDESC   = "
+  You see a 7 foot tall suit of shining armour." ;
+
+  MMOVEPROB = 33 ;
+  MOBILE_MAP
+  (
+    mansion_loHall_01, mansion_loHall_02, mansion_loHall_03,
+    mansion_upHall_03, mansion_upHall_02, mansion_upHall_01,
+    mansion_upHall_02, mansion_upHall_03,
+    mansion_loHall_03, mansion_loHall_02
+  ) ;
+
+  WIDGET
+  (
+    "a mace", "mansion_mace",
+    0,0, 80,80, 0,
+    $mobile
+  )
+  MWEAPON ;
+}
+
+
+/***************************************************************************/
+/* The peacock (bush)                                                      */
+/***************************************************************************/
+
+{
+  MOBILE
+  (
+    "a peacock bush", "mansion_peacockBush", FEMALE,
+    450, 1500, Mins (30),
+    mansion_topiary_01
+  )
+  MATTACK = 100 ;
+  MFIXED  = "Ouch! It has too many thorns to carry safely!" ;
+  MDNAME  = "A large peacock-shaped bush stands out from the others." ;
+  MENTER  = "You feel a gentle breeze and hear the leaves rustle." ;
+  MEXIT   = &MENTER ;
+  MDESC   = "
+  This is a very large bush, expertly pruned into the shape of a peacock." ;
+
+  MMOVEPROB = 10 ;
+  MOBILE_MAP
+  (
+    mansion_topiary_01, mansion_topiary_02,
+    mansion_topiary_05, mansion_topiary_04
+  ) ;
+
+  WIDGET
+  (
+    "a sharp thorn", "mansion_thorn",
+    0,0, 100,20, 0,
+    $mobile
+  )
+  WCLOAK ; MWEAPON ;
+}

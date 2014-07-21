@@ -1,0 +1,46 @@
+
+/***************************************************************************/
+/*                                                                         */
+/* UberMUD Universe rules and data for "The land of Drogon"                */
+/*                                                                         */
+/*    Copyright (c) 1992 Gordon Henderson                                  */
+/*                                                                         */
+/*  This software is not public domain  and may not be passed to a third   */
+/*  party unless full permission has been obtained from Gordon Henderson   */
+/*                                                                         */
+/***************************************************************************/
+
+#include  "drogon.h"
+#include   "rooms.h"
+#include "widgets.h"
+
+
+func @.dm_monastery
+{
+  archWizCommand ;
+
+  $now = time () ;
+
+/** Reset the floor-switch? **/
+
+  if (!mon_stone.active)
+    if ($now > mon_stone.reArm_time)
+    {
+      mon_stone.active = 1 ;
+      @._lekoFor (mon_stone, "The Dungeon Master appears, fiddles with something on the floor
+then vanishes!\n") ;
+    }
+
+
+/** Return the silver chalice to the table? **/
+
+  if (mon_chalice.location == specialStore)
+    if ($now > mon_chalice.restoreTime)
+    {
+      @._move (mon_chalice, mon_chapel) ;
+      @._lekoFor (mon_chalice, "The Dungeon Master appears, places something on the table then vanishes!\n") ;
+      mon_chalice.dName = "A most exquisite silver chalice sits on top of the table." ;
+      mon_chalice.onTable = 1 ;
+    }
+
+}

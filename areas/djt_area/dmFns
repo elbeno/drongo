@@ -1,0 +1,54 @@
+/***************************************************************\
+* dmFns description file for Logic Island 			*
+* Submitted by Bugblatter djt1000@uk.ac.cam.hermes		*
+\***************************************************************/
+
+/* Revision History
+ 
+ Date   | Modifications
+--------+-------------------------------------------------------
+22Feb94 | This file created
+03Mar94 | Changed descriptions slightly
+        | Added reset function for each object
+05Mar94 | Removed them again!
+--------+-------------------------------------------------------
+04Mar93 | Submitted to Irn-Bru
+--------+-------------------------------------------------------
+
+*/
+
+#include "widgets.h"
+#include "rooms.h"
+
+/*****************\
+* The Room Puzzle *
+\*****************/
+
+/* Needs to be called when each ingot is reset */
+func #333.dm_island2
+{
+  foreach $ing in (listnew(island2_wizTower_bIngot, island2_wizTower_sIngot,
+                           island2_wizTower_gIngot, island2_wizTower_pIngot))
+  {
+    $ing = $1 ; /* The ingot to replace */
+    if ($ing.location == #4)
+    {
+      @._move($ing, island2_wizTower_09) ;
+      @._reko (island2_wizTower_09,"
+The Dungeon Master appears, and starts wiggling his fingers! There is 
+a puff of blue smoke, which clears revealing ", $ing.name, ". The Dungeon
+Master looks at you, grins inanely, and then vanishes!\n") ;
+      island2_wizTower_02._resetFn() ;
+    }
+  }
+
+  /* Reset Pebble */
+  if (island2_beach_pebble.location == island2_wizTower_09)
+  {
+    @._move(island2_beach_pebble, island2_beach_cave) ;
+    @._leko("
+The wizard reaches into his pocket and pulls out a shiny pebble, which
+he places on the sand in front of him.\n") ;
+  }
+}
+

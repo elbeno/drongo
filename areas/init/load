@@ -1,0 +1,2 @@
+$MUDUTILDIR/sub hardstuff | $MUDUTILDIR/extract hardstuff.h
+$MUDUTILDIR/sub players $MUDUTILDIR/extract players.h

@@ -1,0 +1,72 @@
+	boot.log	revision log for boot.u and related files
+
+	Ubermud universe rules for Drongo.
+
+By:
+  Borogove
+  Sidhe
+  Karuvel
+  Milamber (emotes)
+  Winker
+
+
+11/03/94 |  1.01 | Copied from rws13 after major overhaul.
+22/04/94 |  1.02 | Tidied output of look
+22/04/94 |  1.10 | Started to split boot.u into umInit and commands\*
+28/04/94 |  1.11 | Still working on splitting. Changed setuid creator
+		   functions need sorting out. Renamed resetitem to
+		   resetObject; resetitems to resetInvent; offeritem to
+		   offerObject; complocs to compLocs;
+02/05/94 |  1.12 | Renamed ._use to .inUse for Drogon compatibility. @._use
+		   changes #actor's currently used object (and sets ._use
+		   for compatibility with the current Drongo monitor)
+05/05/94 |	 | Changed see, seel, oe to allow @ for the object #.
+06/05/94 |  1.13 | Updated from rws13s bootmods.u: _move, _resurrect,
+		   mWhere, _go, _doFollowers, follow, sf, _doDmFns, _reobj,
+		   _welcome (without system status check: calls @._sysStatus
+		   instead - put all the stuff in that), changed @ and Util.
+		   _connects and _maxconnects to connects and maxConnects
+		   _welcome also changed to catfiles motd/welcome,
+		   motd/builders, and motd/wizards
+09/05/94 |         help, _pageFile, more: _pager stuff changed to .pDir,
+		   .pFil, .pNum.  LOOK, who.
+		   Haven't added the bit at the end which updates #30.stuff
+09/05/94 |  1.14 | tick stuff from rwsboot.u. robot implemented as 'force'
+ 		   usemana, attack, flee, _matchAnything
+11/05/94 |  1.15 | hide and showExit print more diagnostic looking messages...
+13/05/94 |  1.16 | moved create.u to boot2.u, including area.
+		   changed _newRoomNo to _newRoom
+		   @.motd added
+	    1.17 | Updated see,seel,oe,whatis,tp and summon from dtmmods
+		   Added _pNum and _pName to print.u	
+		   Added Rdestroy, removeLink, fetch, reset, m/o/pmatch from
+		   dtmboot.u (not listp,_compLogins,_compLevels,
+		   _insertionSort, _listp_showplay/_getdate,_repeatText)
+14/05/94 |  1.18 | create.u:changed newRoom/Widget/Mobile to manually search
+		   rather than using match when checking for existing rooms.
+17/05/94 |  1.19 | print.u:added twoplayer emote stuff.
+26/05/95 |  1.20 | examine.u: contains EX funcs moved from boot.u
+                   players.u: contains summon, mWhere, pWhere moved from boot.u
+                   objects.u: contains all object fns (eg open) moved from boot.u
+                              and checked out
+                   status.u: contains score, who, help fns
+                   added scb function to wizard.u
+                   created magic.u - moved summon, pWhere, mWhere there
+                   added blind, paralyse, deaf, dumb, fumble
+                   need to change communication to take account of these ****
+                   and make sure these get reset when players leave! done
+27/05/95           moved some of the wiz functions around, changed boot
+                   implemented skeet
+28/05/95 |  1.21 | added (re-added) emotes which weren't here
+                   changed the emote function to work properly with an initial '
+                   done @._takeMoney and @._giveMoney so that they change
+                   levels appropriately (they only change one level at a time)
+                   changed boot, skeet, zap, scb to take account of visibility
+                   added ip number tracking
+                   fixed (I think) memory leaks in regexp and regcmp
+30/05/95           added snt, sal and fixed fumble, blind bugs
+31/05/95           added qw (-loc and -ip switches for arches) in status.u
+01/06/95 |  1.22 | hacked the server to implement idle times
+                   the built in function getidle($plr) returns the time
+                   (in seconds since 1/1/1970) that the last command was issued
+
